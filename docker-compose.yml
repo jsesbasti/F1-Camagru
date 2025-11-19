@@ -1,0 +1,12 @@
+
+database:
+  image: mysql
+  restart: always
+  env-file:
+    - ".env"
+
+server:
+  depends-on:
+    - database
+  
+  image: "srv/"
