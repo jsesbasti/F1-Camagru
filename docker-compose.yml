@@ -1,12 +1,42 @@
 
-database:
-  image: mysql
-  restart: always
-  env-file:
-    - ".env"
+services:
+  database:
+    image: mysql
+    restart: always
+    env-file:
+      - ".env"
+    conatiner_name: database
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin", "ping", "-h", "localhost", "-u", "$$MYSQL_USER", "--password=$$MYSQL_PASSWORD"]
+      start_period: 5s
+      timeout: 20s
+      retries: 10
 
-server:
-  depends-on:
-    - database
+  server:
+    depends-on:
+      database:
+        conditions: service_healthy
+        restart: true
+    build: "./srv/"
+    ports:
+      - "3000:3000"
+    container_name: server
+    networks:
+      - backend
+      - frontend
   
-  image: "srv/"
+  frontend:
+    build: "./www/"
+    ports:
+      - "8000:8000"
+    container_name: frontend
+    networks:
+      - frontend
+
+networks:
+  backend:
+    driver: bridge
+  frontend:
+    driver: bridge
