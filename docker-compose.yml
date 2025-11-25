@@ -15,7 +15,7 @@ services:
       retries: 10
 
   server:
-    build: "./srv/"
+    build: "./srv"
     env_file:
       - ".env"
     ports:
