@@ -15,10 +15,6 @@ services:
       retries: 10
 
   server:
-    depends_on:
-      database:
-        conditions: service_healthy
-        restart: true
     build: "./srv/"
     env_file:
       - ".env"
@@ -28,6 +24,10 @@ services:
     networks:
       - backend
       - frontend
+    depends_on:
+      database:
+        conditions: service_healthy
+        restart: true
   
   frontend:
     build: "./www/"
