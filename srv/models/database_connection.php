@@ -6,12 +6,12 @@ $db_username = getenv("DB_USER", true) ?: getenv("DB_USER") ?: null;
 $db_password = getenv("DB_PASS",  true) ?: getenv("DB_PASS") ?: null;
 
 try {
-$conn = new mysqli($server_name, $db_username, $db_password);
+	$conn = new mysqli($server_name, $db_username, $db_password);
 
-if ($conn->connect_error) {
-	$conn = null;
-	throw new Exception("could not login");
-}
+	if ($conn->connect_error) {
+		$conn = null;
+		throw new Exception("could not login");
+	}
 }
 catch (Exception $e) {
 	exit($e->getMessage());

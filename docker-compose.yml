@@ -20,6 +20,8 @@ services:
         conditions: service_healthy
         restart: true
     build: "./srv/"
+    env-file:
+      - ".env"
     ports:
       - "3000:3000"
     container_name: server
