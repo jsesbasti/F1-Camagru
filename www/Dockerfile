@@ -1,7 +1,8 @@
-FROM debian:bookworm
+FROM php:8.2-cli
 
-RUN apt-get update && apt-get upgrade -y && apt-get install php -y
+COPY . /usr/src/web
+WORKDIR /usr/src/web
 
-CMD ["php", "-S", "localhost:8000"]
+CMD [ "php", "-S", "0.0.0.0:8000"]
 
 EXPOSE 8000

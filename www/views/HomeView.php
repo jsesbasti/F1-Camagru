@@ -2,5 +2,5 @@
 <?php require 'Header.php' ?>
 
 <main>
-	<?php require_once 'Images.php'?>	
+	<?php require 'Images.php'?>
 </main>

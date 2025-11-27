@@ -8,8 +8,10 @@ services:
     container_name: database
     networks:
       - backend
+    volumes:
+      - ./data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin", "ping", "-h", "localhost", "-u", "$$MYSQL_USER", "--password=$$MYSQL_PASSWORD"]
+      test: ["CMD", "mysql", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD", "--execute", "SELECT 1;"]
       start_period: 5s
       timeout: 20s
       retries: 10
@@ -28,7 +30,16 @@ services:
       database:
         condition: service_healthy
         restart: true
-  
+    develop:
+      watch:
+        - action: sync
+          path: ./www
+          target: /usr/src/web
+          initial_sync: true
+        - action: rebuild
+          path: .env
+
+
   frontend:
     build: "./www/"
     ports:
@@ -36,9 +47,19 @@ services:
     container_name: frontend
     networks:
       - frontend
+    develop:
+      watch:
+        - action: sync
+          path: ./www
+          target: /usr/src/web
+          initial_sync: true
+
 
 networks:
   backend:
     driver: bridge
   frontend:
     driver: bridge
+
+volumes:
+  db-data:

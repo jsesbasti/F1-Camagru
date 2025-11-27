@@ -33,4 +33,9 @@
 		padding: 0 0.5vw;
 		border: 1rcap rgba(255, 255, 255, 50);
 	}
+
+	header > div > img {
+		max-width: 32px;
+		max-height: 32px;
+	}
 </style>
