@@ -5,15 +5,14 @@ $db_name = getenv("DB_NAME", true) ?: getenv("DB_NAME") ?: null;
 $db_username = getenv("DB_USER", true) ?: getenv("DB_USER") ?: null;
 $db_password = getenv("DB_PASS",  true) ?: getenv("DB_PASS") ?: null;
 
-try {
-	$conn = new mysqli($server_name, $db_username, $db_password, db_name);
+echo $db_server;
 
-	if ($conn->connect_error) {
-		$conn = null;
-		throw new Exception("could not login");
-	}
+try {
+	$conn = new PDO("mysql:host=$db_server;dbname=$db_name", $db_username, $db_password);
+	$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	echo "connected succesfully";
 }
-catch (Exception $e) {
+catch (PDOException $e) {
 	exit($e->getMessage());
 }
 

@@ -1,4 +1,6 @@
 <?php
+	include "./srcs/router.php";
+	include "./srcs/login.php";
 	$router = new Router();
 
 	$router->post("/login", postLogin());
