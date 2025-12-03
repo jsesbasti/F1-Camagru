@@ -3,7 +3,8 @@
 	$routes = [
 		"/" => "./views/HomeView.php",
 		"/settings" => "./views/SettingsView.php",
-		"/search" => "SearchView.php"
+		"/search" => "./views/SearchView.php",
+		"/login" => "./views/Login.php"
 	];
 
 	require $routes[$request];

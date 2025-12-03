@@ -3,33 +3,38 @@
 class Router {
 	private array $routes = [];
 
-	public function get($path, callable|array $callback): void {
-		$this->routes['GET'][$path] = $callback;
+
+	public function add(string $method, string $path, array $controller) {
+		$path = $this->normalizePath($path);
+		$this->routes[] = [
+			'path' => $path,
+			'method' => strtoupper($method),
+			'controller' => $controller,
+			'middlewares' => []
+		];
 	}
-	public function post($path, callable|array $callback): void {
-		$this->routes['POST'][$path] = $callback;
+
+	private function normalizePath(string $path) {
+		$path = trim($path, '/'); $path = "/{$path}/";
+		$path = preg_replace('#[/]{2,}#', '/', $path);
+		return $path;
 	}
 
-	public function resolve(): mixed {
-		$method = $_SERVER["REQUEST_METHOD"];
-		$path = $_SERVER["REQUEST_URI"] ?? '/';
-		$path = explode('?', $path)[0];
-
-		$callback = $this->routes[$method][$path] ?? null;
-
-		if ($callback === null) {
-			http_response_code(404);
-			return "404 not found";
+	public function resolve(string $path) {
+		$path = $this->normalizePath($path);
+		$method = strtoupper($_SERVER['REQUEST_METHOD']);
+		foreach ($this->routes as $route) {
+			if (!preg_match("#^{$route['path']}$#", $path) || $route['method'] !== $method) {
+				continue;
+			}
+			[$class, $function] = $route['controller'];
+			$controllerInstance = new $class;
+			$controllerInstance->{$function}();
+			die();
 		}
-
-		if (is_array($callback)) {
-			[$class, $method] = $callback;
-			$controller = new $class();
-			return ($controller->method);
-		}
-
-		return  $callback;
+		http_response_code(404);
 	}
 }
+
 
 ?>

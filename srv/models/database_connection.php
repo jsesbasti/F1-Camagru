@@ -1,19 +1,44 @@
 <?php
 
 $db_server = getenv("DB_SERVER", true) ?: getenv("DB_SERVER") ?: null;
-$db_name = getenv("DB_NAME", true) ?: getenv("DB_NAME") ?: null;
-$db_username = getenv("DB_USER", true) ?: getenv("DB_USER") ?: null;
-$db_password = getenv("DB_PASS",  true) ?: getenv("DB_PASS") ?: null;
+$db_name = getenv("MYSQL_DATABASE", true) ?: getenv("MYSQL_DATABASE") ?: null;
+$db_username = getenv("MYSQL_USER", true) ?: getenv("MYSQL_USER") ?: null;
+$db_password = getenv("MYSQL_PASSWORD",  true) ?: getenv("MYSQL_PASSWORD") ?: null;
+$dsn = "mysql:host=$db_server;dbname=$db_name";
 
-echo $db_server;
-
-try {
-	$conn = new PDO("mysql:host=$db_server;dbname=$db_name", $db_username, $db_password);
-	$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-	echo "connected succesfully";
+function connectDb() {
+	global $dsn, $db_username, $db_password;
+	try {
+		$conn = new PDO($dsn, $db_username, $db_password, array(PDO::ATTR_PERSISTENT => true));
+		$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		return ($conn);
+	} catch (PDOException $e) {
+		die(http_response_code(403));
+	}
 }
-catch (PDOException $e) {
-	exit($e->getMessage());
+
+function makeQuery(string $sql) {
+	$conn = connectDb();
+	$sth = $conn->query($sql);
+	return ($sth);
+}
+
+function createDB() {
+	try {
+		$conn = connectDb(); 
+		$sql = "CREATE TABLE IF NOT EXISTS users (
+		id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+		firstname VARCHAR(30) NOT NULL,
+		lastname VARCHAR(30) NOT NULL,
+		username VARCHAR(10) NOT NULL,
+		email VARCHAR(50),
+		reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)";
+		$conn->exec($sql);
+		$conn = null;
+	}
+	catch (PDOException $e) {
+		die($e->getMessage());
+	}
 }
 
 ?>

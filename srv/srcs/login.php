@@ -4,32 +4,43 @@ $uid = getenv("OAUTH_UID", true) ?: getenv("OAUTH_UID");
 $secret = getenv("OAUTH_SECRET", true) ?: getenv("OAUTH_SECRET");
 
 include "./models/response.php";
+include './models/database_connection.php';
 
-$database_error = new Response(["code" => 500, "msg" => "database connection error"]);
+class LoginController {
+	function loginUser() {
+		$result = ['user' => null, 'password' => null];
+		echo json_encode($_POST);
+		parse_str($_POST, $result);
+		// echo json_encode($result);
+		if ($result['user'] == null || $result['password'] == null) #se deberia encargar frontend de que no llegue null
+			json_response(['msg' => 'invalid credentials'], 401);
+		$user = $result['user'];
+		$password = convert_uuencode($result['password']);
+		echo $password;
+		$password = convert_uudecode($password);
+		echo $password;
+		$conn = makeQuery("SELECT * FROM users WHERE 'username==$user'");
 
-function postLogin() {
-	include './models/database_connection.php';
-	global $database_error;
-	global $conn;
+		json_response($_SERVER, 200);
+	}
 
-	// echo global $database_error::jsonSerialize();
-	if ($conn == null)
-		echo json_encode($database_error);
-	return (json_encode($database_error));
+	function registerUser() {
+		password_hash($result['password'], PASSWORD_DEFAULT);
+	}
 }
 
-function getLogin() {
-	
-}
+
 
 // login(null);
 
-function callback() {
-	include 'database_connection.php';
-	global $database_error;
+// function callback() {
+// 	include './models/database_connection.php';
+// 	global $database_error;
+// 	global $conn;
 	
-	if ($conn === null)
-		return (json_encode($database_error));
-}
+// 	if ($conn === null)
+// 		echo "hola";
+// 	return (json_encode($database_error));
+// }
 
 ?>
