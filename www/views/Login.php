@@ -42,7 +42,7 @@
 <body>
     <div class="login-box">
         <h3>Login</h3>
-        <input type="text" id="username" placeholder="Usuario" required />
+        <input type="text" id="user" placeholder="Usuario" required />
         <input type="password" id="password" placeholder="Contraseña" required />
         <button onclick="login()">Entrar</button>
         <p id="message"></p>
@@ -50,16 +50,17 @@
 
     <script>
         async function login() {
-            const username = document.getElementById("username").value;
+            const user = document.getElementById("user").value;
             const password = document.getElementById("password").value;
             const message = document.getElementById("message");
 
-            const response = await fetch("http://<?php echo $_SERVER['SERVER_ADDR'];?>:3000/login", {
+            const response = await fetch("http://10.12.250.20:3000/login", {
                 method: "POST",
+                mode: 'cors',
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ user, password })
             });
 
             const data = await response.json();

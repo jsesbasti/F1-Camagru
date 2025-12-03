@@ -1,5 +1,6 @@
 <?php
 
+
 class Router {
 	private array $routes = [];
 
@@ -21,6 +22,23 @@ class Router {
 	}
 
 	public function resolve(string $path) {
+		// echo 'hola';
+		// function send_cors_headers() {
+		//     $allowedOrigins = ['http://10.12.250.20:8000'];
+		//     $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+		//     if (in_array($origin, $allowedOrigins, true)) {
+		//         header("Access-Control-Allow-Origin: $origin");
+		//         header('Access-Control-Allow-Credentials: true');
+		//     }
+		//     header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+		//     header('Access-Control-Allow-Headers: Content-Type, X-Requested-With, Authorization, Accept');
+		// 	header("Content-Type: application/json");
+		// }
+		// send_cors_headers();
+		// if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+		//     http_response_code(204);
+		//     exit;
+		// }
 		$path = $this->normalizePath($path);
 		$method = strtoupper($_SERVER['REQUEST_METHOD']);
 		foreach ($this->routes as $route) {

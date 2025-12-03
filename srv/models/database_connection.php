@@ -17,10 +17,15 @@ function connectDb() {
 	}
 }
 
-function makeQuery(string $sql) {
+function makeQuery(string $sql, array $params = []) {
 	$conn = connectDb();
-	$sth = $conn->query($sql);
-	return ($sth);
+	if (empty($params)) {
+		$sth = $conn->query($sql);
+		return $sth;
+	}
+	$sth = $conn->prepare($sql);
+	$sth->execute($params);
+	return $sth;
 }
 
 function createDB() {
@@ -31,13 +36,14 @@ function createDB() {
 		firstname VARCHAR(30) NOT NULL,
 		lastname VARCHAR(30) NOT NULL,
 		username VARCHAR(10) NOT NULL,
+		'password' password() NOT NULL,
 		email VARCHAR(50),
 		reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)";
 		$conn->exec($sql);
 		$conn = null;
 	}
 	catch (PDOException $e) {
-		die($e->getMessage());
+		die();
 	}
 }
 
