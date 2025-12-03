@@ -9,5 +9,5 @@
 	$router->add('POST', '/register', [LoginController::class, 'registerUser']);
 	
 	$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-	$router->resolve($pth);
+	$router->resolve($path);
 ?>

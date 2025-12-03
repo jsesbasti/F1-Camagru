@@ -1,0 +1,9 @@
+#.htaccess
+
+# Habilitar reescritura
+RewriteEngine On
+
+# Redirigir todas las solicitudes a index.php
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*)$ /index.php [QSA,L]
