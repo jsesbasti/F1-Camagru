@@ -1,9 +1,10 @@
-FROM php:8.2-cli
+FROM nginx:1.29
 
+COPY nginx.conf /etc/nginx/nginx.conf
 
-COPY . /usr/src/web
-WORKDIR /usr/src/web
+COPY . /usr/share/nginx/html
+WORKDIR /usr/share/nginx/html
 
-CMD [ "php", "-S", "0.0.0.0:8000"]
+CMD ["nginx", "-g", "daemon off;"]
 
-EXPOSE 8000
+EXPOSE 80
