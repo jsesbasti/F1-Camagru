@@ -1,6 +1,5 @@
 <?php
 include "./models/response.php";
-include './models/database_connection.php';
 class LoginController {
 	public function loginUser() {
 		$input = json_decode(file_get_contents('php://input'), true);
@@ -9,7 +8,7 @@ class LoginController {
 		}
 		$user = $input['user'] ?? null;
 		$password = $input['password'] ?? null;
-
+		echo $user;
 		// frontend should validate, but double-check here
 		if (empty($user) || empty($password)) {
 			json_response(['msg' => 'invalid credentials'], 401);

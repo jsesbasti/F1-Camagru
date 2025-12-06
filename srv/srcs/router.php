@@ -1,4 +1,7 @@
 <?php
+header("Access-Control-Allow-Origin: http://localhost:8000");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
 class Router {
 	private array $routes = [];
 	public function add(string $method, string $path, array $controller) {
@@ -18,6 +21,11 @@ class Router {
 	public function resolve(string $path) {
 		$path = $this->normalizePath($path);
 		$method = strtoupper($_SERVER['REQUEST_METHOD']);
+		if ($method === 'OPTIONS')
+		{
+			http_response_code(204);
+			die();
+		}
 		foreach ($this->routes as $route) {
 			if (!preg_match("#^{$route['path']}$#", $path) || $route['method'] !== $method) {
 				continue;
@@ -25,10 +33,9 @@ class Router {
 			[$class, $function] = $route['controller'];
 			$controllerInstance = new $class;
 			$controllerInstance->{$function}();
+			die();
 		}
 		http_response_code(404);
 	}
 }
-
-
 ?>

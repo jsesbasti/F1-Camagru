@@ -54,7 +54,7 @@
             const password = document.getElementById("password").value;
             const message = document.getElementById("message");
 
-            const response = await fetch("http://10.11.249.123:3000/login", {
+            const response = await fetch("http://localhost:3000/login", {
                 method: "POST",
                 mode: 'cors',
                 headers: {
@@ -65,10 +65,6 @@
 
             const data = await response.json();
 
-            if (response.cors_error) {
-                message.style.color = 'red';
-                message.textContent = "CORS ERROR";
-            }
             if (response.ok) {
                 message.style.color = "green";
                 message.textContent = "Login correcto ✔️";
