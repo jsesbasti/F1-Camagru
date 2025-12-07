@@ -3,8 +3,8 @@
     <head>
         <meta charset="UTF-8">
         <title>Login</title>
-        <link href="../styles/auth.css" rel="stylesheet">
-        <script async src="../shared/js/auth.js"></script>
+        <link href="./styles/auth.css" rel="stylesheet">
+        <script src="./shared/js/auth.js"></script>
     </head>
     <body>
         <div class="login-box">
@@ -14,7 +14,7 @@
             <input type="email" id="email" placeholder="correo.electronico@gmail.com" required />
             <input type="text" id="username" placeholder="Usuario" required />
             <input type="password" id="password" placeholder="Contraseña" required />
-            <button onblur="document.addEventListener('keydown', (event) => { if (event.key === 'Enter') {register();}});"
+            <button onblur="document.addEventListener('keydown', (event) => { if (event.key === 'Enter') {register()}});"
                 onclick="register()">Entrar</button>
             <p id="message"></p>
         </div>

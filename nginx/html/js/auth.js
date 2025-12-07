@@ -3,7 +3,7 @@ async function login() {
     const password = document.getElementById("password").value;
     const message = document.getElementById("message");
 
-    const response = await fetch("http://localhost:3000/login", {
+    const response = await fetch("http://localhost/api/login", {
         method: "POST",
         mode: 'cors',
         headers: {
@@ -30,7 +30,7 @@ async function register() {
     const password = document.getElementById("password").value;
     const message = document.getElementById("message");
 
-    const response = await fetch("http://localhost:3000/login", {
+    const response = await fetch("http://localhost/api/login", {
         method: "POST",
         mode: 'cors',
         headers: {
