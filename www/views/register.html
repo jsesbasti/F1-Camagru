@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>Login</title>
+        <link href="../styles/auth.css" rel="stylesheet">
+        <script async src="../shared/js/auth.js"></script>
+    </head>
+    <body>
+        <div class="login-box">
+            <h3>Login</h3>
+			<input type="text" id="fname" placeholder="Nombre" required />
+			<input type="text" id="lname" placeholder="Apellido/s" required />
+            <input type="email" id="email" placeholder="correo.electronico@gmail.com" required />
+            <input type="text" id="username" placeholder="Usuario" required />
+            <input type="password" id="password" placeholder="Contraseña" required />
+            <button onblur="document.addEventListener('keydown', (event) => { if (event.key === 'Enter') {register();}});"
+                onclick="register()">Entrar</button>
+            <p id="message"></p>
+        </div>
+    </body>
+</html>

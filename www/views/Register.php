@@ -4,44 +4,12 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: #f5f5f5;
-        }
-        .login-box {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            width: 300px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        input, button {
-            width: 100%;
-            margin-top: 10px;
-            padding: 10px;
-            font-size: 16px;
-        }
-        button {
-            background: #007bff;
-            border: none;
-            color: white;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        button:hover {
-            background: #005fcc;
-        }
-    </style>
+    <title>Register</title>
+    
 </head>
 <body>
     <div class="login-box">
-        <h3>Login</h3>
+        <h3>Register</h3>
         <input type="text" id="user" placeholder="Usuario" required />
         <input type="password" id="password" placeholder="Contraseña" required />
         <button onclick="login()">Entrar</button>
@@ -54,7 +22,7 @@
             const password = document.getElementById("password").value;
             const message = document.getElementById("message");
 
-            const response = await fetch("http://localhost:3000/login", {
+            const response = await fetch("http://localhost:3000/register", {
                 method: "POST",
                 mode: 'cors',
                 headers: {
@@ -67,7 +35,7 @@
 
             if (response.ok) {
                 message.style.color = "green";
-                message.textContent = "Login correcto ✔️";
+                message.textContent = data.msg;
             } else {
                 message.style.color = "red";
                 message.textContent = data.error || "Credenciales incorrectas";

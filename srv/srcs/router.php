@@ -21,11 +21,6 @@ class Router {
 	public function resolve(string $path) {
 		$path = $this->normalizePath($path);
 		$method = strtoupper($_SERVER['REQUEST_METHOD']);
-		if ($method === 'OPTIONS')
-		{
-			http_response_code(204);
-			die();
-		}
 		foreach ($this->routes as $route) {
 			if (!preg_match("#^{$route['path']}$#", $path) || $route['method'] !== $method) {
 				continue;

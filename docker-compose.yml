@@ -6,6 +6,7 @@ services:
     env_file:
       - ".env"
     container_name: database
+    user: "$HOST_UID:$HOST_GID"
     networks:
       - backend
     volumes:

@@ -25,21 +25,16 @@ function makeQuery(string $sql, array $params = []) {
 	return $sth;
 }
 function createDB() {
-	try {
-		$conn = connectDb(); 
-		$sql = "CREATE TABLE IF NOT EXISTS users (
-		id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-		firstname VARCHAR(30) NOT NULL,
-		lastname VARCHAR(30) NOT NULL,
-		username VARCHAR(10) NOT NULL,
-		'password' password() NOT NULL,
-		email VARCHAR(50),
-		reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)";
-		$conn->exec($sql);
-		$conn = null;
-	}
-	catch (PDOException $e) {
-		die();
-	}
+	$conn = connectDb(); 
+	$sql = "CREATE TABLE IF NOT EXISTS users (
+	id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	firstname VARCHAR(30) NOT NULL,
+	lastname VARCHAR(30) NOT NULL,
+	username VARCHAR(10) NOT NULL,
+	password VARCHAR(10000) NOT NULL,
+	email VARCHAR(50),
+	reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)";
+	$conn->exec($sql);
+	$conn = null;
 }
 ?>
