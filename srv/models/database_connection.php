@@ -11,7 +11,7 @@ function connectDb() {
 		$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		return ($conn);
 	} catch (PDOException $e) {
-		die(http_response_code(403));
+		die(json_response("database could not connect", 401));
 	}
 }
 function makeQuery(string $sql, array $params = []) {
