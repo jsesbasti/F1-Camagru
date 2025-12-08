@@ -1,9 +1,11 @@
+document.addEventListener('keydown', (event) => { if (event.key === 'Enter') {login()}});
+
 async function login() {
     const user = document.getElementById("username").value;
     const password = document.getElementById("password").value;
     const message = document.getElementById("message");
 
-    const response = await fetch("http://localhost/api/login", {
+    const response = await fetch("http://localhost:9000/login", {
         method: "POST",
         mode: 'cors',
         headers: {
@@ -30,7 +32,7 @@ async function register() {
     const password = document.getElementById("password").value;
     const message = document.getElementById("message");
 
-    const response = await fetch("http://localhost/api/login", {
+    const response = await fetch("http://localhost:9000/register", {
         method: "POST",
         mode: 'cors',
         headers: {
