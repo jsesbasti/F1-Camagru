@@ -22,6 +22,9 @@ async function login() {
 	    message.style.color = "red";
 	    message.textContent = data.error || "Credenciales incorrectas";
     }
+
+    const headers = await response.headers;
+    headers.forEach( (value, key) => { console.log(`${key}: ${value}`)} );
 }
 
 async function register() {

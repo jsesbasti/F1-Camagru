@@ -20,6 +20,7 @@ class UserController {
 		$dbUser = $stmt->fetch();
 		// password_verify(plainPassword, hashFromDb)
 		if (password_verify($password, $dbUser['password'])) {
+			session_start();
 			json_response(['msg' => 'login successful', 'user' => $dbUser['username']], 200);
 		} else {
 			json_response(['error' => 'Invalid password'], 401);
