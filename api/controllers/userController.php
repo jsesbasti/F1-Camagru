@@ -43,12 +43,14 @@ class UserController {
 
 	public function registerUser() {
 		$input = json_decode(file_get_contents('php://input'), true);
-		if (!is_array($input) || empty($input['user']) || empty($input['password'])) {
+		if (!is_array($input) || empty($input['firstname']) || empty($input['lastname']) || 
+			empty($input['firstname']) || empty($input['user']) || empty($input['password'])) 
+		{
 			json_response(['error' => 'invalid request'], 400);
 		}
-		$fname = $input['firstname'] ?? 'firstname';
-		$lname = $input['lastname'] ?? 'lastname';
-		$email = $input['email'] ?? 'email@email.com';
+		$fname = $input['firstname'];
+		$lname = $input['lastname'];
+		$email = $input['email'];
 		$user = $input['user'];
 		$hashed = password_hash($input['password'], PASSWORD_DEFAULT);
 		// Insert new user (makeQuery should return a statement or execute the query)

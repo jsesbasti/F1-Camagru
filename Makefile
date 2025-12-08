@@ -6,11 +6,13 @@ DB_DIR=$(PWD)/data/
 export HOST_UID=${UID}
 export HOST_GID=${GID}
 
-all: build up
+all: configure build up
 
-up:
+configure:
 	@mkdir -p $(DB_DIR)
 	@chmod -R 777 $(DB_DIR)
+
+up:
 	@$(COMPOSE) up -d
 
 build:

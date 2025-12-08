@@ -1,8 +1,9 @@
-document.addEventListener('keydown', (event) => { if (event.key === 'Enter') {login()}});
+document.addEventListener('keydown', (event) => { if (event.key === 'Enter') { window[document.title]()}});
 
-document.addEventListener('DOMContentLoaded', async (event) => {
-	const cookies = cookieStore.getAll();
-	(await cookies).forEach( (value, index ) => {
+const cookies = cookieStore.getAll();
+
+document.addEventListener('DOMContentLoaded', async () => {
+	(await cookies).forEach( ( value ) => {
 		if (value.name === 'PHPSESSID')
 			window.location.href = "http://localhost:8000/";
 	})
@@ -57,6 +58,7 @@ async function register() {
 	if (response.ok) {
 		message.style.color = "green";
 		message.textContent = `${data.msg}, please, login now`;
+		window.location.href = "http://localhost:8000/";
 	} else {
 		message.style.color = "red";
 		message.textContent = data.error || "Credenciales incorrectas";
