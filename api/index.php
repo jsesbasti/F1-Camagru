@@ -1,6 +1,6 @@
 <?php
-	include "./srcs/router.php";
-	include "./srcs/userController.php";
+	include "./router.php";
+	include "./controllers/userController.php";
 	include "./models/database_connection.php";
 	if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 		die(http_response_code(204));
