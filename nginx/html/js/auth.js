@@ -3,10 +3,14 @@ document.addEventListener('keydown', (event) => { if (event.key === 'Enter') { w
 const cookies = cookieStore.getAll();
 
 document.addEventListener('DOMContentLoaded', async () => {
-	(await cookies).forEach( ( value ) => {
-		if (value.name === 'PHPSESSID')
-			window.location.href = "http://localhost:8000/";
+	const res = fetch("http://localhost:9000/logged", {
+		method: 'GET',
+		credentials: true
 	})
+
+	const data = (await res).json();
+	if (data.logged == true)
+		window.location.href = "http://localhost:8000/"
 });
 
 async function login() {

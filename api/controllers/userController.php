@@ -2,15 +2,13 @@
 include "./models/response.php";
 class UserController {
 	private function checkSession(): bool {
-		if (session_status() === PHP_SESSION_NONE) {
-			session_start();
-		}
+		session_start();
 		return isset($_SESSION['user_id']);
 	}
 
 	public function loginUser() {
 		if ($this->checkSession() === false)
-			json_response(["path" => "/"], 301);
+			json_response(["path" => ""], 301);
 		$input = json_decode(file_get_contents('php://input'), true);
 		if (!is_array($input)) {
 			session_destroy();
@@ -33,7 +31,6 @@ class UserController {
 		// password_verify(plainPassword, hashFromDb)
 		if (password_verify($password, $dbUser['password'])) {
 			$_SESSION['user_id'] = $dbUser['id'];
-			session_write_close();
 			json_response(['msg' => 'login successful'], 200);
 		} else {
 			session_destroy();
@@ -56,6 +53,12 @@ class UserController {
 		// Insert new user (makeQuery should return a statement or execute the query)
 		makeQuery("INSERT INTO users (firstname, lastname, username, password, email) VALUES (:firstname, :lastname, :username, :password, :email)", [':username' => $user, ':password' => $hashed, ':firstname' => $fname, ':lastname' => $lname, ':email' => $email]);
 		json_response(['msg' => 'registered'], 201);
+	}
+
+	public function isLogged() {
+		if ($this->checkSession())
+			json_response(["logged" => true, "user" => $_SESSION['user_id']], 200);
+		json_response(["logged" => false], 200);
 	}
 }
 ?>

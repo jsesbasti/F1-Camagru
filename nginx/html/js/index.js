@@ -1,8 +1,10 @@
-const cookies = cookieStore.getAll();
-
 document.addEventListener('DOMContentLoaded', async () => {
-	(await cookies).forEach( ( value ) => {
-		if (value.name === 'PHPSESSID')
-			document.getElementById('login-register').style.display = none;
-	})
+	const res = await fetch("http://localhost:9000/logged", {
+		method: 'GET',
+        credentials: "include"
+    });
+    const data = await res.json();
+    if (data.logged === true) {
+        document.getElementById("login-register").style.display = "none";
+    }
 });
