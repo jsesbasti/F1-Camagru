@@ -1,5 +1,13 @@
 document.addEventListener('keydown', (event) => { if (event.key === 'Enter') {login()}});
 
+document.addEventListener('DOMContentLoaded', async (event) => {
+	const cookies = cookieStore.getAll();
+	(await cookies).forEach( (value, index ) => {
+		if (value.name === 'PHPSESSID')
+			window.location.href = "http://localhost:8000/";
+	})
+});
+
 async function login() {
 	const user = document.getElementById("username").value;
 	const password = document.getElementById("password").value;
@@ -20,8 +28,7 @@ async function login() {
 		message.style.color = "green";
 		message.textContent = data.msg;
 	} else if (response.status == 301) {
-		console.log("hola");
-		window.location.href = "http://localhost:8000/";
+		window.location.href = `http://localhost:8000/${data.path}`;
 	} else {
 		message.style.color = "red";
 		message.textContent = data.error || "Credenciales incorrectas";
