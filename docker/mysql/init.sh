@@ -1,8 +1,11 @@
--- Crear base de datos (si no existe)
-CREATE DATABASE IF NOT EXISTS camagru_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE camagru_db;
+set -e
 
--- Tabla users
+echo "Using database: $MYSQL_DATABASE"
+
+# Crear DB (por si acaso) y tablas
+mysql -u root -p"$MYSQL_ROOT_PASSWORD" << EOF
+USE $MYSQL_DATABASE;
+
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(50) NOT NULL UNIQUE,
@@ -13,7 +16,6 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Tabla images (las fotos subidas por usuarios)
 CREATE TABLE IF NOT EXISTS images (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
@@ -23,7 +25,6 @@ CREATE TABLE IF NOT EXISTS images (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Tabla comments (comentarios en imágenes)
 CREATE TABLE IF NOT EXISTS comments (
   id INT AUTO_INCREMENT PRIMARY KEY,
   image_id INT NOT NULL,
@@ -34,7 +35,6 @@ CREATE TABLE IF NOT EXISTS comments (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Tabla likes (likes a imágenes)
 CREATE TABLE IF NOT EXISTS likes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   image_id INT NOT NULL,
@@ -44,3 +44,4 @@ CREATE TABLE IF NOT EXISTS likes (
   FOREIGN KEY (image_id) REFERENCES images(id) ON DELETE CASCADE,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+EOF

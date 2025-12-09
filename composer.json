@@ -1,17 +1,16 @@
 {
-		"name": "jsebasti/camagru",
-		"type": "project",
-		"autoload": {
-			"psr-4": {
-				"App\\": "app/"
-			}
-		},
-		"authors": [
-			{
-				"name": "jsesbasti",
-				"email": "jsebasti@student.42barcelona.com"
-			}
-		],
-		"minimum-stability": "dev",
-		"require": {}
+    "name": "jsebasti/camagru",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    },
+    "authors": [
+        {
+            "name": "jsebasti",
+            "email": "jsebasti@student.42barcelona.com"
+        }
+    ],
+    "require": {}
 }

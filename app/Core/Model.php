@@ -13,8 +13,12 @@ class Model
         if ($pdo === null) {
             $config = require __DIR__ . '/../../config/config.php';
 
+            $host = $config['host'];
+            $database = $config['database'];
+            $dsn = "mysql:host=$host;dbname=$database";
+            // echo $dsn;
             $pdo = new PDO(
-                "mysql:host={$config['host']};dbname={$config['database']}",
+                $dsn,
                 $config['user'],
                 $config['password'],
                 [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]

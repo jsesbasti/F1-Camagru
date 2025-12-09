@@ -1,16 +1,13 @@
 COMPOSE-FILE=docker/docker-compose.yml
 COMPOSE=docker compose -f $(COMPOSE-FILE)
 
-DATA-DIR=db-data
-
-all: configure build up
-
-configure:
-	@mkdir -p $(DATA-DIR)
-	@chmod +777 $(DATA-DIR)
+all: build up
 
 up:
 	@$(COMPOSE) up -d
+
+up-logs:
+	@$(COMPOSE) up
 
 build:
 	@echo "🔧 Build (todos los servicios)..."
@@ -24,15 +21,18 @@ down:
 	@echo "🧹 Bajando contenedores..."
 	@$(COMPOSE) down
 
-down-volumes:
-	@echo "🧹 Bajando contenedores..."
-	@$(COMPOSE) down -v	
-
-fclean: down-volumes clean
+clean:
 	@echo "🔥 Borrando todas las imágenes de Docker (esto es destructivo)..."
-	@rm -rf $(DATA-DIR)
-	@docker system prune -af 2>/dev/null || true
+	@docker rmi $$(docker images -aq)
+
+down-vol: stop
+	@echo "🔥 Eliminando volumenes peristentes (@db)..."
+	@docker volume rm $$(docker volume ls -q)
+
+fclean: down clean
 
 re: fclean up
 
-.PHONY: all up build stop down down-volumes clean fclean re 
+re-vol: fclean down-vol up
+
+.PHONY: all up-logs up build stop down down-volumes clean fclean re 
