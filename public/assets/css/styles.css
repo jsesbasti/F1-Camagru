@@ -4,7 +4,6 @@
 	box-sizing: border-box;
 	font-family: system-ui;
 }
-
 header > div {
 	min-width: 350px;
 	padding-top: 1vh;
@@ -17,7 +16,6 @@ header > div {
 		margin-right: 2vw;
 	}
 } 
-
 .user-button {
 	display: flex;
 	flex-direction: row;
@@ -28,14 +26,12 @@ header > div {
 		max-height: 32px;
 	}
 }
-
 nav {
 	display: flex;
 	flex-direction: row;
 	justify-self: center;
 	justify-content: space-between;
 }
-
 .nav-item {
 	text-decoration: none;
 	color: black;
@@ -44,8 +40,7 @@ nav {
 	padding: 0 0.5vw;
 	border: 1rcap rgba(255, 255, 255, 50);
 }
-
 div > img {
 	max-width: 32px;
-	max-height: 32px;
+		max-height: 32px;
 }

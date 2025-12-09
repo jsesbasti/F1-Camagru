@@ -1,4 +1,6 @@
 <?php
+namespace App\Controllers;
+
 include "./models/response.php";
 class UserController {
 	private function checkSession(): bool {

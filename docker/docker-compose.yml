@@ -1,0 +1,48 @@
+version: "3.8"
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: camagru-nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ../public:/var/www/html/public
+      - ../app:/var/www/html/app
+      - ../config:/var/www/html/config
+      - ../vendor:/var/www/html/vendor
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+
+  php:
+    build: ./php
+    container_name: camagru-php
+    env_file:
+      - .env
+    volumes:
+      - ../:/var/www/html
+    working_dir: /var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+
+  db:
+    image: mysql:8
+    container_name: camagru-db
+    env_file:
+      - .env 
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db-data:/var/lib/mysql
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p$$MYSQL_ROOT_PASSWORD"] 
+      start_period: 5s
+      timeout: 20s
+      retries: 10
+
+volumes:
+  db-data:

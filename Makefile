@@ -1,16 +1,13 @@
-COMPOSE=docker compose
-COMPOSE-FILE=docker-compose.yml
+COMPOSE-FILE=docker/docker-compose.yml
+COMPOSE=docker compose -f $(COMPOSE-FILE)
 
-DB_DIR=$(PWD)/data/
-
-export HOST_UID=${UID}
-export HOST_GID=${GID}
+DATA-DIR=db-data
 
 all: configure build up
 
 configure:
-	@mkdir -p $(DB_DIR)
-	@chmod -R 777 $(DB_DIR)
+	@mkdir -p $(DATA-DIR)
+	@chmod +777 $(DATA-DIR)
 
 up:
 	@$(COMPOSE) up -d
@@ -33,7 +30,7 @@ down-volumes:
 
 fclean: down-volumes clean
 	@echo "🔥 Borrando todas las imágenes de Docker (esto es destructivo)..."
-	@rm -rf $(BD_DIR)
+	@rm -rf $(DATA-DIR)
 	@docker system prune -af 2>/dev/null || true
 
 re: fclean up
