@@ -3,19 +3,20 @@
     <head>
         <meta charset="UTF-8">
         <title>register</title>
-        <link href="styles/auth.css" rel="stylesheet">
-        <script src="js/auth.js"></script>
     </head>
     <body>
-        <div class="login-box">
-            <h3>Register</h3>
-			<input type="text" id="fname" placeholder="Nombre" required />
-			<input type="text" id="lname" placeholder="Apellido/s" required/>
-            <input type="email" id="email" placeholder="email@gmail.com" required />
-            <input type="text" id="username" placeholder="Usuario" required />
-            <input type="password" id="password" placeholder="Contraseña" required />
-            <button onclick="register()">Entrar</button>
-            <p id="message"></p>
-        </div>
+       <form action = "<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post">
+            <div>
+               <label for="username">Username:</label>
+               <input type="text" name="username" id="name">
+            </div>
+            <div>
+               <label for="password">Password:</label>
+               <input type="password" name="password" id="password">
+            </div>
+            <section style="margin-left:2rem;">
+               <button type="submit" name="register">Login</button>
+            </section>
+       </form> 
     </body>
 </html>

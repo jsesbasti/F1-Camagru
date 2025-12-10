@@ -4,14 +4,14 @@
 	const cookies = cookieStore.getAll();
 	
 	document.addEventListener('DOMContentLoaded', async () => {
-		const res = fetch("http://localhost:9000/logged", {
+		const res = fetch("http://localhost:8080/logged", {
 			method: 'GET',
 			credentials: true
 		})
 	
 		const data = (await res).json();
 		if (data.logged == true)
-			window.location.href = "http://localhost:8000/"
+			window.location.href = "http://localhost:8080/"
 	});
 	
 	async function login() {
@@ -19,7 +19,7 @@
 		const password = document.getElementById("password").value;
 		const message = document.getElementById("message");
 	
-		const response = await fetch("http://localhost:9000/login", {
+		const response = await fetch("http://localhost:8080/login", {
 			method: "POST",
 			mode: 'cors',
 			credentials: 'include',
@@ -34,7 +34,7 @@
 			message.style.color = "green";
 			message.textContent = data.msg;
 		} else if (response.status == 301) {
-			window.location.href = `http://localhost:8000/${data.path}`;
+			window.location.href = `http://localhost:8080/${data.path}`;
 		} else {
 			message.style.color = "red";
 			message.textContent = data.error || "Credenciales incorrectas";
@@ -50,7 +50,7 @@
 		const password = document.getElementById("password").value;
 		const message = document.getElementById("message");
 	
-		const response = await fetch("http://localhost:9000/register", {
+		const response = await fetch("http://localhost:8080/register", {
 			method: "POST",
 			mode: 'cors',
 			headers: {

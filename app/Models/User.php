@@ -18,4 +18,9 @@ class User extends Model
         $stmt->execute([$id]);
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
+
+    public static function add(array $data) {
+        $stmt = self::db()->prepare("INSERT INTO users (username, email, password) VALUES (:username, :email, :password)",
+            [':username' => $data['username'], ':email' => $data['email'], ':password' => $data['password']]);
+    }
 }
