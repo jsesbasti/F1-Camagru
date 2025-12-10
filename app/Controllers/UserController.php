@@ -11,7 +11,7 @@ class UserController extends Controller {
 		$input = [];
 		$this->view('register', [
 			'title' => 'Register page',
-			'input' => &$input
+			'input' => $input
 		]);
 	}
 

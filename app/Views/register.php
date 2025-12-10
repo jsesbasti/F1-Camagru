@@ -2,10 +2,10 @@
 <html lang="es">
     <head>
         <meta charset="UTF-8">
-        <title>register</title>
+        <title>$title</title>
     </head>
     <body>
-       <form action = "<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post">
+       <form action = "<?php echo $template; ?>" method="post">
             <div>
                <label for="username">Username:</label>
                <input type="text" name="username" id="name">
