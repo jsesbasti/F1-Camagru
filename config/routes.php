@@ -1,11 +1,11 @@
 <?php
 
-use Controller\HomeController;
-use Controller\UserController;
+use App\Controllers\HomeController;
+use App\Controllers\UserController;
 
-$router->add('GET', '/', [HomeController::class, 'index']);
-$router->add('GET', '/login', [UserController::class, 'login']);
-$oruter->add('GET', '/register', [UserController::class, 'register']);
-$router->add('POST', '/login', [UserController::class, 'auth']);
+$router->get('/', [HomeController::class, 'index']);
+$router->get('/login', [UserController::class, 'login']);
+$oruter->get('/register', [UserController::class, 'register']);
+$router->post('/login', [UserController::class, 'auth']);
 
 ?>
