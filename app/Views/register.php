@@ -2,21 +2,18 @@
 <html lang="es">
     <head>
         <meta charset="UTF-8">
-        <title>$title</title>
+        <title><?php echo $title ?></title>
+        <link href="assets/css/auth.css" rel="stylesheet">
     </head>
     <body>
-       <form action = "<?php echo $template; ?>" method="post">
+       <form action = "/" method="post" class="login-box">
             <div>
-               <label for="username">Username:</label>
-               <input type="text" name="username" id="name">
+            <input type="email" name="email" id="email" autocomplete="on" placeholder="email" required>
+            <input type="text" name="username" id="username" autocomplete="on" placeholder="username" required>
+            <input type="password" name="password" id="password" placeholder="password" required>
+            <input type="password" name="confirm" id="confirm" placeholder="confirm password" required>
+            <button enabled="false" type="submit" name="register">Register</button>
             </div>
-            <div>
-               <label for="password">Password:</label>
-               <input type="password" name="password" id="password">
-            </div>
-            <section style="margin-left:2rem;">
-               <button type="submit" name="register">Login</button>
-            </section>
        </form> 
     </body>
 </html>

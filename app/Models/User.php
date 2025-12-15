@@ -20,7 +20,13 @@ class User extends Model
     }
 
     public static function add(array $data) {
-        $stmt = self::db()->prepare("INSERT INTO users (username, email, password) VALUES (:username, :email, :password)",
-            [':username' => $data['username'], ':email' => $data['email'], ':password' => $data['password']]);
+        $stmt = self::db()->prepare("INSERT INTO users (username, email, password) VALUES (:username, :email, :password)");
+        try {
+            $stmt->execute($data);
+            return true;
+        } catch (\PDOException $e) {
+            return false;
+        }
+        // return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 }
