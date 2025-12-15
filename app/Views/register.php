@@ -6,7 +6,7 @@
         <link href="assets/css/auth.css" rel="stylesheet">
     </head>
     <body>
-       <form action = "/" method="post" class="login-box">
+       <form action = "/register" method="post" class="login-box">
             <div>
             <input type="email" name="email" id="email" autocomplete="on" placeholder="email" required>
             <input type="text" name="username" id="username" autocomplete="on" placeholder="username" required>
