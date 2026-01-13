@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Core\Model;
+use PDOStatement;
 
 class User extends Model
 {
@@ -20,13 +21,16 @@ class User extends Model
     }
 
     public static function add(array $data) {
-        $stmt = self::db()->prepare("INSERT INTO users (username, email, password) VALUES (:username, :email, :password)");
         try {
+            $stmt = self::db()->prepare("INSERT INTO users (username, email, password) VALUES (:username, :email, :password)");
             $stmt->execute($data);
             return true;
         } catch (\PDOException $e) {
             return false;
         }
         // return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+    public static function getCol(PDOStatement $stmt, string $col, &$data) {
+        return $stmt->bindColumn($col,  $data);
     }
 }

@@ -16,7 +16,6 @@ class Model
             $host = $config['host'];
             $database = $config['database'];
             $dsn = "mysql:host=$host;dbname=$database";
-            // echo $dsn;
             $pdo = new PDO(
                 $dsn,
                 $config['user'],

@@ -25,11 +25,11 @@ clean:
 	@echo "🔥 Borrando todas las imágenes de Docker (esto es destructivo)..."
 	@docker rmi $$(docker images -aq)
 
-down-vol: stop
+down-vol: down
 	@echo "🔥 Eliminando volumenes peristentes (@db)..."
 	@docker volume rm $$(docker volume ls -q)
 
-fclean: down clean
+fclean: down-vol clean
 
 re: fclean up
 
