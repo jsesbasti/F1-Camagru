@@ -14,6 +14,11 @@ body {
     width: 300px;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
+
+.error-msg {
+    color: red;
+}
+
 input, button {
     width: 100%;
     margin-top: 10px;

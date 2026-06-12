@@ -5,14 +5,18 @@
     <title><?= $title ?></title>
 </head>
 <body>
-    <h1><?= $title ?></h1>
-
-    <h2>Usuarios:</h2>
-    <ul>
-        <?php foreach ($users as $user): ?>
-            <li><?= $user['username'] ?></li>
-        <?php endforeach; ?>
-    </ul>
-
+    <header>
+        <h1><?= $title ?></h1>
+    </header>
+    <main>
+        <h2>Usuarios:</h2>
+        <ul>
+            <?php foreach ($users as $user): ?>
+                <li><?= $user['username'] ?></li>
+            <?php endforeach; ?>
+        </ul>
+    </main>
+    <footer>
+    </footer>
 </body>
 </html>

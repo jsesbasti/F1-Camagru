@@ -3,50 +3,93 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\User;
+use App\Core\Auth;
 
 class UserController extends Controller {
 	private $session;
 
 	public function register() {
-		$input = [];
+		if (Auth::check()) {
+			header('Location: /', true, 301);
+			exit;
+		}
 		$this->view('register', [
 			'title' => 'Register page',
-			'input' => $input
 		]);
 	}
 	
 	public function login() {
-		$input = [];
+		if (Auth::check()) {
+			header('Location: /', true, 301);
+			exit;
+		}
 		$this->view('login', [
 			'title' => 'Login page',
-			'input' => $input
 		]);
 	}
 
 	public function create(): void {
-		parse_str(file_get_contents("php://input"),  $data);
-
-		if (empty($data) || empty($data['email']) || empty($data['username']) || empty($data['password'])) {
+		header('Content-Type: application/json');
+		$data = json_decode(file_get_contents("php://input"), true);
+		if (
+			empty($data['email']) ||
+			empty($data['username']) ||
+			empty($data['password'])
+		) {
 			http_response_code(400);
+			echo json_encode([
+				'error' => 'Missing fields'
+			]);
+			exit;
 		}
-		$users = User::all();
-		extract($data);
-		if (User::add(array(':email' => $email, ':username' => $username, ':password' => $password))) {
+		$email = $data['email'];
+		$username = $data['username'];
+		$password = $data['password'];
+		$hash = password_hash($password, PASSWORD_DEFAULT);
+		if (User::add([
+			':email' => $email,
+			':username' => $username,
+			':password' => $hash
+		])) {
 			http_response_code(201);
-		} else {
-			echo 'user or email already in use';
-			http_response_code(400);
+			echo json_encode([
+				'success' => true
+			]);
+			exit;
 		}
+		http_response_code(409);
+		echo json_encode([
+			'error' => 'User already exists'
+		]);
+		exit;
 	}
 
 	public function auth(): void {
-		parse_str(file_get_contents("php://input"),  $data);
-
-		if (empty($data) || empty($data['username']) || empty($data['password'])) {
+		header('Content-Type: application/json');
+		$data = json_decode(file_get_contents("php://input"), true);
+		if (
+			empty($data['username']) ||
+			empty($data['password'])
+		) {
 			http_response_code(400);
+			echo json_encode([
+				'error' => 'Missing credentials'
+			]);
+			exit;
 		}
-		$users = User::all();
-		extract($data);
+		$user = User::findByUsername($data['username']);
+		if (!$user || !password_verify($data['password'], $user['password'])) {
+			http_response_code(401);
+			echo json_encode([
+				'error' => 'Invalid credentials'
+			]);
+			exit;
+		}
+		Auth::authenticate($user['id']);
+		echo json_encode([
+			'success' => true
+		]);
+		exit;
 	}
 }
 ?>

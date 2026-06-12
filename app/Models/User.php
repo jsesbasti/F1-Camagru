@@ -20,6 +20,12 @@ class User extends Model
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
+    public static function findByUsername(string $username) {
+        $stmt = self::db()->prepare("SELECT id, username, password FROM users WHERE username = :username LIMIT 1");
+        $stmt->execute([':username' => $username]);
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
     public static function add(array $data) {
         try {
             $stmt = self::db()->prepare("INSERT INTO users (username, email, password) VALUES (:username, :email, :password)");
