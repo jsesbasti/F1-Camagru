@@ -4,6 +4,7 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Models\User;
 use App\Core\Auth;
+use App\Validators\UserValidator;
 
 class UserController extends Controller {
 	private $session;
@@ -29,22 +30,31 @@ class UserController extends Controller {
 	}
 
 	public function create(): void {
-		header('Content-Type: application/json');
+		header('Content-Type: application/json; charset=utf-8');
 		$data = json_decode(file_get_contents("php://input"), true);
-		if (
-			empty($data['email']) ||
-			empty($data['username']) ||
-			empty($data['password'])
-		) {
+		if (!$data) {
 			http_response_code(400);
 			echo json_encode([
-				'error' => 'Missing fields'
+				'errors' => [
+					'error' => 'Invalid JSON'
+				]
+			]);	
+			exit;
+		}
+
+		$errors = UserValidator::validateRegister($data);
+		if ($errors) {
+			http_response_code(400);
+			echo json_encode([
+				'errors' => $errors
 			]);
 			exit;
 		}
-		$email = $data['email'];
-		$username = $data['username'];
-		$password = $data['password'];
+
+		$email = trim($data['email'] ?? '');
+		$username = trim($data['username'] ?? '');
+		$password = trim($data['password'] ?? '');
+
 		$hash = password_hash($password, PASSWORD_DEFAULT);
 		if (User::add([
 			':email' => $email,
@@ -59,7 +69,9 @@ class UserController extends Controller {
 		}
 		http_response_code(409);
 		echo json_encode([
-			'error' => 'User already exists'
+			'errors' => [
+					'username' => 'Username already taken'
+				]
 		]);
 		exit;
 	}
@@ -67,13 +79,24 @@ class UserController extends Controller {
 	public function auth(): void {
 		header('Content-Type: application/json');
 		$data = json_decode(file_get_contents("php://input"), true);
+		if (!$data) {
+			http_response_code(400);
+			echo json_encode([
+				'errors' => [
+					'error' => 'Invalid JSON'
+				]
+			]);
+			exit;
+		}
 		if (
 			empty($data['username']) ||
 			empty($data['password'])
 		) {
 			http_response_code(400);
 			echo json_encode([
-				'error' => 'Missing credentials'
+				'errors' => [
+					'error' => 'Missing credentials'
+				]
 			]);
 			exit;
 		}
@@ -81,7 +104,9 @@ class UserController extends Controller {
 		if (!$user || !password_verify($data['password'], $user['password'])) {
 			http_response_code(401);
 			echo json_encode([
-				'error' => 'Invalid credentials'
+				'errors' => [
+					'error' => 'Invalid credentials'
+				]
 			]);
 			exit;
 		}

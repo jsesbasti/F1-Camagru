@@ -35,7 +35,7 @@ fclean: down-vol clean
 env:
 	@cp docker/env.example docker/.env
 
-logs_%:
+logs-%:
 	@docker logs -f camagru-$*
 
 

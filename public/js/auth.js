@@ -18,15 +18,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
 			const data = await response.json();
 
+			
 			if (response.ok) {
 				window.location.href = '/';
 			} else {
-				document.getElementById('error').textContent =
-					data.error || 'Login failed';
+				Object.entries(data.errors).forEach(([field, message]) => {
+					console.log(field);
+					const errorElement = document.getElementById(`${field}-error`);
+					if (errorElement) {
+						errorElement.textContent = message;
+					}
+				});
 			}
 		} catch (error) {
-			document.getElementById('error').textContent =
-				'Server error';
 			console.log(data.error);
 		}
 	});
@@ -41,6 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		e.preventDefault();
 
+		document.querySelectorAll('.error-msg')
+		.forEach(el => el.textContent = '');
 		const username = document.getElementById('username').value;
 		const password = document.getElementById('password').value;
 		const email = document.getElementById('email').value;
@@ -54,12 +60,14 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (response.ok) {
 				window.location.href = '/';
 			} else {
-				document.getElementById('error').textContent =
-					data.error || 'Register failed';
+				Object.entries(data.errors).forEach(([field, message]) => {
+					const errorElement = document.getElementById(`${field}-error`);
+					if (errorElement) {
+						errorElement.textContent = message;
+					}
+				});
 			}
 		} catch (error) {
-			document.getElementById('error').textContent =
-				'Server error';
 			console.log(data.error);
 		}
 	});
