@@ -50,7 +50,14 @@ document.addEventListener('DOMContentLoaded', () => {
 		const username = document.getElementById('username').value;
 		const password = document.getElementById('password').value;
 		const email = document.getElementById('email').value;
+		const confirm_pass = document.getElementById('confirm').value;
 
+		if (confirm_pass !== password)
+		{
+			const confirmErr = document.getElementById('confirm-error')
+			.textContent = 'Passwords does not match';
+			return ;
+		}
 		try {
 
 			const response = await api('/register', 'POST', { username, password, email });

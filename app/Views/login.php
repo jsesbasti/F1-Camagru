@@ -13,7 +13,7 @@
 
                 <button enabled="false" type="submit" name="login">Login</button>
             </div>
+            <p id="error-error" class="error-msg"></p>
        </form>
-       <p id="error" class="error-msg"></p>
     </body>
 </html>
