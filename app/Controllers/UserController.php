@@ -45,22 +45,18 @@ class UserController extends Controller
 		header('Content-Type: application/json; charset=utf-8');
 		$data = json_decode(file_get_contents("php://input"), true);
 		if (!$data) {
-			http_response_code(400);
-			echo json_encode([
+			Helper::json_response([
 				'errors' => [
 					'error' => 'Invalid JSON'
 				]
-			]);
-			exit;
+			], 400);
 		}
 
 		$errors = UserValidator::validateRegister($data);
 		if ($errors) {
-			http_response_code(400);
-			echo json_encode([
+			Helper::json_response([
 				'errors' => $errors
-			]);
-			exit;
+			], 400);
 		}
 
 		$email = trim($data['email'] ?? '');
@@ -79,21 +75,17 @@ class UserController extends Controller
 			exit;
 		}
 		if (User::findByUsername($username) != null) {
-			http_response_code(409);
-			echo json_encode([
+			Helper::json_response([
 				'errors' => [
 					'username' => 'Username already taken'
 				]
-			]);
-			exit;
+			], 409);
 		}
-		http_response_code(409);
-		echo json_encode([
+		Helper::json_response([
 			'errors' => [
 				'email' => 'Email in use'
 			]
-		]);
-		exit;
+		], 409);
 	}
 
 	public function auth(): void
@@ -101,42 +93,34 @@ class UserController extends Controller
 		header('Content-Type: application/json');
 		$data = json_decode(file_get_contents("php://input"), true);
 		if (!$data) {
-			http_response_code(400);
-			echo json_encode([
+			Helper::json_response([
 				'errors' => [
 					'error' => 'Invalid JSON'
 				]
-			]);
-			exit;
+			], 400);
 		}
 		if (
 			empty($data['username']) ||
 			empty($data['password'])
 		) {
-			http_response_code(400);
-			echo json_encode([
+			Helper::json_response([
 				'errors' => [
 					'error' => 'Missing credentials'
 				]
-			]);
-			exit;
+			], 400);
 		}
 		$user = User::findByUsername($data['username']);
 		if (!$user || !password_verify($data['password'], $user['password'])) {
-			http_response_code(401);
-			echo json_encode([
+			Helper::json_response([
 				'errors' => [
 					'error' => 'Invalid credentials'
 				]
-			]);
-			exit;
+			], 401);
 		}
 		Auth::authenticate($user['id']);
-		http_response_code(200);
-		echo json_encode([
+		Helper::json_response([
 			'success' => true
-		]);
-		exit;
+		], 200);
 	}
 }
 ?>
