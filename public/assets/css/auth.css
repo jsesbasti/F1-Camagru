@@ -1,41 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;0,900;1,700;1,800;1,900&family=Inter:wght@400;500;700&display=swap');
+
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: #f5f5f5;
+    background: #0F0F14; /* Asphalt Black */
     margin: 0;
+    padding: 15px;
 }
 
 .login-box {
-    background: white;
-    padding: 20px;
+    background: #1F1F27; /* Carbon Dark */
+    padding: 30px 24px;
     border-radius: 8px;
-    width: min(90vw, 300px);
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    width: min(90vw, 340px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    border: 1px solid #2E2E3A;
+    border-top: 4px solid #E10600; /* F1 Red highlight strip */
+    position: relative;
+}
+
+/* F1 Styled Title */
+.login-box::before {
+    content: 'F1 CAMAGRU';
+    display: block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-style: italic;
+    text-transform: uppercase;
+    font-size: 24px;
+    color: #FFFFFF;
+    text-align: center;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+    background: linear-gradient(135deg, #FFFFFF 60%, #E10600);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .error-msg {
-    color: red;
+    color: #ff4a43;
     text-align: center;
     width: 100%;
-    margin: 15px 0 0;
+    margin-top: 8px;
+    font-size: 0.85rem;
+    min-height: 1.2rem;
+    font-family: 'Inter', sans-serif;
 }
 
-input, button {
+.error-msg:empty {
+    display: none;
+    margin: 0;
+    min-height: 0;
+}
+
+input {
     width: 100%;
-    margin-top: 10px;
-    padding-block: 10px;
-    font-size: 1rem;
+    margin-top: 12px;
+    padding: 12px;
+    font-size: 16px; /* Prevents mobile browser auto-zoom on input focus */
+    background-color: #0F0F14; /* Asphalt Black input box */
+    border: 1px solid #2E2E3A;
+    border-radius: 4px;
+    color: #FFFFFF;
+    outline: none;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
+
+input::placeholder {
+    color: #AEAEB2;
+}
+
+input:focus {
+    border-color: #E10600;
+    box-shadow: 0 0 6px rgba(225, 6, 0, 0.4);
+}
+
 button {
-    background: #007bff;
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px;
+    font-size: 15px;
+    font-family: 'Barlow Condensed', sans-serif;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    background: #00E676; /* F1 Start Light Green */
     border: none;
-    color: white;
+    color: #0F0F14; /* Deep Asphalt Dark text for contrast */
     cursor: pointer;
-    border-radius: 5px;
+    border-radius: 4px;
+    transform: skewX(-10deg);
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 10px rgba(0, 230, 118, 0.3);
 }
+
 button:hover {
-    background: #005fcc;
+    background: #00FF87; /* Neon Mint on Hover */
+    box-shadow: 0 6px 15px rgba(0, 255, 135, 0.4);
+    transform: skewX(-10deg) translateY(-1px);
+}
+
+button:active {
+    transform: skewX(-10deg) translateY(1px);
 }

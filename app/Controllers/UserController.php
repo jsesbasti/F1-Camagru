@@ -7,10 +7,12 @@ use App\Core\Auth;
 use App\Validators\UserValidator;
 use App\Core\Helper;
 
-class UserController extends Controller {
+class UserController extends Controller
+{
 	private $session;
 
-	public function register() {
+	public function register()
+	{
 		if (Auth::check()) {
 			header('Location: /', true, 301);
 			exit;
@@ -19,8 +21,9 @@ class UserController extends Controller {
 			'title' => 'Register page',
 		]);
 	}
-	
-	public function login() {
+
+	public function login()
+	{
 		if (Auth::check()) {
 			header('Location: /', true, 301);
 			exit;
@@ -30,7 +33,15 @@ class UserController extends Controller {
 		]);
 	}
 
-	public function create(): void {
+	public function logout(): void
+	{
+		Auth::logout();
+		header('Location: /', true, 301);
+		exit;
+	}
+
+	public function create(): void
+	{
 		header('Content-Type: application/json; charset=utf-8');
 		$data = json_decode(file_get_contents("php://input"), true);
 		if (!$data) {
@@ -39,7 +50,7 @@ class UserController extends Controller {
 				'errors' => [
 					'error' => 'Invalid JSON'
 				]
-			]);	
+			]);
 			exit;
 		}
 
@@ -57,34 +68,36 @@ class UserController extends Controller {
 		$password = trim($data['password'] ?? '');
 
 		$hash = password_hash($password, PASSWORD_DEFAULT);
-		if (User::add([
-			':email' => $email,
-			':username' => $username,
-			':password' => $hash
-		])) {
+		if (
+			User::add([
+				':email' => $email,
+				':username' => $username,
+				':password' => $hash
+			])
+		) {
 			Helper::json_response(['success' => true]);
 			exit;
 		}
-		if (User::findByUsername($username) != null)
-		{
+		if (User::findByUsername($username) != null) {
 			http_response_code(409);
 			echo json_encode([
 				'errors' => [
-						'username' => 'Username already taken'
-					]
+					'username' => 'Username already taken'
+				]
 			]);
 			exit;
 		}
 		http_response_code(409);
 		echo json_encode([
 			'errors' => [
-					'email' => 'Email in use'
-				]
+				'email' => 'Email in use'
+			]
 		]);
 		exit;
 	}
 
-	public function auth(): void {
+	public function auth(): void
+	{
 		header('Content-Type: application/json');
 		$data = json_decode(file_get_contents("php://input"), true);
 		if (!$data) {

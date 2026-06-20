@@ -1,0 +1,916 @@
+/* CSS Variables for Formula 1 Theme */
+:root {
+  --f1-red: #E10600;
+  --f1-red-hover: #b80500;
+  --f1-red-glow: rgba(225, 6, 0, 0.4);
+  --asphalt-black: #0F0F14;
+  --carbon-dark: #1F1F27;
+  --carbon-medium: #2A2A35;
+  --carbon-light: #3D3D4E;
+  --border-color: #2E2E3A;
+  --text-primary: #FFFFFF;
+  --text-secondary: #AEAEB2;
+  --font-racing: 'Barlow Condensed', 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Reset & Global Base Style */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--asphalt-black);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--asphalt-black);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--carbon-medium);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--f1-red);
+}
+
+/* Header Styles */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background-color: rgba(31, 31, 39, 0.85);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border-bottom: 2px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 5vw;
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  transition: border-bottom-color 0.3s;
+}
+
+.header:hover {
+  border-bottom-color: rgba(225, 6, 0, 0.5);
+}
+
+/* Logo F1 style */
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.logo-icon {
+  width: 24px;
+  height: 24px;
+  background-color: var(--f1-red);
+  transform: skewX(-15deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  color: white;
+  font-family: var(--font-racing);
+  font-style: italic;
+  font-size: 14px;
+}
+
+.logo-text {
+  font-family: var(--font-racing);
+  font-size: 26px;
+  font-weight: 800;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-primary);
+  background: linear-gradient(135deg, #FFFFFF 60%, var(--f1-red));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Header Buttons */
+.auth-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.btn {
+  font-family: var(--font-racing);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 8px 18px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: skewX(-10deg);
+}
+
+.btn-login {
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  background: transparent;
+}
+
+.btn-login:hover {
+  background-color: var(--carbon-medium);
+  border-color: var(--text-secondary);
+}
+
+.btn-register {
+  color: white;
+  background-color: var(--f1-red);
+  border: 1px solid var(--f1-red);
+  box-shadow: 0 4px 10px var(--f1-red-glow);
+}
+
+.btn-register:hover {
+  background-color: var(--f1-red-hover);
+  border-color: var(--f1-red-hover);
+  box-shadow: 0 6px 15px var(--f1-red-glow);
+  transform: skewX(-10deg) translateY(-1px);
+}
+
+.btn span {
+  display: inline-block;
+  transform: skewX(10deg); /* Counteract skew for text readable */
+}
+
+/* Logged in User Profile Trigger */
+.user-menu-container {
+  position: relative;
+}
+
+.user-profile-btn {
+  background: none;
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.user-profile-btn:hover {
+  border-color: var(--f1-red);
+  box-shadow: 0 0 10px var(--f1-red-glow);
+}
+
+.user-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--carbon-light), var(--f1-red));
+  color: white;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-racing);
+  font-size: 16px;
+}
+
+/* User Profile Dropdown Menu */
+.dropdown-menu {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  width: 220px;
+  background-color: rgba(31, 31, 39, 0.95);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  border-top: 3px solid var(--f1-red);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  display: none;
+  flex-direction: column;
+  z-index: 1010;
+  opacity: 0;
+  transform: translateY(10px) scale(0.95);
+  transform-origin: top right;
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dropdown-menu.show {
+  display: flex;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.dropdown-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dropdown-username {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dropdown-role {
+  font-size: 11px;
+  color: var(--f1-red);
+  font-family: var(--font-racing);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dropdown-item {
+  padding: 12px 18px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s;
+}
+
+.dropdown-item:hover {
+  background-color: var(--carbon-medium);
+  color: var(--text-primary);
+  padding-left: 22px;
+}
+
+.dropdown-item.logout {
+  border-top: 1px solid var(--border-color);
+}
+
+.dropdown-item.logout:hover {
+  background-color: rgba(225, 6, 0, 0.1);
+  color: #ff4a43;
+}
+
+/* Main Content Area */
+.main-content {
+  margin-top: 60px;
+  margin-bottom: 70px;
+  padding: 20px 10px;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.feed-container {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+/* Instagram F1 Post Card */
+.post-card {
+  background-color: var(--carbon-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.3s;
+}
+
+.post-card:hover {
+  border-color: rgba(225, 6, 0, 0.3);
+}
+
+/* Post Header */
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.post-user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.post-user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--f1-red), var(--carbon-light));
+  color: white;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-family: var(--font-racing);
+  border: 1.5px solid var(--border-color);
+}
+
+.post-username {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.post-username:hover {
+  color: var(--f1-red);
+}
+
+.post-time {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.post-badge {
+  background-color: rgba(225, 6, 0, 0.15);
+  border: 1px solid var(--f1-red);
+  color: white;
+  font-family: var(--font-racing);
+  text-transform: uppercase;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Post Image Visuals */
+.post-media-container {
+  width: 100%;
+  aspect-ratio: 4/5;
+  background-color: var(--asphalt-black);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+/* F1 Styled dynamic visual backgrounds */
+.f1-visual-bg {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.5s ease;
+}
+
+.post-media-container:hover .f1-visual-bg {
+  transform: scale(1.02);
+}
+
+.visual-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(15, 15, 20, 0.9) 10%, rgba(15, 15, 20, 0.2) 60%, rgba(15, 15, 20, 0.7) 100%);
+  z-index: 1;
+}
+
+.visual-top-info {
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.visual-lap-time {
+  background-color: rgba(15, 15, 20, 0.85);
+  border-left: 3px solid #00E676; /* Green lap time split info */
+  padding: 4px 10px;
+  font-family: var(--font-racing);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  color: #00E676;
+  text-transform: uppercase;
+  border-radius: 0 4px 4px 0;
+}
+
+.visual-circuit-map {
+  z-index: 2;
+  align-self: center;
+  width: 70%;
+  opacity: 0.85;
+  filter: drop-shadow(0 0 15px var(--f1-red-glow));
+}
+
+.visual-bottom-data {
+  z-index: 2;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.visual-speedometer {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  font-family: var(--font-racing);
+  color: white;
+}
+
+.speed-value {
+  font-size: 42px;
+  font-weight: 900;
+  line-height: 0.9;
+  font-style: italic;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.speed-unit {
+  font-size: 14px;
+  color: var(--f1-red);
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.visual-telemetry {
+  display: flex;
+  gap: 15px;
+  font-family: var(--font-racing);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.telemetry-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.telemetry-val {
+  color: white;
+  font-weight: 700;
+}
+
+/* Post Actions */
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px 8px 16px;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, color 0.2s;
+}
+
+.action-btn:hover {
+  transform: scale(1.15);
+  color: var(--f1-red);
+}
+
+.action-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: fill 0.2s, stroke 0.2s;
+}
+
+.action-btn.liked svg {
+  fill: var(--f1-red);
+  stroke: var(--f1-red);
+  animation: heartBeat 0.3s forwards;
+}
+
+@keyframes heartBeat {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1.1); }
+}
+
+/* Post Stats & Captions */
+.post-details {
+  padding: 0 16px 14px 16px;
+}
+
+.post-likes-count {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.post-caption {
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.post-caption-user {
+  font-weight: 700;
+  text-decoration: none;
+  color: white;
+  margin-right: 6px;
+}
+
+/* Comments section */
+.post-comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+  max-height: 120px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.comment-item {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.comment-user {
+  font-weight: 700;
+  color: white;
+  text-decoration: none;
+  margin-right: 6px;
+}
+
+/* Add Comment Input Form */
+.comment-form {
+  display: flex;
+  align-items: center;
+  border-top: 1px solid var(--border-color);
+  padding: 10px 0 0 0;
+  gap: 10px;
+}
+
+.comment-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 13px;
+  padding: 4px 0;
+}
+
+.comment-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.comment-submit-btn {
+  background: none;
+  border: none;
+  color: var(--f1-red);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  opacity: 0.5;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.comment-input:not(:placeholder-shown) + .comment-submit-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.comment-submit-btn:hover {
+  color: white;
+}
+
+/* Infinite Scroll Loader */
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0;
+  margin-bottom: 20px;
+}
+
+/* F1 Grid Start Light Spinner */
+.f1-loader {
+  display: flex;
+  gap: 8px;
+}
+
+.f1-light {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: #33333C;
+  border: 1px solid #111;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.8);
+}
+
+.f1-light.active {
+  background-color: var(--f1-red);
+  box-shadow: 0 0 10px var(--f1-red), inset 0 0 2px white;
+}
+
+/* Footer Navigation Styles */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background-color: rgba(31, 31, 39, 0.9);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border-top: 2px solid var(--border-color);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 1000;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.footer-nav-btn {
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  text-decoration: none;
+}
+
+.footer-nav-btn:hover,
+.footer-nav-btn.active {
+  color: var(--f1-red);
+  transform: translateY(-2px);
+  filter: drop-shadow(0 0 4px var(--f1-red-glow));
+}
+
+.footer-nav-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.footer-nav-btn.active svg {
+  stroke-width: 2.5;
+}
+
+/* Add Post Action Circle Button in Footer */
+.footer-add-btn {
+  background-color: var(--f1-red);
+  color: white;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px var(--f1-red-glow);
+  transform: translateY(-10px) skewX(-10deg);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.footer-add-btn:hover {
+  background-color: var(--f1-red-hover);
+  box-shadow: 0 6px 18px var(--f1-red-glow);
+  transform: translateY(-13px) skewX(-10deg) scale(1.08);
+}
+
+.footer-add-btn svg {
+  width: 22px;
+  height: 22px;
+  stroke: white;
+  stroke-width: 3;
+  transform: skewX(10deg); /* Counteract skew */
+}
+
+/* Mock Post Modal styling */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 15, 20, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.modal-overlay.show {
+  display: flex;
+  opacity: 1;
+}
+
+.modal-card {
+  background-color: var(--carbon-dark);
+  border: 1px solid var(--border-color);
+  border-top: 4px solid var(--f1-red);
+  border-radius: 8px;
+  width: 90%;
+  max-width: 450px;
+  padding: 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+  transform: translateY(20px) scale(0.95);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-overlay.show .modal-card {
+  transform: translateY(0) scale(1);
+}
+
+.modal-title {
+  font-family: var(--font-racing);
+  font-size: 22px;
+  text-transform: uppercase;
+  font-style: italic;
+  font-weight: 800;
+  margin-bottom: 15px;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 8px;
+}
+
+.modal-content {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.modal-close-btn {
+  width: 100%;
+  border: none;
+  background-color: var(--f1-red);
+  color: white;
+  font-family: var(--font-racing);
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.modal-close-btn:hover {
+  background-color: var(--f1-red-hover);
+}
+
+/* Responsiveness adjustments */
+@media (min-width: 768px) {
+  /* Feed is centered and slightly padded */
+  .main-content {
+    padding: 30px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Small screen adjustments */
+  .logo-text {
+    font-size: 22px;
+  }
+  .header {
+    padding: 0 4vw;
+  }
+  .btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .main-content {
+    margin-bottom: 75px;
+  }
+}
+
+/* Drivers Stories (Instagram style) */
+.drivers-stories {
+  background-color: var(--carbon-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stories-title {
+  font-family: var(--font-racing);
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--f1-red);
+  letter-spacing: 1px;
+  font-weight: 800;
+  border-left: 2px solid var(--f1-red);
+  padding-left: 6px;
+}
+
+.stories-wrapper {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 5px;
+  scrollbar-width: thin;
+}
+
+.stories-wrapper::-webkit-scrollbar {
+  height: 4px;
+}
+
+.story-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  min-width: 60px;
+}
+
+.story-avatar-ring {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  padding: 2px;
+  background: linear-gradient(135deg, var(--f1-red) 30%, #FFD700 70%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+.story-item:hover .story-avatar-ring {
+  transform: scale(1.05);
+}
+
+.story-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: var(--carbon-medium);
+  border: 2px solid var(--carbon-dark);
+  color: white;
+  font-family: var(--font-racing);
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.story-username {
+  font-size: 11px;
+  color: var(--text-secondary);
+  max-width: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
