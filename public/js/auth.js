@@ -37,7 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-
 	const form = document.getElementById('register-form');
 	if (!form)
 		return;
@@ -48,14 +47,13 @@ document.addEventListener('DOMContentLoaded', () => {
 		document.querySelectorAll('.error-msg')
 		.forEach(el => el.textContent = '');
 		const username = document.getElementById('username').value;
-		const password = document.getElementById('password').value;
 		const email = document.getElementById('email').value;
+		const password = document.getElementById('password').value;
 		const confirm_pass = document.getElementById('confirm').value;
 
 		if (confirm_pass !== password)
 		{
-			const confirmErr = document.getElementById('confirm-error')
-			.textContent = 'Passwords does not match';
+			document.getElementById('confirm-error').textContent = 'Passwords does not match';
 			return ;
 		}
 		try {
@@ -73,9 +71,13 @@ document.addEventListener('DOMContentLoaded', () => {
 						errorElement.textContent = message;
 					}
 				});
+				username = '';
+				email = '';
+				password = '';
+				confirm_pass = '';
 			}
 		} catch (error) {
-			console.log(data.error);
+			return ;
 		}
 	});
 });

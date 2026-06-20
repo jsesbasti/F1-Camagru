@@ -1,10 +1,11 @@
 <?php
 namespace App\Controllers;
 
-use App\Core\Controller;
 use App\Models\User;
+use App\Core\Controller;
 use App\Core\Auth;
 use App\Validators\UserValidator;
+use App\Core\Helper;
 
 class UserController extends Controller {
 	private $session;
@@ -61,16 +62,23 @@ class UserController extends Controller {
 			':username' => $username,
 			':password' => $hash
 		])) {
-			http_response_code(201);
+			Helper::json_response(['success' => true]);
+			exit;
+		}
+		if (User::findByUsername($username) != null)
+		{
+			http_response_code(409);
 			echo json_encode([
-				'success' => true
+				'errors' => [
+						'username' => 'Username already taken'
+					]
 			]);
 			exit;
 		}
 		http_response_code(409);
 		echo json_encode([
 			'errors' => [
-					'username' => 'Username already taken'
+					'email' => 'Email in use'
 				]
 		]);
 		exit;
@@ -111,6 +119,7 @@ class UserController extends Controller {
 			exit;
 		}
 		Auth::authenticate($user['id']);
+		http_response_code(200);
 		echo json_encode([
 			'success' => true
 		]);
