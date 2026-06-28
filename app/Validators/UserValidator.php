@@ -22,10 +22,10 @@ class UserValidator {
 
 			$errors['username'] = 'Username is required';
 
-		} elseif (!preg_match('/^[a-zA-Z0-9_]{3,20}$/', $username)) {
+		} elseif (!preg_match('/^[a-zA-Z0-9_]{4,20}$/', $username)) {
 
 			$errors['username'] =
-				'Username must be 3-20 chars and only contain letters, numbers and underscores';
+				'Username must be 4-20 chars and only contain letters, numbers and underscores';
 		}
 
 		if (!$password) {
