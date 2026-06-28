@@ -1,7 +1,7 @@
 <?php
 namespace App\Core;
 
-class Auth
+class Session
 {
 	public static function check()
 	{
@@ -18,5 +18,8 @@ class Auth
 		session_destroy();
 	}
 
+	public static function getId(): int {
+		return ($_SESSION['user_id']);
+	}
 }
 ?>

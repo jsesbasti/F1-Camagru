@@ -3,7 +3,7 @@ namespace App\Controllers;
 
 use App\Models\User;
 use App\Core\Controller;
-use App\Core\Auth;
+use App\Core\Session;
 use App\Validators\UserValidator;
 use App\Core\Helper;
 
@@ -12,7 +12,7 @@ class RegisterController extends Controller
 
 	public function register()
 	{
-		if (Auth::check()) {
+		if (Session::check()) {
 			header('Location: /', true, 301);
 			exit;
 		}

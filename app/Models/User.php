@@ -36,6 +36,17 @@ class User extends Model
         }
         // return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
+
+    public static function mod(int $id, string $col, $data) {
+        try {
+            $stmt = self::db()->prepare("UPDATE users SET :col = :data WHERE id = :id");
+            $stmt = execute(['col' => $col, 'data' => $data, 'id' => $id]);
+            return true;
+        } catch (\PDOException $e) {
+            return false;
+        }
+    }
+
     public static function getCol(PDOStatement $stmt, string $col, &$data) {
         return $stmt->bindColumn($col,  $data);
     }

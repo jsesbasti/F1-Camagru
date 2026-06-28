@@ -3,13 +3,13 @@ namespace App\Controllers;
 
 use App\Models\User;
 use App\Core\Controller;
-use App\Core\Auth;
+use App\Core\Session;
 use App\Core\Helper;
 
 class LoginController extends Controller {
 
 	public function login() {
-		if (Auth::check()) {
+		if (Session::check()) {
 			header('Location: /', true, 301);
 			exit;
 		}
@@ -51,7 +51,7 @@ class LoginController extends Controller {
 		// Aquí deberías comprobar si el usuario tiene verified = 1 en la base de datos.
 		// Si no está verificado, debes impedir el login y avisar de que verifique su bandeja de entrada.
 		
-		Auth::authenticate($user['id']);
+		Session::authenticate($user['id']);
 		Helper::json_response([
 			'success' => true
 		], 200);

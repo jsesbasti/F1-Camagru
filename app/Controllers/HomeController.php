@@ -4,7 +4,7 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\User;
-use App\Core\Auth;
+use App\Core\Session;
 
 class HomeController extends Controller
 {
@@ -13,7 +13,7 @@ class HomeController extends Controller
         $users = User::all();
         $currentUser = null;
         
-        if (Auth::check()) {
+        if (Session::check()) {
             $currentUser = User::find($_SESSION['user_id']);
         }
 

@@ -3,7 +3,7 @@ namespace App\Controllers;
 
 use App\Models\User;
 use App\Core\Controller;
-use App\Core\Auth;
+use App\Core\Session;
 use App\Validators\UserValidator;
 use App\Core\Helper;
 
@@ -11,20 +11,55 @@ class UserController extends Controller
 {
 	private $session;
 
-	public function register()
-	{
-		if (Auth::check()) {
-			header('Location: /', true, 301);
+	public function updateEmail() {
+		header('Content-Type: application/json; charset=utf-8');
+		if (Session::check()) {
+			$id = Session::getId();
+		}
+		else {
+			Helper::json_response([
+				'errors' => [
+					'error' => 'Session lost'
+				]
+			], 403);
 			exit;
 		}
-		$this->view('register', [
-			'title' => 'Register page',
-		]);
+		$data = json_decode(file_get_contents("php://input"), true);
+		if (!$data) {
+			Helper::json_response([
+				'errors' => [
+					'error' => 'Invalid JSON'
+				]
+			], 400);
+		}
+
+		$email = trim($data['email'] ?? '');
+
+		if (
+			User::mod()
+		) {
+			Helper::json_response(['success' => true]);
+			exit;
+		}
+		if (User::findByUsername($username) != null) {
+			Helper::json_response([
+				'errors' => [
+					'username' => 'Username already taken'
+				]
+			], 409);
+			exit;
+		}
+		Helper::json_response([
+			'errors' => [
+				'email' => 'Email in use'
+			]
+		], 409);
+		exit;
 	}
 
 	public function login()
 	{
-		if (Auth::check()) {
+		if (Session::check()) {
 			header('Location: /', true, 301);
 			exit;
 		}
@@ -35,7 +70,7 @@ class UserController extends Controller
 
 	public function logout(): void
 	{
-		Auth::logout();
+		Session::logout();
 		header('Location: /', true, 301);
 		exit;
 	}
@@ -88,7 +123,7 @@ class UserController extends Controller
 		], 409);
 	}
 
-	public function auth(): void
+	public function Session(): void
 	{
 		header('Content-Type: application/json');
 		$data = json_decode(file_get_contents("php://input"), true);
@@ -117,7 +152,7 @@ class UserController extends Controller
 				]
 			], 401);
 		}
-		Auth::authenticate($user['id']);
+		Session::Sessionenticate($user['id']);
 		Helper::json_response([
 			'success' => true
 		], 200);
