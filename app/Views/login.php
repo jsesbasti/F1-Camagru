@@ -3,6 +3,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title><?php echo $title ?></title>
+        <link rel="stylesheet" href="assets/css/colors.css">
         <link rel="stylesheet" href="assets/css/auth.css">
         <script type="module" src="js/auth.js"></script>
     </head>

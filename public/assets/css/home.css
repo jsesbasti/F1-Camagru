@@ -1,15 +1,5 @@
-/* CSS Variables for Formula 1 Theme */
+/* Typography variables */
 :root {
-  --f1-red: #E10600;
-  --f1-red-hover: #b80500;
-  --f1-red-glow: rgba(225, 6, 0, 0.4);
-  --asphalt-black: #0F0F14;
-  --carbon-dark: #1F1F27;
-  --carbon-medium: #2A2A35;
-  --carbon-light: #3D3D4E;
-  --border-color: #2E2E3A;
-  --text-primary: #FFFFFF;
-  --text-secondary: #AEAEB2;
   --font-racing: 'Barlow Condensed', 'Outfit', system-ui, -apple-system, sans-serif;
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
 }
@@ -49,7 +39,7 @@ body {
   left: 0;
   right: 0;
   height: 60px;
-  background-color: rgba(31, 31, 39, 0.85);
+  background-color: var(--carbon-dark-85);
   backdrop-filter: blur(12px) saturate(180%);
   -webkit-backdrop-filter: blur(12px) saturate(180%);
   border-bottom: 2px solid var(--border-color);
@@ -58,12 +48,12 @@ body {
   align-items: center;
   padding: 0 5vw;
   z-index: 1000;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 20px var(--shadow-500);
   transition: border-bottom-color 0.3s;
 }
 
 .header:hover {
-  border-bottom-color: rgba(225, 6, 0, 0.5);
+  border-bottom-color: var(--f1-red-hover-glow);
 }
 
 /* Logo F1 style */
@@ -83,7 +73,7 @@ body {
   align-items: center;
   justify-content: center;
   font-weight: 900;
-  color: white;
+  color: var(--text-primary);
   font-family: var(--font-racing);
   font-style: italic;
   font-size: 14px;
@@ -97,7 +87,8 @@ body {
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--text-primary);
-  background: linear-gradient(135deg, #FFFFFF 60%, var(--f1-red));
+  background: linear-gradient(135deg, var(--text-primary) 60%, var(--f1-red));
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -134,7 +125,7 @@ body {
 }
 
 .btn-register {
-  color: white;
+  color: var(--text-primary);
   background-color: var(--f1-red);
   border: 1px solid var(--f1-red);
   box-shadow: 0 4px 10px var(--f1-red-glow);
@@ -187,7 +178,7 @@ body {
   width: 100%;
   height: 100%;
   background: linear-gradient(135deg, var(--carbon-light), var(--f1-red));
-  color: white;
+  color: var(--text-primary);
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -202,13 +193,13 @@ body {
   top: 50px;
   right: 0;
   width: 220px;
-  background-color: rgba(31, 31, 39, 0.95);
+  background-color: var(--carbon-dark-95);
   backdrop-filter: blur(16px);
   border: 1px solid var(--border-color);
   border-top: 3px solid var(--f1-red);
   border-radius: 6px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 10px 30px var(--shadow-700);
   display: none;
   flex-direction: column;
   z-index: 1010;
@@ -269,8 +260,8 @@ body {
 }
 
 .dropdown-item.logout:hover {
-  background-color: rgba(225, 6, 0, 0.1);
-  color: #ff4a43;
+  background-color: var(--f1-red-soft);
+  color: var(--error-red);
 }
 
 /* Main Content Area */
@@ -304,7 +295,7 @@ body {
 }
 
 .post-card:hover {
-  border-color: rgba(225, 6, 0, 0.3);
+  border-color: var(--f1-red-soft-border);
 }
 
 /* Post Header */
@@ -327,7 +318,7 @@ body {
   height: 34px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--f1-red), var(--carbon-light));
-  color: white;
+  color: var(--text-primary);
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -354,9 +345,9 @@ body {
 }
 
 .post-badge {
-  background-color: rgba(225, 6, 0, 0.15);
+  background-color: var(--f1-red-tint);
   border: 1px solid var(--f1-red);
-  color: white;
+  color: var(--text-primary);
   font-family: var(--font-racing);
   text-transform: uppercase;
   font-size: 10px;
@@ -400,7 +391,7 @@ body {
 .visual-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(15, 15, 20, 0.9) 10%, rgba(15, 15, 20, 0.2) 60%, rgba(15, 15, 20, 0.7) 100%);
+  background: linear-gradient(to top, var(--asphalt-black-90) 10%, var(--asphalt-black-20) 60%, var(--asphalt-black-70) 100%);
   z-index: 1;
 }
 
@@ -412,14 +403,14 @@ body {
 }
 
 .visual-lap-time {
-  background-color: rgba(15, 15, 20, 0.85);
-  border-left: 3px solid #00E676; /* Green lap time split info */
+  background-color: var(--asphalt-black-85);
+  border-left: 3px solid var(--start-green); /* Green lap time split info */
   padding: 4px 10px;
   font-family: var(--font-racing);
   font-weight: 700;
   font-size: 15px;
   letter-spacing: 0.5px;
-  color: #00E676;
+  color: var(--start-green);
   text-transform: uppercase;
   border-radius: 0 4px 4px 0;
 }
@@ -445,7 +436,7 @@ body {
   align-items: flex-end;
   gap: 5px;
   font-family: var(--font-racing);
-  color: white;
+  color: var(--text-primary);
 }
 
 .speed-value {
@@ -453,7 +444,7 @@ body {
   font-weight: 900;
   line-height: 0.9;
   font-style: italic;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  text-shadow: 0 2px 10px var(--shadow-500);
 }
 
 .speed-unit {
@@ -478,7 +469,7 @@ body {
 }
 
 .telemetry-val {
-  color: white;
+  color: var(--text-primary);
   font-weight: 700;
 }
 
@@ -550,7 +541,7 @@ body {
 .post-caption-user {
   font-weight: 700;
   text-decoration: none;
-  color: white;
+  color: var(--text-primary);
   margin-right: 6px;
 }
 
@@ -572,7 +563,7 @@ body {
 
 .comment-user {
   font-weight: 700;
-  color: white;
+  color: var(--text-primary);
   text-decoration: none;
   margin-right: 6px;
 }
@@ -618,7 +609,7 @@ body {
 }
 
 .comment-submit-btn:hover {
-  color: white;
+  color: var(--text-primary);
 }
 
 /* Infinite Scroll Loader */
@@ -640,14 +631,14 @@ body {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background-color: #33333C;
-  border: 1px solid #111;
-  box-shadow: inset 0 0 5px rgba(0,0,0,0.8);
+  background-color: var(--carbon-deep);
+  border: 1px solid var(--border-strong);
+  box-shadow: inset 0 0 5px var(--shadow-800);
 }
 
 .f1-light.active {
   background-color: var(--f1-red);
-  box-shadow: 0 0 10px var(--f1-red), inset 0 0 2px white;
+  box-shadow: 0 0 10px var(--f1-red), inset 0 0 2px var(--text-primary);
 }
 
 /* Footer Navigation Styles */
@@ -657,7 +648,7 @@ body {
   left: 0;
   right: 0;
   height: 60px;
-  background-color: rgba(31, 31, 39, 0.9);
+  background-color: var(--carbon-dark-90);
   backdrop-filter: blur(12px) saturate(180%);
   -webkit-backdrop-filter: blur(12px) saturate(180%);
   border-top: 2px solid var(--border-color);
@@ -665,7 +656,7 @@ body {
   justify-content: space-around;
   align-items: center;
   z-index: 1000;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 -4px 20px var(--shadow-500);
 }
 
 .footer-nav-btn {
@@ -705,7 +696,7 @@ body {
 /* Add Post Action Circle Button in Footer */
 .footer-add-btn {
   background-color: var(--f1-red);
-  color: white;
+  color: var(--text-primary);
   width: 44px;
   height: 44px;
   border-radius: 50%;
@@ -728,7 +719,7 @@ body {
 .footer-add-btn svg {
   width: 22px;
   height: 22px;
-  stroke: white;
+  stroke: var(--text-primary);
   stroke-width: 3;
   transform: skewX(10deg); /* Counteract skew */
 }
@@ -737,7 +728,7 @@ body {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(15, 15, 20, 0.85);
+  background-color: var(--asphalt-black-85);
   backdrop-filter: blur(8px);
   z-index: 2000;
   display: none;
@@ -760,7 +751,7 @@ body {
   width: 90%;
   max-width: 450px;
   padding: 24px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 10px 40px var(--shadow-800);
   transform: translateY(20px) scale(0.95);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -788,11 +779,75 @@ body {
   margin-bottom: 20px;
 }
 
+.modal-state {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-state[hidden] {
+  display: none;
+}
+
+.modal-auth-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.modal-primary-btn,
+.modal-secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-family: var(--font-racing);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.modal-primary-btn {
+  width: 100%;
+  background-color: var(--f1-red);
+  color: var(--text-primary);
+  border: none;
+  box-shadow: 0 4px 12px var(--f1-red-glow);
+}
+
+.modal-secondary-btn {
+  flex: 1 1 120px;
+  background-color: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.modal-primary-btn:hover,
+.modal-secondary-btn:hover {
+  transform: translateY(-1px);
+}
+
+.modal-secondary-btn:hover {
+  border-color: var(--text-secondary);
+}
+
+.modal-status {
+  min-height: 1.2rem;
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
 .modal-close-btn {
   width: 100%;
   border: none;
   background-color: var(--f1-red);
-  color: white;
+  color: var(--text-primary);
   font-family: var(--font-racing);
   text-transform: uppercase;
   font-weight: 700;
@@ -879,7 +934,7 @@ body {
   height: 48px;
   border-radius: 50%;
   padding: 2px;
-  background: linear-gradient(135deg, var(--f1-red) 30%, #FFD700 70%);
+  background: linear-gradient(135deg, var(--f1-red) 30%, var(--gold) 70%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -896,7 +951,7 @@ body {
   border-radius: 50%;
   background-color: var(--carbon-medium);
   border: 2px solid var(--carbon-dark);
-  color: white;
+  color: var(--text-primary);
   font-family: var(--font-racing);
   font-weight: 700;
   font-size: 14px;

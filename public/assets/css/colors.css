@@ -1,0 +1,34 @@
+:root {
+  --f1-red: #E10600;
+  --f1-red-hover: #b80500;
+  --f1-red-glow: rgba(225, 6, 0, 0.4);
+  --f1-red-hover-glow: rgba(225, 6, 0, 0.5);
+  --f1-red-soft: rgba(225, 6, 0, 0.1);
+  --f1-red-tint: rgba(225, 6, 0, 0.15);
+  --f1-red-soft-border: rgba(225, 6, 0, 0.3);
+  --asphalt-black: #0F0F14;
+  --asphalt-black-85: rgba(15, 15, 20, 0.85);
+  --asphalt-black-90: rgba(15, 15, 20, 0.9);
+  --asphalt-black-70: rgba(15, 15, 20, 0.7);
+  --asphalt-black-20: rgba(15, 15, 20, 0.2);
+  --carbon-dark: #1F1F27;
+  --carbon-dark-90: rgba(31, 31, 39, 0.9);
+  --carbon-dark-95: rgba(31, 31, 39, 0.95);
+  --carbon-medium: #2A2A35;
+  --carbon-light: #3D3D4E;
+  --carbon-deep: #33333C;
+  --border-color: #2E2E3A;
+  --border-strong: #111111;
+  --text-primary: #FFFFFF;
+  --text-secondary: #AEAEB2;
+  --error-red: #ff4a43;
+  --start-green: #00E676;
+  --start-green-hover: #00FF87;
+  --start-green-glow: rgba(0, 230, 118, 0.3);
+  --start-green-glow-hover: rgba(0, 255, 135, 0.4);
+  --shadow-500: rgba(0, 0, 0, 0.5);
+  --shadow-600: rgba(0, 0, 0, 0.6);
+  --shadow-700: rgba(0, 0, 0, 0.7);
+  --shadow-800: rgba(0, 0, 0, 0.8);
+  --gold: #FFD700;
+}

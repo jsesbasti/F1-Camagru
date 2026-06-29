@@ -7,10 +7,11 @@
     <!-- Google Fonts: Barlow Condensed for racing aesthetic, Inter for body text -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="assets/css/colors.css">
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;0,900;1,700;1,800;1,900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/home.css">
 </head>
-<body>
+<body data-authenticated="<?= $currentUser ? '1' : '0' ?>">
 
     <!-- Header Estático (Siempre Visible) -->
     <header class="header">
@@ -78,144 +79,83 @@
                 </div>
             <?php endif; ?>
 
-            <!-- Post 1: Monaco GP -->
-            <div class="post-card" id="post-1">
-                <div class="post-header">
-                    <div class="post-user-info">
-                        <div class="post-user-avatar">CL</div>
-                        <a href="#" class="post-username">charles_leclerc</a>
-                    </div>
-                    <div class="post-badge">Pole Position</div>
-                </div>
-                <div class="post-media-container">
-                    <div class="f1-visual-bg" style="background: linear-gradient(135deg, #FF416C, #FF4B2B)">
-                        <div class="visual-overlay"></div>
-                        <div class="visual-top-info">
-                            <span class="visual-lap-time">1:12.909</span>
-                            <span style="font-family: var(--font-racing); color: var(--f1-red); font-weight:700; z-index:2; text-shadow:0 2px 4px rgba(0,0,0,0.8);">MONACO GP</span>
-                        </div>
-                        
-                        <!-- SVG de Trazado de Mónaco -->
-                        <svg class="visual-circuit-map" viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M10 20 C40 20, 50 10, 80 15 C110 20, 120 40, 140 45 C170 50, 190 70, 180 85 C170 100, 110 90, 90 75 C70 60, 50 85, 30 70 C10 55, 10 30, 10 20 Z" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-                            <circle cx="80" cy="15" r="5" fill="#E10600" />
-                        </svg>
-
-                        <div class="visual-bottom-data">
-                            <div class="visual-speedometer">
-                                <span class="speed-value">314</span>
-                                <span class="speed-unit">KM/H</span>
-                                <span style="font-family: var(--font-racing); font-size:18px; font-weight:800; color:#FFD700; margin-left:15px; font-style:italic; text-shadow:0 2px 5px rgba(0,0,0,0.5);">MARCHA 7</span>
+            <?php if (!empty($posts)): ?>
+                <?php foreach ($posts as $post): ?>
+                    <?php
+                        $imageStyle = '';
+                        if (!empty($post['image_url'])) {
+                            $escapedImageUrl = htmlspecialchars($post['image_url'], ENT_QUOTES, 'UTF-8');
+                            $imageStyle = "background-image: url('{$escapedImageUrl}')";
+                        }
+                        $caption = trim((string) ($post['caption'] ?? ''));
+                        $comments = $post['comments'] ?? [];
+                    ?>
+                    <div class="post-card" id="post-<?= (int) $post['id'] ?>">
+                        <div class="post-header">
+                            <div class="post-user-info">
+                                <div class="post-user-avatar"><?= htmlspecialchars($post['avatar_initials']) ?></div>
+                                <a href="#" class="post-username"><?= htmlspecialchars($post['username']) ?></a>
                             </div>
-                            <div class="visual-telemetry">
-                                <div class="telemetry-item">DRS: <span class="telemetry-val" style="color: #00E676;">ON</span></div>
-                                <div class="telemetry-item">RPM: <span class="telemetry-val">12.100</span></div>
-                                <div class="telemetry-item">TEMP: <span class="telemetry-val">96°C</span></div>
+                            <div class="post-badge"><?= htmlspecialchars($post['badge']) ?></div>
+                        </div>
+                        <div class="post-media-container">
+                            <div class="f1-visual-bg" style="<?= $imageStyle ?>">
+                                <div class="visual-overlay"></div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="post-actions">
-                    <button class="action-btn like-btn" aria-label="Like Post">
-                        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                    </button>
-                    <button class="action-btn comment-trigger-btn" aria-label="Comment">
-                        <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                    </button>
-                </div>
-                <div class="post-details">
-                    <div class="post-likes-count"><span class="likes-num">18.420</span> me gusta</div>
-                    <div class="post-caption">
-                        <a href="#" class="post-caption-user">charles_leclerc</a>
-                        <span>Sensación única volando por las calles de casa. ¡La pole es nuestra! 🇲🇨🏆 #F1 #MonacoGP</span>
-                    </div>
-                    <div class="post-comments-list">
-                        <div class="comment-item">
-                            <a href="#" class="comment-user">lewis_44</a>
-                            <span>Gran vuelta, Charles! Mañana será una buena batalla. 🏁</span>
+                        <div class="post-actions">
+                            <button class="action-btn like-btn" aria-label="Like Post">
+                                <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                            </button>
+                            <button class="action-btn comment-trigger-btn" aria-label="Comment">
+                                <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                            </button>
                         </div>
-                    </div>
-                    <form class="comment-form">
-                        <input type="text" placeholder="Añadir un comentario..." class="comment-input" required autocomplete="off">
-                        <button type="submit" class="comment-submit-btn">Publicar</button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Post 2: Spa GP -->
-            <div class="post-card" id="post-2">
-                <div class="post-header">
-                    <div class="post-user-info">
-                        <div class="post-user-avatar">LN</div>
-                        <a href="#" class="post-username">ln4</a>
-                    </div>
-                    <div class="post-badge">Eau Rouge Split</div>
-                </div>
-                <div class="post-media-container">
-                    <div class="f1-visual-bg" style="background: linear-gradient(135deg, #1A2980, #26D0CE)">
-                        <div class="visual-overlay"></div>
-                        <div class="visual-top-info">
-                            <span class="visual-lap-time">1:46.286</span>
-                            <span style="font-family: var(--font-racing); color: var(--f1-red); font-weight:700; z-index:2; text-shadow:0 2px 4px rgba(0,0,0,0.8);">SPA GP</span>
-                        </div>
-                        
-                        <!-- SVG de Trazado de Spa -->
-                        <svg class="visual-circuit-map" viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M15 15 C60 10, 120 20, 150 15 C180 10, 190 40, 180 60 C170 80, 140 70, 110 85 C80 100, 40 90, 20 70 C5 50, 10 30, 15 15 Z" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-                            <circle cx="150" cy="15" r="5" fill="#E10600" />
-                        </svg>
-
-                        <div class="visual-bottom-data">
-                            <div class="visual-speedometer">
-                                <span class="speed-value">332</span>
-                                <span class="speed-unit">KM/H</span>
-                                <span style="font-family: var(--font-racing); font-size:18px; font-weight:800; color:#FFD700; margin-left:15px; font-style:italic; text-shadow:0 2px 5px rgba(0,0,0,0.5);">MARCHA 8</span>
+                        <div class="post-details">
+                            <div class="post-likes-count"><span class="likes-num"><?= number_format((int) $post['likes_count'], 0, ',', '.') ?></span> me gusta</div>
+                            <div class="post-caption">
+                                <a href="#" class="post-caption-user"><?= htmlspecialchars($post['username']) ?></a>
+                                <span><?= htmlspecialchars($caption !== '' ? $caption : 'Sin descripción') ?></span>
                             </div>
-                            <div class="visual-telemetry">
-                                <div class="telemetry-item">DRS: <span class="telemetry-val" style="color: var(--text-secondary);">OFF</span></div>
-                                <div class="telemetry-item">RPM: <span class="telemetry-val">11.850</span></div>
-                                <div class="telemetry-item">TEMP: <span class="telemetry-val">98°C</span></div>
+                            <div class="post-comments-list">
+                                <?php foreach ($comments as $comment): ?>
+                                    <div class="comment-item">
+                                        <a href="#" class="comment-user"><?= htmlspecialchars($comment['username']) ?></a>
+                                        <span><?= htmlspecialchars($comment['comment']) ?></span>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
+                            <form class="comment-form">
+                                <input type="text" placeholder="Añadir un comentario..." class="comment-input" required autocomplete="off">
+                                <button type="submit" class="comment-submit-btn">Publicar</button>
+                            </form>
                         </div>
                     </div>
-                </div>
-                <div class="post-actions">
-                    <button class="action-btn like-btn" aria-label="Like Post">
-                        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                    </button>
-                    <button class="action-btn comment-trigger-btn" aria-label="Comment">
-                        <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                    </button>
-                </div>
-                <div class="post-details">
-                    <div class="post-likes-count"><span class="likes-num">12.980</span> me gusta</div>
-                    <div class="post-caption">
-                        <a href="#" class="post-caption-user">ln4</a>
-                        <span>Curva a fondo en Eau Rouge. La compresión de la gravedad es de locos en esta parte de Spa. 🇧🇪🏎️ #McLaren #BelgianGP</span>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="post-card">
+                    <div class="post-details" style="padding: 24px; text-align: center;">
+                        Aún no hay publicaciones para mostrar.
                     </div>
-                    <div class="post-comments-list">
-                        <div class="comment-item">
-                            <a href="#" class="comment-user">mclaren_official</a>
-                            <span>¡Telemetry looks fast, Lando! 🟧⚡</span>
-                        </div>
-                    </div>
-                    <form class="comment-form">
-                        <input type="text" placeholder="Añadir un comentario..." class="comment-input" required autocomplete="off">
-                        <button type="submit" class="comment-submit-btn">Publicar</button>
-                    </form>
                 </div>
-            </div>
+            <?php endif; ?>
 
-            <!-- Loader de F1 para Scroll Infinito -->
-            <div id="infinite-loader" class="loader-container">
-                <div class="f1-loader" aria-label="Cargando más publicaciones">
-                    <div class="f1-light"></div>
-                    <div class="f1-light"></div>
-                    <div class="f1-light"></div>
-                    <div class="f1-light"></div>
-                    <div class="f1-light"></div>
+            <?php if (!empty($hasMorePosts)): ?>
+                <div id="infinite-loader"
+                     class="loader-container"
+                     data-endpoint="/api/posts"
+                     data-has-more="1"
+                     data-next-page="<?= (int) ($nextFeedPage ?? 2) ?>"
+                     data-page-size="<?= (int) ($feedPageSize ?? 4) ?>">
+                    <div class="f1-loader" aria-label="Cargando más publicaciones">
+                        <div class="f1-light"></div>
+                        <div class="f1-light"></div>
+                        <div class="f1-light"></div>
+                        <div class="f1-light"></div>
+                        <div class="f1-light"></div>
+                    </div>
                 </div>
-            </div>
+            <?php endif; ?>
 
         </div>
     </main>
@@ -240,12 +180,24 @@
     </footer>
 
     <!-- Modal para añadir fotos (Marcador interactivo) -->
-    <div class="modal-overlay" id="add-post-modal">
+    <div class="modal-overlay" id="add-post-modal" data-authenticated="<?= $currentUser ? '1' : '0' ?>">
         <div class="modal-card">
-            <h2 class="modal-title">Cargar Telemetría</h2>
-            <div class="modal-content">
-                <p>¡Prepara tu cámara de boxes! Aquí podrás añadir tus capturas de carreras o imágenes favoritas de la Fórmula 1.</p>
-                <p style="margin-top: 10px; color: var(--f1-red); font-family: var(--font-racing); font-weight: 700; text-transform: uppercase;">Servicio de boxes listo 🏁</p>
+            <h2 class="modal-title" id="add-photo-modal-title">Cargar Telemetría</h2>
+            <div class="modal-content" id="add-photo-modal-content">
+                <div class="modal-state modal-state-auth" id="add-photo-auth-state" hidden>
+                    <p>Para continuar necesitas activar la cámara y entrar al área de captura.</p>
+                    <p style="margin-top: 10px; color: var(--f1-red); font-family: var(--font-racing); font-weight: 700; text-transform: uppercase;">Boxes listos para recibir tu imagen.</p>
+                    <button class="modal-primary-btn" id="add-photo-camera-btn" type="button">Permitir cámara y continuar</button>
+                    <p class="modal-status" id="add-photo-status" aria-live="polite"></p>
+                </div>
+                <div class="modal-state modal-state-guest" id="add-photo-guest-state" hidden>
+                    <p>Primero te has de hacer login para poder subir fotos o capturar nuevas imágenes.</p>
+                    <p style="margin-top: 10px; color: var(--f1-red); font-family: var(--font-racing); font-weight: 700; text-transform: uppercase;">Entra a boxes para continuar.</p>
+                    <div class="modal-auth-actions">
+                        <a class="modal-secondary-btn" href="/login">Login</a>
+                        <a class="modal-primary-btn" href="/register">Register</a>
+                    </div>
+                </div>
             </div>
             <button class="modal-close-btn" id="modal-close-btn">Volver a Pista</button>
         </div>

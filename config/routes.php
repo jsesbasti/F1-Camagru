@@ -1,10 +1,14 @@
 <?php
 
 use App\Controllers\HomeController;
+use App\Controllers\PostController;
 use App\Controllers\LoginController;
+use App\Controllers\PhotoController;
 use App\Controllers\RegisterController;
 
 $router->get('/', [HomeController::class, 'index']);
+$router->get('/api/posts', [PostController::class, 'index']);
+$router->get('/photo', [PhotoController::class, 'index']);
 $router->get('/login', [LoginController::class, 'login']);
 $router->get('/register', [RegisterController::class, 'register']);
 $router->post('/login', [LoginController::class, 'auth']);
