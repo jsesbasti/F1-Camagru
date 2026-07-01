@@ -51,6 +51,8 @@ class RegisterController extends Controller
 		// 2. Se guardaría el usuario con verified = 0 y el token en tu DB.
 		// 3. Se enviaría un email con un enlace de verificación, ej: http://localhost:8080/verify?token=XYZ
 
+		$verify_token = bin2hex(random_bytes(16));
+
 		if (
 			User::add([
 				':email' => $email,
@@ -61,7 +63,7 @@ class RegisterController extends Controller
 			Helper::json_response(['success' => true]);
 			exit;
 		}
-		if (User::findByUsername($username) != null) {
+		if (User::find(username: $username) != null) {
 			Helper::json_response([
 				'errors' => [
 					'username' => 'Username already taken'

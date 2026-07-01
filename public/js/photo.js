@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       activeStream = await navigator.mediaDevices.getUserMedia({
-        video: {
+        video: { 
           facingMode: 'user',
           width: { ideal: 1280 },
           height: { ideal: 720 }

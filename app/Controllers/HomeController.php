@@ -17,7 +17,7 @@ class HomeController extends Controller
         $currentUser = null;
         
         if (Session::check()) {
-            $currentUser = User::find($_SESSION['user_id']);
+            $currentUser = User::find(id: Session::getId());
         }
 
         $this->view('home', [

@@ -33,9 +33,17 @@ class UserController extends Controller
 			], 400);
 		}
 
-		$email = trim($data['email'] ?? '');
+		$old_email = trim($data['old_email'] ?? '');
+		$new_email = trim($data['new_email'] ?? '');
+		$pass = trim($data['password'] ?? '');
+		if (!User::findByEmail())
+		try {
+			UserValidator::validateEmail($new_email);
+		} catch (\Exception $e) {
+			$errors['new_email'] = $e->getMessage();
+		}
 
-		if (
+		if () (
 			User::mod()
 		) {
 			Helper::json_response(['success' => true]);

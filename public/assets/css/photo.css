@@ -80,6 +80,7 @@ body {
   height: 100%;
   object-fit: cover;
   display: block;
+  transform: scaleX(-1);
   background: linear-gradient(135deg, rgba(61, 61, 78, 0.35), rgba(15, 15, 20, 0.9));
 }
 

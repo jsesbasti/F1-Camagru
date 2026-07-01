@@ -38,8 +38,10 @@ class LoginController extends Controller {
 				]
 			], 400);
 		}
-		$user = User::findByUsername($data['username']);
-		if (!$user || !password_verify($data['password'], $user['password'])) {
+		$username = trim($data['username'] ?? '');
+		$password = trim($data['password'] ?? '');
+		$user = User::find(username: $username);
+		if (!$user || !password_verify($password, $user['password'])) {
 			Helper::json_response([
 				'errors' => [
 					'error' => 'Invalid credentials'

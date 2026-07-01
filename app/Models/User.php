@@ -13,7 +13,17 @@ class User extends Model
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    public static function find(int $id)
+    public static function find(?int $id = null, ?string $username = null, ?string $email = null) {
+        if ($id !== null)
+            return self::findId($id);
+        if ($username !== null)
+            return self::findByUsername($username);
+        if ($email !== null)
+            return self::findByEmail($email);
+        return null;
+    }
+
+    public static function findId(int $id)
     {
         $stmt = self::db()->prepare("SELECT * FROM users WHERE id = ?");
         $stmt->execute([$id]);
@@ -23,6 +33,12 @@ class User extends Model
     public static function findByUsername(string $username) {
         $stmt = self::db()->prepare("SELECT id, username, password FROM users WHERE username = :username LIMIT 1");
         $stmt->execute([':username' => $username]);
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
+    public static function findByEmail(string $email) {
+        $stmt = self::db()->prepare("SELECT id, email, password FROM users WHERE email = :email LIMIT 1");
+        $stmt->execute([':email' => $email]);
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
