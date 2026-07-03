@@ -2,10 +2,11 @@
 namespace App\Controllers;
 
 use App\Models\User;
+use App\Models\Verification;
 use App\Core\Controller;
 use App\Core\Session;
-use App\Validators\UserValidator;
 use App\Core\Helper;
+use App\Validators\UserValidator;
 
 class RegisterController extends Controller
 {
@@ -51,8 +52,6 @@ class RegisterController extends Controller
 		// 2. Se guardaría el usuario con verified = 0 y el token en tu DB.
 		// 3. Se enviaría un email con un enlace de verificación, ej: http://localhost:8080/verify?token=XYZ
 
-		$verify_token = bin2hex(random_bytes(16));
-
 		if (
 			User::add([
 				':email' => $email,
@@ -60,6 +59,7 @@ class RegisterController extends Controller
 				':password' => $hash
 			])
 		) {
+			self::sendEmailVerification($username);
 			Helper::json_response(['success' => true]);
 			exit;
 		}
@@ -95,5 +95,30 @@ class RegisterController extends Controller
 			'title' => 'Login page',
 			'msg' => 'Cuenta verificada con éxito. Ya puedes iniciar sesión.'
 		]);
+	}
+
+	private function sendEmailVerification($username) {
+		$token = bin2hex(random_bytes(16));
+		$user = Verification::find(username: $username);
+		$expires_at = (new \DateTime())->modify('+30 minutes')->format('Y-m-d H:i:s');
+		$url = "http://localhost:8080/verify?=token=$token";
+		if ($user == null) {
+			Helper::json_response([
+				'errors' => [
+					'error' => 'User does not exist'
+				]
+			], 403);
+		}
+		if (Verification::add([$user['id'], $token, $expires_at])) {
+			mail($user['email'], 'EMAIL VERIFICATION', "You need to verify your account $username.\r\nHere is the link where you can do it.\r\n\r\n$url");
+			return ;
+		}
+		else {
+			Helper::json_response([
+				'errors' => [
+					'error' => 'Something went wrong'
+				]
+			], 500);
+		}
 	}
 }
