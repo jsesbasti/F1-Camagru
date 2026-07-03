@@ -59,6 +59,7 @@ class RegisterController extends Controller
 				':password' => $hash
 			])
 		) {
+			header('Location: /');
 			self::sendEmailVerification($username);
 			Helper::json_response(['success' => true]);
 			exit;
@@ -88,6 +89,25 @@ class RegisterController extends Controller
 			exit;
 		}
 
+		$email_verification = Verification::find(token: $token);
+		if (!$email_verification) {
+			Helper::json_response([
+				'errors' => [
+					'error' => 'Token does not exist'
+				]
+			], 403);
+			exit;
+		}
+		if ($email_verification['expires_at'] < new \DateTime().format('Y-m-d H:i:s')) {
+			Helper::json_response([
+				'errors' => [
+					'error' => 'Token has expired'
+				]
+			], 403);
+			exit;
+		}
+		User::mod($email_verification['user_id'], 'is_verified', true);
+
 		// Aquí buscarías el usuario por el token en la base de datos,
 		// marcarías verified = 1, borrarías el token de la DB y redirigirías a /login con un mensaje de éxito.
 
@@ -108,8 +128,9 @@ class RegisterController extends Controller
 					'error' => 'User does not exist'
 				]
 			], 403);
+			exit ;
 		}
-		if (Verification::add([$user['id'], $token, $expires_at])) {
+		if (Verification::add([$user['id'], $token, $expires_at]) !== null) {
 			mail($user['email'], 'EMAIL VERIFICATION', "You need to verify your account $username.\r\nHere is the link where you can do it.\r\n\r\n$url");
 			return ;
 		}
@@ -119,6 +140,7 @@ class RegisterController extends Controller
 					'error' => 'Something went wrong'
 				]
 			], 500);
+			exit ;
 		}
 	}
 }

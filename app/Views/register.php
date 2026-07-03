@@ -23,6 +23,7 @@
             <p id="confirm-error" class="error-msg"></p>
             <button enabled="false" type="submit" name="register">Register</button>
         </div>
+        <p id="error-error" class="error-msg"></p>
     </form>
 </body>
 
