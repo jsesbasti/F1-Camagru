@@ -98,7 +98,7 @@ class RegisterController extends Controller
 			], 403);
 			exit;
 		}
-		if ($email_verification['expires_at'] < new \DateTime().format('Y-m-d H:i:s')) {
+		if ($email_verification['expires_at'] < (new \DateTime())->format('Y-m-d H:i:s')) {
 			Helper::json_response([
 				'errors' => [
 					'error' => 'Token has expired'
@@ -106,7 +106,7 @@ class RegisterController extends Controller
 			], 403);
 			exit;
 		}
-		User::mod($email_verification['user_id'], 'is_verified', true);
+		User::mod($email_verification['user_id'], 'is_verified', 1);
 
 		// Aquí buscarías el usuario por el token en la base de datos,
 		// marcarías verified = 1, borrarías el token de la DB y redirigirías a /login con un mensaje de éxito.
@@ -121,7 +121,7 @@ class RegisterController extends Controller
 		$token = bin2hex(random_bytes(16));
 		$user = Verification::find(username: $username);
 		$expires_at = (new \DateTime())->modify('+30 minutes')->format('Y-m-d H:i:s');
-		$url = "http://localhost:8080/verify?=token=$token";
+		$url = "http://localhost:8080/verify?token=$token";
 		if ($user == null) {
 			Helper::json_response([
 				'errors' => [
@@ -130,7 +130,7 @@ class RegisterController extends Controller
 			], 403);
 			exit ;
 		}
-		if (Verification::add([$user['id'], $token, $expires_at]) !== null) {
+		if (Verification::add([":user_id" => $user['id'], ":token" => $token, ":expires_at" => $expires_at]) != null) {
 			mail($user['email'], 'EMAIL VERIFICATION', "You need to verify your account $username.\r\nHere is the link where you can do it.\r\n\r\n$url");
 			return ;
 		}

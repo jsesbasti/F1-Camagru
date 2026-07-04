@@ -53,14 +53,27 @@ class User extends Model
         // return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
-    public static function mod(int $id, string $col, $data) {
-        try {
-            $stmt = self::db()->prepare("UPDATE users SET :col = :data WHERE id = :id");
-            $stmt = execute(['col' => $col, 'data' => $data, 'id' => $id]);
-            return true;
-        } catch (\PDOException $e) {
-            return false;
+    public static function mod(int $id, string $col, $data): bool
+    {
+        $allowed = [
+            'is_verified',
+            'username',
+            'email',
+            'password'
+        ];
+
+        if (!in_array($col, $allowed, true)) {
+            throw new \InvalidArgumentException('Invalid column');
         }
+
+        $stmt = self::db()->prepare(
+            "UPDATE users SET $col = :value WHERE id = :id"
+        );
+
+        return $stmt->execute([
+            'value' => $data,
+            'id' => $id
+        ]);
     }
 
     public static function getCol(PDOStatement $stmt, string $col, &$data) {

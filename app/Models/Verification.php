@@ -48,6 +48,7 @@ class Verification extends Model
             $stmt->execute($data);
             return true;
         } catch (\PDOException $e) {
+            error_log($e->getMessage());
             return false;
         }
     }
