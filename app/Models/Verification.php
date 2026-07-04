@@ -59,6 +59,29 @@ class Verification extends Model
             $stmt = execute([':col' => $col, ':data' => $data, ':id' => $id]);
             return true;
         } catch (\PDOException $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
+
+    public static function verifyEmail(int $id) {
+        try {
+            $stmt = self::db()->prepare("UPDATE user SET is_verified = 1 WHERE id = :id");
+            $stmt = execute([':id' => $id]);
+            return true;
+        } catch (\PDOException $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
+
+    public static function deleteByToken($token) {
+        try {
+            $stmt = self::db()->prepare("DELETE FROM email_verification WHERE token = :token");
+            $stmt->execute([":token" => $token]);
+            return true;
+        } catch (\PDOException $e) {
+            error_log($e->getMessage());
             return false;
         }
     }

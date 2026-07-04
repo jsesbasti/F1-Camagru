@@ -59,9 +59,9 @@ class RegisterController extends Controller
 				':password' => $hash
 			])
 		) {
-			header('Location: /');
 			self::sendEmailVerification($username);
-			Helper::json_response(['success' => true]);
+			header('Location: /');
+			Helper::json_response(['success' => true], 200);
 			exit;
 		}
 		if (User::find(username: $username) != null) {
@@ -106,7 +106,9 @@ class RegisterController extends Controller
 			], 403);
 			exit;
 		}
-		User::mod($email_verification['user_id'], 'is_verified', 1);
+		if (User::verifyEmail($email_verification['user_id'], 'is_verified', 1)) {
+			Verification::deleteByToken($token);
+		}
 
 		// Aquí buscarías el usuario por el token en la base de datos,
 		// marcarías verified = 1, borrarías el token de la DB y redirigirías a /login con un mensaje de éxito.
