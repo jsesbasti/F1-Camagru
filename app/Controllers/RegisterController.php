@@ -22,6 +22,13 @@ class RegisterController extends Controller
 		]);
 	}
 
+	public function loadVerify()
+	{
+		$this->view('verifypage', [
+			'title' => 'Verify page',
+		]);
+	}
+
 	public function create(): void
 	{
 		header('Content-Type: application/json; charset=utf-8');
@@ -47,11 +54,6 @@ class RegisterController extends Controller
 
 		$hash = password_hash($password, PASSWORD_DEFAULT);
 
-		// NOTA: Para la verificación por email:
-		// 1. Aquí se generaría un token de activación único, ej: bin2hex(random_bytes(16))
-		// 2. Se guardaría el usuario con verified = 0 y el token en tu DB.
-		// 3. Se enviaría un email con un enlace de verificación, ej: http://localhost:8080/verify?token=XYZ
-
 		if (
 			User::add([
 				':email' => $email,
@@ -60,8 +62,7 @@ class RegisterController extends Controller
 			])
 		) {
 			self::sendEmailVerification($username);
-			header('Location: /');
-			Helper::json_response(['success' => true], 200);
+			Helper::json_response(['success' => true, 'redirect' => '/register/verify']);
 			exit;
 		}
 		if (User::find(username: $username) != null) {
@@ -99,6 +100,7 @@ class RegisterController extends Controller
 			exit;
 		}
 		if ($email_verification['expires_at'] < (new \DateTime())->format('Y-m-d H:i:s')) {
+			error_log('Token expired');
 			Helper::json_response([
 				'errors' => [
 					'error' => 'Token has expired'
@@ -106,7 +108,7 @@ class RegisterController extends Controller
 			], 403);
 			exit;
 		}
-		if (User::verifyEmail($email_verification['user_id'], 'is_verified', 1)) {
+		if (Verification::verifyEmail($email_verification['user_id'], 'is_verified', 1)) {
 			Verification::deleteByToken($token);
 		}
 

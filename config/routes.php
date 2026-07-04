@@ -15,5 +15,6 @@ $router->post('/login', [LoginController::class, 'auth']);
 $router->post('/register', [RegisterController::class, 'create']);
 $router->get('/verify', [RegisterController::class, 'verify']);
 $router->get('/logout', [LoginController::class, 'logout']);
+$router->get('/register/verify', [RegisterController::class, 'loadVerify']);
 
 ?>

@@ -18,9 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 			const data = await response.json();
 
-			
-			if (response.ok) {
-				window.location.href = '/';
+			if (data.redirect) {
+				window.location.href = data.redirect;
 			} else {
 				Object.entries(data.errors).forEach(([field, message]) => {
 					console.log(field);
@@ -31,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				});
 			}
 		} catch (error) {
-			console.log(data.error);
+			console.log(error.message);
 		}
 	});
 });
@@ -62,8 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 			const data = await response.json();
 
-			if (response.ok) {
-				window.location.href = '/';
+			if (data.redirect) {
+				window.location.href = data.redirect;
 			} else {
 				Object.entries(data.errors).forEach(([field, message]) => {
 					const errorElement = document.getElementById(`${field}-error`);

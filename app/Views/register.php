@@ -11,6 +11,9 @@
 </head>
 
 <body>
+    <a href="/" class="back-button">
+        ← HOME
+    </a>
     <form id="register-form" class="login-box">
         <div>
             <input type="text" name="email" id="email" autocomplete="on" placeholder="email">

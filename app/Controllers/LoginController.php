@@ -49,13 +49,22 @@ class LoginController extends Controller {
 			], 401);
 		}
 		
+		if ($user['is_verified'] != 1) {
+			Helper::json_response([
+				'errors' => [
+					'error' => 'Email is not verified.'
+				]
+			], 403);
+		}
+
 		// NOTA: Para el requisito de verificación por email:
 		// Aquí deberías comprobar si el usuario tiene verified = 1 en la base de datos.
 		// Si no está verificado, debes impedir el login y avisar de que verifique su bandeja de entrada.
 		
 		Session::authenticate($user['id']);
 		Helper::json_response([
-			'success' => true
+			'success' => true,
+			'redirect' => '/'
 		], 200);
 	}
 

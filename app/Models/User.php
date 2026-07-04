@@ -31,13 +31,13 @@ class User extends Model
     }
 
     public static function findByUsername(string $username) {
-        $stmt = self::db()->prepare("SELECT id, username, password FROM users WHERE username = :username LIMIT 1");
+        $stmt = self::db()->prepare("SELECT * FROM users WHERE username = :username LIMIT 1");
         $stmt->execute([':username' => $username]);
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
     public static function findByEmail(string $email) {
-        $stmt = self::db()->prepare("SELECT id, email, password FROM users WHERE email = :email LIMIT 1");
+        $stmt = self::db()->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
         $stmt->execute([':email' => $email]);
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }

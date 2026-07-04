@@ -66,8 +66,8 @@ class Verification extends Model
 
     public static function verifyEmail(int $id) {
         try {
-            $stmt = self::db()->prepare("UPDATE user SET is_verified = 1 WHERE id = :id");
-            $stmt = execute([':id' => $id]);
+            $stmt = self::db()->prepare("UPDATE users SET is_verified = 1 WHERE id = :id");
+            $stmt->execute([':id' => $id]);
             return true;
         } catch (\PDOException $e) {
             error_log($e->getMessage());
