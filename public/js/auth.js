@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
 						errorElement.textContent = message;
 					}
 				});
+				form.reset();
 			}
 		} catch (error) {
 			console.log(error.message);
@@ -70,10 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
 						errorElement.textContent = message;
 					}
 				});
-				username = '';
-				email = '';
-				password = '';
-				confirm_pass = '';
+				form.reset();
 			}
 		} catch (error) {
 			return ;

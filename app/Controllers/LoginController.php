@@ -15,6 +15,12 @@ class LoginController extends Controller {
 		}
 		$this->view('login', [
 			'title' => 'Login page',
+			'styles' => [
+				'auth'
+			],
+			'scripts' => [
+				'auth'
+			],
 		]);
 	}
 

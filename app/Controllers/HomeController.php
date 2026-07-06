@@ -21,13 +21,22 @@ class HomeController extends Controller
         }
 
         $this->view('home', [
-            'title' => 'Página de inicio',
-            'users' => $users,
-            'posts' => $feed['posts'],
-            'hasMorePosts' => $feed['hasMore'],
-            'feedPageSize' => $feedPageSize,
-            'nextFeedPage' => $feed['hasMore'] ? 2 : null,
-            'currentUser' => $currentUser
-        ]);
+                'title' => 'Página de inicio',
+                'users' => $users,
+                'posts' => $feed['posts'],
+                'hasMorePosts' => $feed['hasMore'],
+                'feedPageSize' => $feedPageSize,
+                'nextFeedPage' => $feed['hasMore'] ? 2 : null,
+                'currentUser' => $currentUser,
+                'header' => 'header',
+                'footer' => 'footer-nav',
+                'styles' => [
+                    'home'
+                ],
+                'scripts' => [
+                    'home'
+                ]
+            ]
+        );
     }
 }

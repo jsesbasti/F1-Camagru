@@ -17,6 +17,12 @@ class PhotoController extends Controller
         $this->view('photo', [
             'title' => 'Subir foto',
             'currentUser' => null,
+            'styles' => [
+                'photo'
+            ],
+            'scripts' => [
+                'photo'
+            ]
         ]);
     }
 }

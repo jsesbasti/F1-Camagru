@@ -91,7 +91,6 @@ button {
     font-weight: 800;
     letter-spacing: 0.5px;
     background: var(--start-green); /* F1 Start Light Green */
-    border: none;
     color: var(--asphalt-black); /* Deep Asphalt Dark text for contrast */
     cursor: pointer;
     border-radius: 4px;

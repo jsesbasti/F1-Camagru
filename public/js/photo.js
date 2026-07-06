@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const status = document.getElementById('camera-status');
   const retryButton = document.getElementById('retry-camera-btn');
   const captureButton = document.getElementById('capture-photo-btn');
+  const backButton = document.getElementById('feed-btn');
 
   if (!video || !status) {
     return;
@@ -62,6 +63,12 @@ document.addEventListener('DOMContentLoaded', () => {
   if (retryButton) {
     retryButton.addEventListener('click', () => {
       startCamera();
+    });
+  }
+
+  if (backButton) {
+    backButton.addEventListener('click', () => {
+      window.location.href = '/';
     });
   }
 

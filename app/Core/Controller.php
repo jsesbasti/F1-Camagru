@@ -8,6 +8,7 @@ class Controller
     {
         extract($data);
 
-        require __DIR__ . "/../../app/Views/$template.php";
+        $content = __DIR__ . "/../../app/Views/$template.php";
+        require __DIR__ . "/../../app/Views/layouts/app.php";
     }
 }

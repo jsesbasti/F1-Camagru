@@ -1,0 +1,37 @@
+.card {
+
+    background: var(--carbon-dark-95);
+
+    border: 1px solid var(--border-color);
+
+    border-top: 4px solid var(--f1-red);
+
+    border-radius: 16px;
+
+    box-shadow:
+        0 20px 50px var(--shadow-700);
+
+    position: relative;
+
+    overflow: hidden;
+}
+
+.card-carbon::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    background:
+        repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent 18px,
+            rgba(255,255,255,.015) 18px,
+            rgba(255,255,255,.015) 20px
+        );
+
+    pointer-events: none;
+}

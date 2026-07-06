@@ -1,18 +1,3 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($title) ?></title>
-    <!-- Google Fonts: Barlow Condensed for racing aesthetic, Inter for body text -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="assets/css/colors.css">
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;0,900;1,700;1,800;1,900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/home.css">
-</head>
-<body data-authenticated="<?= $currentUser ? '1' : '0' ?>">
-
     <!-- Header Estático (Siempre Visible) -->
     <header class="header">
         <a href="/" class="logo-container">
@@ -160,50 +145,4 @@
         </div>
     </main>
 
-    <!-- Footer Estático (Siempre Visible) -->
-    <footer class="footer">
-        <a href="/" class="footer-nav-btn active" aria-label="Home">
-            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-        </a>
-        <button class="footer-add-btn" id="add-photo-btn" aria-label="Añadir foto">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        </button>
-        <?php if ($currentUser): ?>
-            <a href="/profile" class="footer-nav-btn" aria-label="Perfil">
-                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-            </a>
-        <?php else: ?>
-            <a href="/login" class="footer-nav-btn" aria-label="Login">
-                <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
-            </a>
-        <?php endif; ?>
-    </footer>
-
-    <!-- Modal para añadir fotos (Marcador interactivo) -->
-    <div class="modal-overlay" id="add-post-modal" data-authenticated="<?= $currentUser ? '1' : '0' ?>">
-        <div class="modal-card">
-            <h2 class="modal-title" id="add-photo-modal-title">Cargar Telemetría</h2>
-            <div class="modal-content" id="add-photo-modal-content">
-                <div class="modal-state modal-state-auth" id="add-photo-auth-state" hidden>
-                    <p>Para continuar necesitas activar la cámara y entrar al área de captura.</p>
-                    <p style="margin-top: 10px; color: var(--f1-red); font-family: var(--font-racing); font-weight: 700; text-transform: uppercase;">Boxes listos para recibir tu imagen.</p>
-                    <button class="modal-primary-btn" id="add-photo-camera-btn" type="button">Permitir cámara y continuar</button>
-                    <p class="modal-status" id="add-photo-status" aria-live="polite"></p>
-                </div>
-                <div class="modal-state modal-state-guest" id="add-photo-guest-state" hidden>
-                    <p>Primero te has de hacer login para poder subir fotos o capturar nuevas imágenes.</p>
-                    <p style="margin-top: 10px; color: var(--f1-red); font-family: var(--font-racing); font-weight: 700; text-transform: uppercase;">Entra a boxes para continuar.</p>
-                    <div class="modal-auth-actions">
-                        <a class="modal-secondary-btn" href="/login">Login</a>
-                        <a class="modal-primary-btn" href="/register">Register</a>
-                    </div>
-                </div>
-            </div>
-            <button class="modal-close-btn" id="modal-close-btn">Volver a Pista</button>
-        </div>
-    </div>
-
-    <!-- Script de interacción -->
-    <script src="js/home.js"></script>
-</body>
-</html>
+    <?php require __DIR__ . "/modals/add-photo-modal.php"; ?>

@@ -19,6 +19,12 @@ class RegisterController extends Controller
 		}
 		$this->view('register', [
 			'title' => 'Register page',
+			'styles' => [
+				'auth'
+			],
+			'scripts' => [
+				'auth'
+			]
 		]);
 	}
 
@@ -26,6 +32,9 @@ class RegisterController extends Controller
 	{
 		$this->view('verifypage', [
 			'title' => 'Verify page',
+			'styles' => [
+				'verify'
+			],
 		]);
 	}
 
