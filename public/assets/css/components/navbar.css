@@ -1,0 +1,81 @@
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background-color: var(--carbon-dark-90);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border-top: 2px solid var(--border-color);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 1000;
+  box-shadow: 0 -4px 20px var(--shadow-500);
+}
+
+.footer-nav-btn {
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  text-decoration: none;
+}
+
+.footer-nav-btn:hover,
+.footer-nav-btn.active {
+  color: var(--f1-red);
+  transform: translateY(-2px);
+  filter: drop-shadow(0 0 4px var(--f1-red-glow));
+}
+
+.footer-nav-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.footer-nav-btn.active svg {
+  stroke-width: 2.5;
+}
+
+/* Add Post Action Circle Button in Footer */
+.footer-add-btn {
+  background-color: var(--f1-red);
+  color: var(--text-primary);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px var(--f1-red-glow);
+  transform: translateY(-10px) skewX(-10deg);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.footer-add-btn:hover {
+  background-color: var(--f1-red-hover);
+  box-shadow: 0 6px 18px var(--f1-red-glow);
+  transform: translateY(-13px) skewX(-10deg) scale(1.08);
+}
+
+.footer-add-btn svg {
+  width: 22px;
+  height: 22px;
+  stroke: var(--text-primary);
+  stroke-width: 3;
+  transform: skewX(10deg); /* Counteract skew */
+}

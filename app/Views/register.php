@@ -1,7 +1,7 @@
-<a href="/" class="back-button">
+<a href="/" class="back">
     ← HOME
 </a>
-<form id="register-form" class="login-box">
+<form id="register-form" class="form register">
     <div>
         <input type="text" name="email" id="email" autocomplete="on" placeholder="email">
         <p id="email-error" class="error-msg"></p>

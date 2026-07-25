@@ -1,18 +1,11 @@
 .card {
-
     background: var(--carbon-dark-95);
-
     border: 1px solid var(--border-color);
-
     border-top: 4px solid var(--f1-red);
-
     border-radius: 16px;
-
     box-shadow:
         0 20px 50px var(--shadow-700);
-
     position: relative;
-
     overflow: hidden;
 }
 

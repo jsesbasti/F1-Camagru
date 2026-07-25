@@ -67,7 +67,7 @@ body {
   position: relative;
   width: 100%;
   max-width: 100%;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 5 / 5;
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid var(--border-color);

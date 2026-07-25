@@ -5,10 +5,12 @@ use App\Controllers\PostController;
 use App\Controllers\LoginController;
 use App\Controllers\PhotoController;
 use App\Controllers\RegisterController;
+use App\Controllers\UserController;
 
 $router->get('/', [HomeController::class, 'index']);
 $router->get('/api/posts', [PostController::class, 'index']);
 $router->get('/photo', [PhotoController::class, 'index']);
+$router->post('/photo/upload', [PhotoController::class, 'uploadPhoto']);
 $router->get('/login', [LoginController::class, 'login']);
 $router->get('/register', [RegisterController::class, 'register']);
 $router->post('/login', [LoginController::class, 'auth']);
@@ -16,5 +18,6 @@ $router->post('/register', [RegisterController::class, 'create']);
 $router->get('/verify', [RegisterController::class, 'verify']);
 $router->get('/logout', [LoginController::class, 'logout']);
 $router->get('/register/verify', [RegisterController::class, 'loadVerify']);
+$router->get('/profile', [UserController::class, 'profile']);
 
 ?>

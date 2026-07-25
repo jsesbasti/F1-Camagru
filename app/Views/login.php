@@ -1,7 +1,7 @@
-<a href="/" class="back-button">
+<a href="/" class="back">
     ← HOME
 </a>
-<form id="login-form" class="login-box">
+<form id="login-form" class="form login">
     <div>
         <input
             type="text"

@@ -13,10 +13,7 @@ class RegisterController extends Controller
 
 	public function register()
 	{
-		if (Session::check()) {
-			header('Location: /', true, 301);
-			exit;
-		}
+		$this->requireGuest();
 		$this->view('register', [
 			'title' => 'Register page',
 			'styles' => [
@@ -40,7 +37,6 @@ class RegisterController extends Controller
 
 	public function create(): void
 	{
-		header('Content-Type: application/json; charset=utf-8');
 		$data = json_decode(file_get_contents("php://input"), true);
 		if (!$data) {
 			Helper::json_response([
@@ -79,14 +75,14 @@ class RegisterController extends Controller
 				'errors' => [
 					'username' => 'Username already taken'
 				]
-			], 409);
+			], 400);
 			exit;
 		}
 		Helper::json_response([
 			'errors' => [
 				'email' => 'Email in use'
 			]
-		], 409);
+		], 400);
 		exit;
 	}
 
@@ -101,6 +97,7 @@ class RegisterController extends Controller
 
 		$email_verification = Verification::find(token: $token);
 		if (!$email_verification) {
+			error_log('Token does not exist or was used');
 			Helper::json_response([
 				'errors' => [
 					'error' => 'Token does not exist'
@@ -126,7 +123,12 @@ class RegisterController extends Controller
 
 		$this->view('login', [
 			'title' => 'Login page',
-			'msg' => 'Cuenta verificada con éxito. Ya puedes iniciar sesión.'
+			'styles' => [
+				'auth'
+			],
+			'scripts' => [
+				'auth'
+			]
 		]);
 	}
 

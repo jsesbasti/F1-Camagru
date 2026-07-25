@@ -9,7 +9,7 @@
                 <p class="modal-status" id="add-photo-status" aria-live="polite"></p>
             </div>
             <div class="modal-state modal-state-guest" id="add-photo-guest-state" hidden>
-                <p>Primero te has de hacer login para poder subir fotos o capturar nuevas imágenes.</p>
+                <p>Primero has de hacer login para poder subir fotos o capturar nuevas imágenes.</p>
                 <p style="margin-top: 10px; color: var(--f1-red); font-family: var(--font-racing); font-weight: 700; text-transform: uppercase;">Entra a boxes para continuar.</p>
                 <div class="modal-auth-actions">
                     <a class="modal-secondary-btn" href="/login">Login</a>

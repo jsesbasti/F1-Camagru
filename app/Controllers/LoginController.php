@@ -9,10 +9,7 @@ use App\Core\Helper;
 class LoginController extends Controller {
 
 	public function login() {
-		if (Session::check()) {
-			header('Location: /', true, 301);
-			exit;
-		}
+		$this->requireGuest();
 		$this->view('login', [
 			'title' => 'Login page',
 			'styles' => [
@@ -25,7 +22,6 @@ class LoginController extends Controller {
 	}
 
 	public function auth(): void {
-		header('Content-Type: application/json');
 		$data = json_decode(file_get_contents("php://input"), true);
 		if (!$data) {
 			Helper::json_response([
@@ -44,9 +40,12 @@ class LoginController extends Controller {
 				]
 			], 400);
 		}
+
 		$username = trim($data['username'] ?? '');
 		$password = trim($data['password'] ?? '');
 		$user = User::find(username: $username);
+		if (!$user)
+			$user = User::find(email: $username);
 		if (!$user || !password_verify($password, $user['password'])) {
 			Helper::json_response([
 				'errors' => [
@@ -54,7 +53,7 @@ class LoginController extends Controller {
 				]
 			], 401);
 		}
-		
+
 		if ($user['is_verified'] != 1) {
 			Helper::json_response([
 				'errors' => [
@@ -75,11 +74,7 @@ class LoginController extends Controller {
 	}
 
 	public function logout() {
-		if (session_status() === PHP_SESSION_NONE) {
-			session_start();
-		}
-		$_SESSION = [];
-		session_destroy();
+		Session::close();
 		header('Location: /login');
 		exit;
 	}

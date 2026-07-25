@@ -34,6 +34,7 @@
     <link rel="stylesheet" href="/assets/css/components/buttons.css">
     <link rel="stylesheet" href="/assets/css/components/forms.css">
     <link rel="stylesheet" href="/assets/css/components/cards.css">
+    <link rel="stylesheet" href="/assets/css/components/header.css">
 
     <!-- CSS específico -->
 

@@ -62,21 +62,36 @@ class User extends Model
             'password'
         ];
 
-        if (!in_array($col, $allowed, true)) {
-            throw new \InvalidArgumentException('Invalid column');
+        try {
+            if (!in_array($col, $allowed, true)) {
+                throw new \InvalidArgumentException('Invalid column');
+            }
+            $stmt = self::db()->prepare(
+                "UPDATE users SET $col = :value WHERE id = :id"
+            );
+            $stmt->execute([
+                'value' => $data,
+                'id' => $id
+            ]);
+            return true;
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return false;
         }
-
-        $stmt = self::db()->prepare(
-            "UPDATE users SET $col = :value WHERE id = :id"
-        );
-
-        return $stmt->execute([
-            'value' => $data,
-            'id' => $id
-        ]);
     }
 
     public static function getCol(PDOStatement $stmt, string $col, &$data) {
         return $stmt->bindColumn($col,  $data);
+    }
+
+    public static function delete(int $id) { 
+        try {
+            $stmt->prepare('DELETE FROM users WHERE id = :id');
+            $stmt->execute(['id' => $id]);
+            return true;
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return false;
+        }
     }
 }

@@ -1,9 +1,6 @@
 body {
-
     margin: 0;
-
     font-family: "Inter", sans-serif;
-
     background:
         radial-gradient(circle at top,
             var(--carbon-dark),
@@ -13,192 +10,121 @@ body {
 }
 
 .verify-page {
-
     min-height: 100vh;
-
     display: flex;
-
     justify-content: center;
-
     align-items: center;
-
     padding: 2rem;
 }
 
 .verify-card {
-
     width:min(92%,560px);
-
     padding:3rem;
-
     text-align:center;
 }
 
 .status {
-
     display: inline-block;
-
     margin-bottom: 2rem;
-
     color: var(--start-green);
-
     font-family: "Barlow Condensed", sans-serif;
-
     font-size: .95rem;
-
     letter-spacing: 2px;
-
     text-transform: uppercase;
 }
 
 .mail-icon {
-
     font-size: 5rem;
-
     color: var(--gold);
-
     margin-bottom: 1.5rem;
-
     text-shadow: 0 0 20px rgba(255,215,0,.3);
 }
 
 h1 {
-
     margin: 0;
-
     font-family: "Barlow Condensed", sans-serif;
-
     font-size: 3.2rem;
-
     letter-spacing: 3px;
-
     text-transform: uppercase;
-
     color: var(--text-primary);
 }
 
 .main-text {
-
     margin-top: 1.8rem;
-
     color: var(--text-primary);
-
     line-height: 1.7;
-
     font-size: 1.05rem;
 }
 
 .secondary-text {
-
     color: var(--text-secondary);
-
     line-height: 1.7;
-
     margin-top: .75rem;
 }
 
 .divider {
-
     width: 80px;
-
     height: 4px;
-
     margin: 2.5rem auto;
-
     background: var(--f1-red);
-
     border-radius: 10px;
-
     box-shadow: 0 0 12px var(--f1-red-glow);
 }
 
 .notice {
-
     background: var(--asphalt-black-70);
-
     border: 1px solid var(--border-color);
-
     border-left: 4px solid var(--gold);
-
     border-radius: 8px;
-
     padding: 1.2rem;
-
     margin-bottom: 2rem;
-
     text-align: left;
 }
 
 .notice h2 {
-
     margin: 0 0 .75rem;
-
     font-family: "Barlow Condensed", sans-serif;
-
     font-size: 1.4rem;
-
     color: var(--gold);
-
     letter-spacing: 1px;
 }
 
 .notice p {
-
     margin: 0;
-
     color: var(--text-secondary);
-
     line-height: 1.6;
 }
 
 #resend-btn {
-
     width: 100%;
-
     padding: 1rem;
-
     background: transparent;
-
     border: 2px solid var(--f1-red);
-
     color: var(--text-primary);
-
     border-radius: 8px;
-
     font-family: "Barlow Condensed", sans-serif;
-
     font-size: 1.2rem;
-
     letter-spacing: 2px;
-
     cursor: pointer;
-
     transition: .25s;
 }
 
 #resend-btn:hover {
-
     background: var(--f1-red);
-
     box-shadow: 0 0 20px var(--f1-red-glow);
-
     transform: translateY(-2px);
 }
 
 @media (max-width:600px) {
-
     .verify-card {
-
         padding: 2rem;
     }
 
     h1 {
-
         font-size: 2.4rem;
     }
 
     .mail-icon {
-
         font-size: 4rem;
     }
 }

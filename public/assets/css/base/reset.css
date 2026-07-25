@@ -1,8 +1,6 @@
 /* Reset */
 
-*,
-*::before,
-*::after {
+*, *::before, *::after {
     box-sizing: border-box;
 }
 
@@ -12,58 +10,36 @@
 }
 
 html {
-
     scroll-behavior: smooth;
 }
 
 body {
-
     min-height: 100vh;
-
     line-height: 1.5;
-
     text-rendering: optimizeLegibility;
-
     -webkit-font-smoothing: antialiased;
 }
 
-img,
-picture,
-video,
-canvas,
-svg {
-
+img, picture, video, canvas, svg {
     display: block;
-
     max-width: 100%;
 }
 
-input,
-button,
-textarea,
-select {
-
+input, button, textarea, select {
     font: inherit;
 }
 
 button {
-
     border: none;
-
     background: none;
-
     cursor: pointer;
 }
 
 a {
-
     color: inherit;
-
     text-decoration: none;
 }
 
-ul,
-ol {
-
+ul, ol {
     list-style: none;
 }

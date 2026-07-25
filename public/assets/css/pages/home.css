@@ -1,9 +1,3 @@
-/* Typography variables */
-:root {
-  --font-racing: 'Barlow Condensed', 'Outfit', system-ui, -apple-system, sans-serif;
-  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
-}
-
 /* Reset & Global Base Style */
 body {
   margin: 0;
@@ -80,6 +74,12 @@ body {
 }
 
 .logo-text {
+  display: inline-block;
+  line-height: 1;
+  padding-right: 4px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transform: translateZ(0);
   font-family: var(--font-racing);
   font-size: 26px;
   font-weight: 800;

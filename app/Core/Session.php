@@ -13,7 +13,7 @@ class Session
 		$_SESSION['user_id'] = $id;
 	}
 
-	public static function logout(): void
+	public static function close(): void
 	{
 		session_destroy();
 	}
