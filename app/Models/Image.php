@@ -73,6 +73,21 @@ class Image extends Model
         ];
     }
 
+    public static function create(array $data): int
+    {
+        $stmt = self::db()->prepare(
+            "INSERT INTO images (user_id, filename, description)
+             VALUES (:user_id, :filename, :description)"
+        );
+
+        $stmt->bindValue(':user_id', $data['user_id'], \PDO::PARAM_INT);
+        $stmt->bindValue(':filename', $data['filename'] ?? '', \PDO::PARAM_STR);
+        $stmt->bindValue(':description', $data['description'] ?? '', \PDO::PARAM_STR);
+        $stmt->execute();
+
+        return (int) self::db()->lastInsertId();
+    }
+
     private static function commentsForImages(array $imageIds): array
     {
         if (empty($imageIds)) {

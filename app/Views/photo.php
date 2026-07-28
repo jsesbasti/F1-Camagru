@@ -1,26 +1,53 @@
 <?php require __DIR__ . '/partials/header.php';?>
 <main class="photo-shell">
     <section class="photo-hero">
-        <h1 class="photo-title">Modo <span>boxes</span></h1>
-        <p class="photo-intro">Aquí irá la captura real desde la cámara y el flujo de publicación.</p>
+        <h1 class="photo-title">Photo <span>Editor</span></h1>
+        <p class="photo-intro">Capture or upload photos and customize them with effects before publishing.</p>
     </section>
     <section class="photo-grid">
         <div class="photo-preview">
-            <div class="camera-frame">
-                <video id="camera-preview" class="camera-preview" autoplay playsinline muted></video>
-                <div class="camera-overlay">
-                    <div class="camera-status" id="camera-status">Starting camera...</div>
+            <!-- Modo cámara -->
+            <div id="camera-mode" class="photo-mode active">
+                <div class="camera-frame">
+                    <video id="camera-preview" class="camera-preview" autoplay playsinline muted></video>
+                    <div class="camera-overlay">
+                        <div class="camera-status" id="camera-status">Starting camera...</div>
+                    </div>
                 </div>
+                <div class="superposable-images">
+                    <h3>Available Effects</h3>
+                    <div class="effects-grid" id="effects-container">
+                        <!-- Effects will be loaded here dynamically -->
+                    </div>
+                </div>
+                <button class="photo-action primary" id="capture-photo-btn" type="button">Capture Photo</button>
+                <label class="photo-action secondary" for="upload-image" id="upload-label">Upload Image</label>
+                <input type="file" id="upload-image" name="image" accept="image/*" style="display: none;">
+            </div>
+            
+            <!-- Modo edición -->
+            <div id="edit-mode" class="photo-mode">
+                <div class="camera-frame">
+                    <img id="edit-preview" class="edit-preview" src="" alt="Imagen a editar">
+                </div>
+                <div class="edit-options">
+                    <div class="superposable-images">
+                        <h3>Available Effects</h3>
+                        <div class="effects-grid" id="edit-effects-container">
+                            <!-- Effects will be loaded here dynamically -->
+                        </div>
+                    </div>
+                </div>
+                <button class="photo-action primary" id="publish-photo-btn" type="button">Publish Photo</button>
+                <button class="photo-action secondary" id="cancel-edit-btn" type="button">Cancel</button>
             </div>
         </div>
         <aside class="photo-panel">
-            <form action="/photo/upload" method="post" enctype="multipart/form-data">
-                <input type="file" name="image" accept="image/*" required>
-                <button type="submit">Subir imagen</button>
-            </form>
-            <button class="photo-action primary" id="capture-photo-btn" type="button">Take photo</button>
-            <button class="photo-action secondary" id="retry-camera-btn" type="button">Refresh camera</button>
-            <button class="photo-action primary" id="feed-btn" type="button">Back to track</a>
+            <h3>Previous Photos</h3>
+            <div class="thumbnails-container" id="thumbnails-container">
+                <!-- Thumbnails will be loaded here dynamically -->
+            </div>
+            <button class="photo-action primary" id="feed-btn" type="button">Back to Feed</button>
         </aside>
     </section>
 </main>
