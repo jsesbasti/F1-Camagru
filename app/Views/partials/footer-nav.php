@@ -1,4 +1,4 @@
-<footer class="footer">
+<footer class="fixed inset-x-0 bottom-0 z-[1000] flex h-[60px] items-center justify-around border-t-2 border-line bg-carbon/90 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] backdrop-blur-md backdrop-saturate-[1.8]">
     <a href="/" class="footer-nav-btn active" aria-label="Home">
         <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
     </a>

@@ -35,6 +35,13 @@ fclean: down-vol clean
 env:
 	@cp docker/env.example docker/.env
 
+css-build:
+	@echo "🎨 Compilando Tailwind CSS..."
+	@npm run build:css
+
+css-watch:
+	@npm run watch:css
+
 logs-%:
 	@docker logs -f camagru-$*
 
@@ -48,4 +55,4 @@ re: fclean up
 
 re-vol: fclean down-vol up
 
-.PHONY: all up-logs up build stop down down-volumes clean fclean re env
+.PHONY: all up-logs up build stop down down-volumes clean fclean re env css-build css-watch

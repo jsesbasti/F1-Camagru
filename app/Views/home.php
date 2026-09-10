@@ -1,22 +1,22 @@
     <?php require __DIR__ . "/partials/header.php"; ?>
     <!-- Main Content (Feed y Scroll Infinito) -->
-    <main class="main-content">
-        <div class="feed-container">
-            
+    <main class="mt-[60px] mb-[70px] flex flex-1 items-start justify-center px-2.5 py-5 md:px-5 md:py-[30px] max-[480px]:mb-[75px]">
+        <div class="feed-container mx-auto flex w-full max-w-[600px] flex-col gap-6" data-current-user-id="<?= (int) ($currentUser['id'] ?? 0) ?>">
+
             <!-- Drivers Stories (Instagram-style listing of database users) -->
             <?php if (!empty($users)): ?>
-                <div class="drivers-stories">
-                    <div class="stories-title">Drivers in grid</div>
-                    <div class="stories-wrapper">
+                <div class="flex flex-col gap-2.5 rounded-lg border border-line bg-carbon p-[15px]">
+                    <div class="border-l-2 border-f1-red pl-1.5 font-racing text-[11px] font-extrabold uppercase tracking-wide text-f1-red">Drivers in grid</div>
+                    <div class="flex gap-4 overflow-x-auto pb-1.5 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1">
                         <?php foreach ($users as $user): ?>
-                            <div class="story-item">
-                                <div class="story-avatar-ring">
-                                    <div class="story-avatar">
+                            <a href="/profile?username=<?= urlencode($user['username']) ?>" class="group flex min-w-[60px] flex-col items-center gap-1.5 no-underline">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--color-f1-red)_30%,var(--color-gold)_70%)] p-0.5 transition-transform duration-200 group-hover:scale-105">
+                                    <div class="flex h-full w-full items-center justify-center rounded-full border-2 border-carbon bg-carbon-medium font-racing text-sm font-bold text-white">
                                         <?= substr(strtoupper($user['username']), 0, 2) ?>
                                     </div>
                                 </div>
-                                <span class="story-username"><?= htmlspecialchars($user['username']) ?></span>
-                            </div>
+                                <span class="max-w-[60px] truncate text-[11px] text-muted"><?= htmlspecialchars($user['username']) ?></span>
+                            </a>
                         <?php endforeach; ?>
                     </div>
                 </div>
@@ -24,60 +24,11 @@
 
             <?php if (!empty($posts)): ?>
                 <?php foreach ($posts as $post): ?>
-                    <?php
-                        $imageStyle = '';
-                        if (!empty($post['image_url'])) {
-                            $escapedImageUrl = htmlspecialchars($post['image_url'], ENT_QUOTES, 'UTF-8');
-                            $imageStyle = "background-image: url('{$escapedImageUrl}')";
-                        }
-                        $caption = trim((string) ($post['caption'] ?? ''));
-                        $comments = $post['comments'] ?? [];
-                    ?>
-                    <div class="post-card" id="post-<?= (int) $post['id'] ?>">
-                        <div class="post-header">
-                            <div class="post-user-info">
-                                <div class="post-user-avatar"><?= htmlspecialchars($post['avatar_initials']) ?></div>
-                                <a href="#" class="post-username"><?= htmlspecialchars($post['username']) ?></a>
-                            </div>
-                            <div class="post-badge"><?= htmlspecialchars($post['badge']) ?></div>
-                        </div>
-                        <div class="post-media-container">
-                            <div class="f1-visual-bg" style="<?= $imageStyle ?>">
-                                <div class="visual-overlay"></div>
-                            </div>
-                        </div>
-                        <div class="post-actions">
-                            <button class="action-btn like-btn" aria-label="Like Post">
-                                <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                            </button>
-                            <button class="action-btn comment-trigger-btn" aria-label="Comment">
-                                <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                            </button>
-                        </div>
-                        <div class="post-details">
-                            <div class="post-likes-count"><span class="likes-num"><?= number_format((int) $post['likes_count'], 0, ',', '.') ?></span> me gusta</div>
-                            <div class="post-caption">
-                                <a href="#" class="post-caption-user"><?= htmlspecialchars($post['username']) ?></a>
-                                <span><?= htmlspecialchars($caption !== '' ? $caption : 'Sin descripción') ?></span>
-                            </div>
-                            <div class="post-comments-list">
-                                <?php foreach ($comments as $comment): ?>
-                                    <div class="comment-item">
-                                        <a href="#" class="comment-user"><?= htmlspecialchars($comment['username']) ?></a>
-                                        <span><?= htmlspecialchars($comment['comment']) ?></span>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                            <form class="comment-form">
-                                <input type="text" placeholder="Añadir un comentario..." class="comment-input" required autocomplete="off">
-                                <button type="submit" class="comment-submit-btn">Upload</button>
-                            </form>
-                        </div>
-                    </div>
+                    <?php require __DIR__ . '/partials/post-card.php'; ?>
                 <?php endforeach; ?>
             <?php else: ?>
                 <div class="post-card">
-                    <div class="post-details" style="padding: 24px; text-align: center;">
+                    <div class="p-6 text-center">
                         Track clear
                     </div>
                 </div>
@@ -85,12 +36,12 @@
 
             <?php if (!empty($hasMorePosts)): ?>
                 <div id="infinite-loader"
-                     class="loader-container"
+                     class="mb-5 flex items-center justify-center py-5"
                      data-endpoint="/api/posts"
                      data-has-more="1"
                      data-next-page="<?= (int) ($nextFeedPage ?? 2) ?>"
                      data-page-size="<?= (int) ($feedPageSize ?? 4) ?>">
-                    <div class="f1-loader" aria-label="Loading cars">
+                    <div class="flex gap-2" aria-label="Loading cars">
                         <div class="f1-light"></div>
                         <div class="f1-light"></div>
                         <div class="f1-light"></div>
@@ -104,3 +55,29 @@
     </main>
 
     <?php require __DIR__ . "/modals/add-photo-modal.php"; ?>
+    <?php require __DIR__ . "/modals/app-modal.php"; ?>
+
+    <!-- Blank post card, kept only as a DOM template so public/js/home.js can
+         clone the exact same markup as above for infinite-scroll posts
+         instead of duplicating it in a JS string. Rendered from the same
+         partials/post-card.php, with the owner menu forced visible so the
+         clone always has it available; home.js hides it per-post itself. -->
+    <template id="post-card-template">
+        <?php
+            (function () {
+                $post = [
+                    'id' => 0,
+                    'user_id' => 1,
+                    'username' => '',
+                    'avatar_initials' => '??',
+                    'image_url' => '',
+                    'caption' => '',
+                    'likes_count' => 0,
+                    'badge' => 'Post',
+                    'comments' => [],
+                ];
+                $currentUser = ['id' => 1];
+                require __DIR__ . '/partials/post-card.php';
+            })();
+        ?>
+    </template>

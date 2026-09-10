@@ -5,3 +5,4 @@ data/
 *.lock
 */secrets/
 */uploads/
+/node_modules/

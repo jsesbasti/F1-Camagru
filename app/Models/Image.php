@@ -55,6 +55,7 @@ class Image extends Model
 
             return [
                 'id' => $imageId,
+                'user_id' => (int) $row['user_id'],
                 'username' => $row['username'],
                 'avatar_initials' => self::initials($row['username']),
                 'image_url' => self::imageUrl($row['filename'] ?? ''),
@@ -71,6 +72,125 @@ class Image extends Model
             'posts' => $posts,
             'hasMore' => $hasMore,
         ];
+    }
+
+    public static function forUser(int $userId): array
+    {
+        $stmt = self::db()->prepare(
+            "SELECT
+                i.id,
+                i.filename,
+                i.description,
+                i.created_at,
+                COALESCE(l.likes_count, 0) AS likes_count,
+                COALESCE(c.comments_count, 0) AS comments_count
+            FROM images i
+            LEFT JOIN (
+                SELECT image_id, COUNT(*) AS likes_count
+                FROM likes
+                GROUP BY image_id
+            ) l ON l.image_id = i.id
+            LEFT JOIN (
+                SELECT image_id, COUNT(*) AS comments_count
+                FROM comments
+                GROUP BY image_id
+            ) c ON c.image_id = i.id
+            WHERE i.user_id = :user_id
+            ORDER BY i.created_at DESC, i.id DESC"
+        );
+
+        $stmt->bindValue(':user_id', $userId, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return array_map(static function (array $row) {
+            return [
+                'id' => (int) $row['id'],
+                'image_url' => self::imageUrl($row['filename'] ?? ''),
+                'caption' => trim((string) ($row['description'] ?? '')),
+                'likes_count' => (int) $row['likes_count'],
+                'comments_count' => (int) $row['comments_count'],
+                'created_at' => $row['created_at'],
+            ];
+        }, $rows);
+    }
+
+    // Single post, shaped exactly like one feedPage() entry (minus
+    // comments_count, and comments in full instead of capped at 3) so it
+    // can be handed straight to partials/post-card.php for the /post page.
+    public static function findPostById(int $id): ?array
+    {
+        $stmt = self::db()->prepare(
+            "SELECT
+                i.id,
+                i.user_id,
+                i.filename,
+                i.description,
+                i.created_at,
+                u.username,
+                COALESCE(l.likes_count, 0) AS likes_count
+            FROM images i
+            INNER JOIN users u ON u.id = i.user_id
+            LEFT JOIN (
+                SELECT image_id, COUNT(*) AS likes_count
+                FROM likes
+                GROUP BY image_id
+            ) l ON l.image_id = i.id
+            WHERE i.id = :id"
+        );
+        $stmt->bindValue(':id', $id, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+        if (!$row) {
+            return null;
+        }
+
+        return [
+            'id' => (int) $row['id'],
+            'user_id' => (int) $row['user_id'],
+            'username' => $row['username'],
+            'avatar_initials' => self::initials($row['username']),
+            'image_url' => self::imageUrl($row['filename'] ?? ''),
+            'caption' => trim((string) ($row['description'] ?? '')),
+            'likes_count' => (int) $row['likes_count'],
+            'created_at' => $row['created_at'],
+            'badge' => 'Post',
+            'comments' => self::allCommentsForImage((int) $row['id']),
+        ];
+    }
+
+    public static function find(int $id): ?array
+    {
+        $stmt = self::db()->prepare("SELECT * FROM images WHERE id = ?");
+        $stmt->execute([$id]);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
+
+    public static function updateDescription(int $id, string $description): bool
+    {
+        try {
+            $stmt = self::db()->prepare("UPDATE images SET description = :description WHERE id = :id");
+            $stmt->execute([':description' => $description, ':id' => $id]);
+            return true;
+        } catch (\PDOException $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+    }
+
+    public static function delete(int $id): bool
+    {
+        try {
+            $stmt = self::db()->prepare("DELETE FROM images WHERE id = :id");
+            $stmt->execute([':id' => $id]);
+            return true;
+        } catch (\PDOException $e) {
+            error_log($e->getMessage());
+            return false;
+        }
     }
 
     public static function create(array $data): int
@@ -129,6 +249,23 @@ class Image extends Model
         }
 
         return $commentsByImage;
+    }
+
+    // Same shape as one commentsForImages() entry, but unlimited — used by
+    // the single-post page instead of the feed's 3-comment preview.
+    private static function allCommentsForImage(int $imageId): array
+    {
+        $stmt = self::db()->prepare(
+            "SELECT c.comment, c.created_at, u.username
+            FROM comments c
+            INNER JOIN users u ON u.id = c.user_id
+            WHERE c.image_id = :image_id
+            ORDER BY c.created_at ASC, c.id ASC"
+        );
+        $stmt->bindValue(':image_id', $imageId, \PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     private static function initials(string $username): string

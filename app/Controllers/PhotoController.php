@@ -16,9 +16,6 @@ class PhotoController extends Controller
         $this->view('photo', [
                 'title' => 'Upload Photo',
             'currentUser' => User::find(id: $id),
-            'styles' => [
-                'photo'
-            ],
             'scripts' => [
                 'photo'
             ]

@@ -16,9 +16,6 @@ class RegisterController extends Controller
 		$this->requireGuest();
 		$this->view('register', [
 			'title' => 'Register page',
-			'styles' => [
-				'auth'
-			],
 			'scripts' => [
 				'auth'
 			]
@@ -29,9 +26,6 @@ class RegisterController extends Controller
 	{
 		$this->view('verifypage', [
 			'title' => 'Verify page',
-			'styles' => [
-				'verify'
-			],
 		]);
 	}
 
@@ -123,9 +117,6 @@ class RegisterController extends Controller
 
 		$this->view('login', [
 			'title' => 'Login page',
-			'styles' => [
-				'auth'
-			],
 			'scripts' => [
 				'auth'
 			]

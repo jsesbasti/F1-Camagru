@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="scroll-smooth">
 
 <head>
 
@@ -22,37 +22,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Inter:wght@400;500;700&display=swap"
           rel="stylesheet">
 
-    <!-- Base -->
+    <!-- Tailwind (compiled from resources/css/app.css, see package.json) -->
 
-    <link rel="stylesheet" href="/assets/css/base/reset.css">
-    <link rel="stylesheet" href="/assets/css/base/colors.css">
-    <link rel="stylesheet" href="/assets/css/base/typography.css">
-    <link rel="stylesheet" href="/assets/css/base/utilities.css">
-
-    <!-- Componentes -->
-
-    <link rel="stylesheet" href="/assets/css/components/buttons.css">
-    <link rel="stylesheet" href="/assets/css/components/forms.css">
-    <link rel="stylesheet" href="/assets/css/components/cards.css">
-    <link rel="stylesheet" href="/assets/css/components/header.css">
-
-    <!-- CSS específico -->
-
-    <?php if (!empty($styles)): ?>
-
-        <?php foreach ($styles as $style): ?>
-
-            <link rel="stylesheet"
-                  href="/assets/css/pages/<?= htmlspecialchars($style) ?>.css">
-
-        <?php endforeach; ?>
-
-    <?php endif; ?>
+    <link rel="stylesheet" href="/assets/css/app.css">
 
 </head>
 
 <body
-    class="<?= htmlspecialchars($bodyClass ?? '') ?>"
+    class="min-h-screen bg-asphalt font-body text-white <?= htmlspecialchars($bodyClass ?? '') ?>"
 <?php
 
 if (!empty($bodyAttributes)) {

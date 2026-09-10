@@ -30,9 +30,6 @@ class HomeController extends Controller
                 'currentUser' => $currentUser,
                 'header' => 'header',
                 'footer' => 'footer-nav',
-                'styles' => [
-                    'home'
-                ],
                 'scripts' => [
                     'home'
                 ]

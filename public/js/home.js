@@ -1,7 +1,10 @@
+import { showAlert, showConfirm } from './modal.js';
+
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize elements
   initUserDropdown();
   initLikeAndCommentSystem();
+  initPostMenu();
   initInfiniteScroll();
   initAddPhotoModal();
 });
@@ -105,7 +108,7 @@ function initLikeAndCommentSystem() {
       const commentItem = document.createElement('div');
       commentItem.className = 'comment-item';
       commentItem.innerHTML = `
-        <a href="#" class="comment-user">${currentUsername}</a>
+        <a href="${profileUrl(currentUsername)}" class="comment-user">${escapeHTML(currentUsername)}</a>
         <span>${escapeHTML(commentText)}</span>
       `;
 
@@ -126,6 +129,14 @@ function formatNumber(num) {
 }
 
 /**
+ * Helper to build a link to a user's profile (mirrors profile-url building
+ * in app/Views/partials/post-card.php).
+ */
+function profileUrl(username) {
+  return username ? `/profile?username=${encodeURIComponent(username)}` : '#';
+}
+
+/**
  * Helper to escape HTML and prevent XSS
  */
 function escapeHTML(str) {
@@ -140,18 +151,158 @@ function escapeHTML(str) {
   );
 }
 
-function escapeAttribute(str) {
-  return escapeHTML(String(str));
+/**
+ * 3. Menú de tres puntos del propio post: editar descripción o borrar
+ * Delegación de eventos igual que el sistema de likes/comentarios, para
+ * que funcione tanto en los posts renderizados por PHP como en los que
+ * llegan por scroll infinito (createPostCard).
+ */
+function initPostMenu() {
+  const feed = document.querySelector('.feed-container');
+  if (!feed) return;
+
+  feed.addEventListener('click', (e) => {
+    const menuBtn = e.target.closest('.post-menu-btn');
+    if (menuBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const dropdown = menuBtn.nextElementSibling;
+      const wasShown = dropdown.classList.contains('show');
+      closeAllPostMenus();
+      if (!wasShown) dropdown.classList.add('show');
+      return;
+    }
+
+    const editBtn = e.target.closest('.post-edit-btn');
+    if (editBtn) {
+      e.preventDefault();
+      closeAllPostMenus();
+      toggleEditMode(editBtn.closest('.post-card'), true);
+      return;
+    }
+
+    const cancelBtn = e.target.closest('.post-edit-cancel-btn');
+    if (cancelBtn) {
+      e.preventDefault();
+      toggleEditMode(cancelBtn.closest('.post-card'), false);
+      return;
+    }
+
+    const deleteBtn = e.target.closest('.post-delete-btn');
+    if (deleteBtn) {
+      e.preventDefault();
+      closeAllPostMenus();
+      deletePost(deleteBtn.closest('.post-card'));
+    }
+  });
+
+  feed.addEventListener('submit', (e) => {
+    const form = e.target.closest('.post-edit-form');
+    if (form) {
+      e.preventDefault();
+      saveEdit(form.closest('.post-card'), form);
+    }
+  });
+
+  // Cerrar el desplegable al hacer click fuera o pulsar Escape
+  document.addEventListener('click', closeAllPostMenus);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAllPostMenus();
+  });
+
+  function closeAllPostMenus() {
+    document.querySelectorAll('.post-menu-dropdown.show')
+      .forEach((el) => el.classList.remove('show'));
+  }
+
+  function toggleEditMode(card, editing) {
+    if (!card) return;
+    const captionEl = card.querySelector('.post-caption');
+    const form = card.querySelector('.post-edit-form');
+    if (!captionEl || !form) return;
+
+    if (editing) {
+      const captionText = card.querySelector('.post-caption-text')?.textContent.trim() || '';
+      const textarea = form.querySelector('.post-edit-textarea');
+      textarea.value = captionText === 'Sin descripción' ? '' : captionText;
+    }
+
+    captionEl.hidden = editing;
+    form.hidden = !editing;
+    if (editing) {
+      form.querySelector('.post-edit-textarea').focus();
+    }
+  }
+
+  async function saveEdit(card, form) {
+    if (!card) return;
+    const id = Number(card.id.replace('post-', ''));
+    const textarea = form.querySelector('.post-edit-textarea');
+    const saveBtn = form.querySelector('.post-edit-save-btn');
+    const description = textarea.value.trim();
+
+    saveBtn.disabled = true;
+    try {
+      const response = await fetch('/api/posts/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, description }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        card.querySelector('.post-caption-text').textContent = data.caption || 'Sin descripción';
+        toggleEditMode(card, false);
+      } else {
+        await showAlert(Object.values(data.errors || {})[0] || 'No se pudo actualizar el post');
+      }
+    } catch (error) {
+      await showAlert('No se pudo actualizar el post');
+    } finally {
+      saveBtn.disabled = false;
+    }
+  }
+
+  async function deletePost(card) {
+    if (!card) return;
+    const confirmed = await showConfirm('¿Seguro que quieres borrar esta foto? Esta acción no se puede deshacer.', 'Borrar foto');
+    if (!confirmed) return;
+
+    const id = Number(card.id.replace('post-', ''));
+    try {
+      const response = await fetch('/api/posts/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        card.remove();
+        // On the single-post page (/post?id=...) there's nothing left to
+        // show once its one card is gone — head back to the feed instead
+        // of leaving an empty container.
+        if (window.location.pathname === '/post') {
+          window.location.href = '/';
+        }
+      } else {
+        await showAlert(Object.values(data.errors || {})[0] || 'No se pudo borrar el post');
+      }
+    } catch (error) {
+      await showAlert('No se pudo borrar el post');
+    }
+  }
 }
 
 /**
- * 3. Lógica de Scroll Infinito con Semáforo de F1
+ * 4. Lógica de Scroll Infinito con Semáforo de F1
  */
 function initInfiniteScroll() {
   const loader = document.getElementById('infinite-loader');
   const feed = document.querySelector('.feed-container');
   if (!loader || !feed) return;
 
+  const currentUserId = Number(feed.dataset.currentUserId || 0);
   const endpoint = loader.dataset.endpoint || '/api/posts';
   const pageSize = Number(loader.dataset.pageSize || '4');
   let currentPage = Number(loader.dataset.nextPage || '2');
@@ -252,70 +403,62 @@ function initInfiniteScroll() {
     loader.remove();
   }
 
+  /**
+   * Clones #post-card-template (rendered server-side by the same
+   * partials/post-card.php that draws the initial feed) and fills it in
+   * with this post's data, instead of duplicating the markup as a JS
+   * string. Using textContent throughout means we don't need to
+   * HTML-escape anything here either.
+   */
   function createPostCard(post) {
-    const card = document.createElement('div');
-    card.className = 'post-card';
+    const template = document.getElementById('post-card-template');
+    const card = template.content.firstElementChild.cloneNode(true);
+
     card.id = `post-${post.id}`;
+    card.querySelector('.post-user-avatar').textContent = post.avatar_initials || '??';
+    card.querySelector('.post-badge').textContent = post.badge || 'Post';
+    card.querySelectorAll('.post-username, .post-caption-user').forEach((el) => {
+      el.textContent = post.username || '';
+      el.href = profileUrl(post.username);
+    });
 
-    const imageStyle = post.image_url
-      ? `background-image: url('${escapeAttribute(post.image_url)}')`
-      : '';
+    if (post.image_url) {
+      card.querySelector('.f1-visual-bg').style.backgroundImage = `url('${post.image_url}')`;
+    }
 
-    const commentsMarkup = Array.isArray(post.comments)
-      ? post.comments.map((comment) => `
-        <div class="comment-item">
-          <a href="#" class="comment-user">${escapeHTML(comment.username || '')}</a>
-          <span>${escapeHTML(comment.comment || '')}</span>
-        </div>
-      `).join('')
-      : '';
+    const menu = card.querySelector('.post-menu');
+    if (menu) {
+      menu.hidden = !(currentUserId > 0 && Number(post.user_id) === currentUserId);
+    }
 
-    card.innerHTML = `
-      <div class="post-header">
-        <div class="post-user-info">
-          <div class="post-user-avatar">${escapeHTML(post.avatar_initials || '??')}</div>
-          <a href="#" class="post-username">${escapeHTML(post.username || '')}</a>
-        </div>
-        <div class="post-badge">${escapeHTML(post.badge || 'POST')}</div>
-      </div>
+    card.querySelector('.likes-num').textContent = formatNumber(Number(post.likes_count || 0));
+    const caption = post.caption || '';
+    card.querySelector('.post-caption-text').textContent = caption || 'Sin descripción';
+    card.querySelector('.post-edit-textarea').value = caption;
 
-      <div class="post-media-container">
-        <div class="f1-visual-bg" style="${imageStyle}">
-          <div class="visual-overlay"></div>
-        </div>
-      </div>
+    const commentsList = card.querySelector('.post-comments-list');
+    (Array.isArray(post.comments) ? post.comments : []).forEach((comment) => {
+      const item = document.createElement('div');
+      item.className = 'comment-item';
 
-      <div class="post-actions">
-        <button class="action-btn like-btn" aria-label="Like Post">
-          <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-        </button>
-        <button class="action-btn comment-trigger-btn" aria-label="Comment">
-          <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-        </button>
-      </div>
+      const userLink = document.createElement('a');
+      userLink.href = profileUrl(comment.username);
+      userLink.className = 'comment-user';
+      userLink.textContent = comment.username || '';
 
-      <div class="post-details">
-        <div class="post-likes-count"><span class="likes-num">${formatNumber(Number(post.likes_count || 0))}</span> me gusta</div>
-        <div class="post-caption">
-          <a href="#" class="post-caption-user">${escapeHTML(post.username || '')}</a>
-          <span>${escapeHTML(post.caption || 'Sin descripción')}</span>
-        </div>
-        <div class="post-comments-list">
-          ${commentsMarkup}
-        </div>
-        <form class="comment-form">
-          <input type="text" placeholder="Añadir un comentario..." class="comment-input" required autocomplete="off">
-          <button type="submit" class="comment-submit-btn">Publicar</button>
-        </form>
-      </div>
-    `;
+      const text = document.createElement('span');
+      text.textContent = comment.comment || '';
+
+      item.append(userLink, text);
+      commentsList.appendChild(item);
+    });
 
     return card;
   }
 }
 
 /**
- * 4. Botón Añadir Foto en Footer - Modal Box Lógica
+ * 5. Botón Añadir Foto en Footer - Modal Box Lógica
  */
 function initAddPhotoModal() {
   const addBtn = document.getElementById('add-photo-btn');
