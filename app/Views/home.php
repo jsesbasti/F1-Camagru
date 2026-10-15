@@ -11,8 +11,8 @@
                         <?php foreach ($users as $user): ?>
                             <a href="/profile?username=<?= urlencode($user['username']) ?>" class="group flex min-w-[60px] flex-col items-center gap-1.5 no-underline">
                                 <div class="flex h-12 w-12 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--color-f1-red)_30%,var(--color-gold)_70%)] p-0.5 transition-transform duration-200 group-hover:scale-105">
-                                    <div class="flex h-full w-full items-center justify-center rounded-full border-2 border-carbon bg-carbon-medium font-racing text-sm font-bold text-white">
-                                        <?= substr(strtoupper($user['username']), 0, 2) ?>
+                                    <div class="flex h-full w-full items-center justify-center overflow-hidden rounded-full border-2 border-carbon bg-carbon-medium font-racing text-sm font-bold text-white">
+                                        <?= \App\Core\Helper::avatar($user['avatar'] ?? null, $user['username']) ?>
                                     </div>
                                 </div>
                                 <span class="max-w-[60px] truncate text-[11px] text-muted"><?= htmlspecialchars($user['username']) ?></span>
@@ -54,8 +54,6 @@
         </div>
     </main>
 
-    <?php require __DIR__ . "/modals/add-photo-modal.php"; ?>
-    <?php require __DIR__ . "/modals/app-modal.php"; ?>
 
     <!-- Blank post card, kept only as a DOM template so public/js/home.js can
          clone the exact same markup as above for infinite-scroll posts

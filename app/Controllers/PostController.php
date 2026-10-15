@@ -4,8 +4,11 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Core\Helper;
+use App\Core\Mailer;
 use App\Core\Session;
 use App\Models\Image;
+use App\Models\Like;
+use App\Models\Comment;
 use App\Models\User;
 
 class PostController extends Controller
@@ -16,7 +19,7 @@ class PostController extends Controller
     {
         $id = (int) ($_GET['id'] ?? 0);
         $currentUser = Session::check() ? User::find(id: Session::getId()) : null;
-        $post = $id ? Image::findPostById($id) : null;
+        $post = $id ? Image::findPostById($id, (int) ($currentUser['id'] ?? 0)) : null;
 
         $this->view('post', [
             'title' => $post ? $post['username'] . ' · Post' : 'Post not found',
@@ -34,7 +37,7 @@ class PostController extends Controller
         $limit = max(1, min((int) ($_GET['limit'] ?? 4), 20));
         $offset = ($page - 1) * $limit;
 
-        $feed = Image::feedPage($limit, $offset);
+        $feed = Image::feedPage($limit, $offset, Session::check() ? Session::getId() : 0);
 
         Helper::json_response([
             'posts' => $feed['posts'],
@@ -99,14 +102,110 @@ class PostController extends Controller
         }
 
         if (Image::delete($id)) {
-            $path = __DIR__ . '/../../public' . $image['filename'];
-            if (is_file($path)) {
-                @unlink($path);
+            foreach (array_filter([$image['filename'], $image['source_filename'] ?? null]) as $filename) {
+                $path = __DIR__ . '/../../public' . $filename;
+                if (is_file($path)) {
+                    @unlink($path);
+                }
             }
             Helper::json_response(['success' => true]);
         } else {
             Helper::json_response(['errors' => ['error' => 'Could not delete post']], 500);
         }
+    }
+
+    public function like(): void
+    {
+        [$userId, $imageId] = $this->interaction();
+
+        Helper::json_response(['success' => true, ...Like::toggle($userId, $imageId)]);
+    }
+
+    public function comment(): void
+    {
+        [$userId, $imageId, $data, $image] = $this->interaction();
+
+        $comment = trim((string) ($data['comment'] ?? ''));
+        if ($comment === '') {
+            Helper::json_response(['errors' => ['comment' => 'Comment cannot be empty']], 400);
+        }
+        if (mb_strlen($comment) > Comment::MAX_LENGTH) {
+            Helper::json_response(['errors' => ['comment' => 'Comment is too long']], 400);
+        }
+
+        $repliedTo = null;
+        $parentId = (int) ($data['parent_id'] ?? 0);
+        if ($parentId) {
+            $repliedTo = Comment::find($parentId);
+            if (!$repliedTo || (int) $repliedTo['image_id'] !== $imageId) {
+                Helper::json_response(['errors' => ['error' => 'Comment not found']], 404);
+            }
+            $parentId = (int) ($repliedTo['parent_id'] ?? $repliedTo['id']);
+        }
+
+        $id = Comment::add($userId, $imageId, $comment, $parentId ?: null);
+        if (!$id) {
+            Helper::json_response(['errors' => ['error' => 'Could not save comment']], 500);
+        }
+
+        $author = User::find(id: $userId);
+
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'success' => true,
+            'comment' => [
+                'id' => $id,
+                'parent_id' => $parentId ?: null,
+                'username' => $author['username'],
+                'comment' => $comment,
+            ]
+        ], JSON_UNESCAPED_SLASHES);
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        }
+
+        $this->notifyComment($author, $image, $comment, $repliedTo);
+        exit;
+    }
+
+    private function notifyComment(array $author, array $image, string $comment, ?array $repliedTo): void
+    {
+        $url = Mailer::baseUrl() . "/post?id={$image['id']}";
+        $footer = "\r\n\r\nSee it here: $url\r\n\r\nYou can turn these emails off in Settings: " . Mailer::baseUrl() . "/settings";
+
+        $notified = [(int) $author['id']];
+
+        $owner = User::find(id: (int) $image['user_id']);
+        if ($owner && !in_array((int) $owner['id'], $notified, true) && $owner['notify_comments']) {
+            Mailer::send($owner['email'], "{$author['username']} commented on your photo",
+                "Hi {$owner['username']},\r\n\r\n{$author['username']} commented on your photo:\r\n\r\n\"$comment\"" . $footer);
+        }
+        $notified[] = (int) $image['user_id'];
+
+        if ($repliedTo) {
+            $target = User::find(id: (int) $repliedTo['user_id']);
+            if ($target && !in_array((int) $target['id'], $notified, true) && $target['notify_comments']) {
+                Mailer::send($target['email'], "{$author['username']} replied to your comment",
+                    "Hi {$target['username']},\r\n\r\n{$author['username']} replied to your comment \"{$repliedTo['comment']}\":\r\n\r\n\"$comment\"" . $footer);
+            }
+        }
+    }
+
+    private function interaction(): array
+    {
+        if (!Session::check()) {
+            Helper::json_response(['errors' => ['error' => 'You need to log in'], 'redirect' => '/login'], 401);
+        }
+
+        $data = json_decode(file_get_contents("php://input"), true) ?: [];
+        $imageId = (int) ($data['id'] ?? 0);
+
+        $image = $imageId ? Image::find($imageId) : null;
+        if (!$image || $image['is_draft']) {
+            Helper::json_response(['errors' => ['error' => 'Post not found']], 404);
+        }
+
+        return [Session::getId(), $imageId, $data, $image];
     }
 
     // Fetches the image only if it belongs to the signed-in user, so

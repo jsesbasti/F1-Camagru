@@ -9,6 +9,13 @@ class Helper {
         echo json_encode($data, JSON_UNESCAPED_SLASHES);
         exit();
     }
+
+    static public function avatar(?string $avatarUrl, string $username): string {
+        if ($avatarUrl) {
+            return '<img src="' . htmlspecialchars($avatarUrl) . '" alt="" class="h-full w-full object-cover">';
+        }
+        return htmlspecialchars(strtoupper(substr(trim($username), 0, 2)) ?: '??');
+    }
 }
 
 ?>

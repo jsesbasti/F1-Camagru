@@ -15,3 +15,6 @@
         </a>
     <?php endif; ?>
 </footer>
+
+<?php require __DIR__ . "/../modals/add-photo-modal.php"; ?>
+<?php require __DIR__ . "/../modals/app-modal.php"; ?>

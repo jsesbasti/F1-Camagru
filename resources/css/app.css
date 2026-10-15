@@ -115,8 +115,11 @@
   .dropdown-item {
     @apply flex items-center gap-2.5 px-[18px] py-3 text-sm text-muted transition-all duration-200 hover:bg-carbon-medium hover:pl-[22px] hover:text-white;
   }
-  .dropdown-item.logout {
-    @apply border-t border-line hover:bg-f1-red/10 hover:text-error;
+  .f1-logout-btn {
+    @apply flex h-10 items-center gap-1.5 rounded-full border-2 border-line px-3.5 font-racing text-xs font-bold uppercase tracking-wide text-white no-underline transition-all duration-300 hover:border-f1-red hover:bg-f1-red hover:shadow-[0_0_10px_rgba(225,6,0,0.4)] max-[480px]:w-10 max-[480px]:justify-center max-[480px]:px-0;
+  }
+  .f1-logout-btn svg {
+    @apply h-4 w-4 flex-shrink-0;
   }
 
   /* ---- Footer nav (partials/footer-nav.php) ---- */
@@ -147,7 +150,16 @@
     @apply flex opacity-100;
   }
   .modal-card {
-    @apply w-[90%] max-w-[450px] translate-y-5 scale-95 rounded-lg border border-line border-t-4 border-t-f1-red bg-carbon p-6 shadow-[0_10px_40px_rgba(0,0,0,0.8)] transition-transform duration-300 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)];
+    @apply relative w-[90%] max-w-[450px] translate-y-5 scale-95 rounded-lg border border-line border-t-4 border-t-f1-red bg-carbon p-6 shadow-[0_10px_40px_rgba(0,0,0,0.8)] transition-transform duration-300 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)];
+  }
+  .modal-logout-link {
+    @apply absolute right-4 top-5 flex items-center gap-1.5 rounded-full border border-line px-2.5 py-1 font-racing text-[11px] font-bold uppercase tracking-wide text-muted no-underline transition-colors duration-200 hover:border-f1-red hover:bg-f1-red hover:text-white;
+  }
+  .modal-logout-link svg {
+    @apply h-3.5 w-3.5;
+  }
+  .modal-logout-link + .modal-title {
+    @apply pr-24;
   }
   .modal-overlay.show .modal-card {
     @apply translate-y-0 scale-100;
@@ -190,7 +202,7 @@
     @apply flex items-center gap-2.5;
   }
   .post-user-avatar {
-    @apply flex h-[34px] w-[34px] items-center justify-center rounded-full border-[1.5px] border-line bg-[linear-gradient(135deg,var(--color-f1-red),var(--color-carbon-light))] font-racing text-[13px] font-bold text-white;
+    @apply flex overflow-hidden h-[34px] w-[34px] items-center justify-center rounded-full border-[1.5px] border-line bg-[linear-gradient(135deg,var(--color-f1-red),var(--color-carbon-light))] font-racing text-[13px] font-bold text-white;
   }
   .post-username {
     @apply text-sm font-bold text-white no-underline hover:text-f1-red;
@@ -237,8 +249,29 @@
   .post-comments-list {
     @apply mb-3 flex max-h-[120px] flex-col gap-1.5 overflow-y-auto pr-1;
   }
+  .comment-thread {
+    @apply flex flex-col gap-1;
+  }
   .comment-item {
     @apply text-[13px] leading-snug;
+  }
+  .comment-item.comment-reply {
+    @apply ml-5 border-l-2 border-line pl-2.5;
+  }
+  .comment-mention {
+    @apply font-bold text-f1-red no-underline hover:underline;
+  }
+  .comment-reply-btn {
+    @apply ml-1.5 text-[11px] font-bold text-muted transition-colors duration-200 hover:text-white;
+  }
+  .comment-reply-chip {
+    @apply mb-1 flex items-center justify-between rounded bg-carbon-light/60 px-2.5 py-1 text-xs text-muted;
+  }
+  .comment-reply-chip strong {
+    @apply text-white;
+  }
+  .comment-reply-cancel {
+    @apply text-base leading-none text-muted hover:text-white;
   }
   .comment-user {
     @apply mr-1.5 font-bold text-white no-underline;
@@ -315,12 +348,66 @@
     @apply border border-line bg-transparent text-white hover:-translate-y-px;
   }
 
-  /* ---- Camera mode toggle (photo.php + public/js/photo.js) ---- */
-  .photo-mode {
-    @apply hidden flex-col gap-4;
+  .photo-stage {
+    @apply relative aspect-square w-full overflow-hidden rounded-2xl border border-line bg-[linear-gradient(135deg,rgba(31,31,39,0.85),rgba(15,15,20,0.95))];
   }
-  .photo-mode.active {
-    @apply flex;
+  .overlay-layer {
+    @apply absolute inset-0 touch-none overflow-hidden;
+  }
+  .overlay-item {
+    @apply absolute -translate-x-1/2 -translate-y-1/2 cursor-move select-none;
+  }
+  .overlay-item img {
+    @apply pointer-events-none block h-auto w-full;
+  }
+  .overlay-item.active {
+    @apply outline-2 outline-dashed outline-f1-red/80;
+  }
+  .overlay-handle {
+    @apply absolute bottom-1 right-1 hidden h-5 w-5 cursor-nwse-resize rounded-full border-2 border-white bg-f1-red shadow-[0_0_8px_rgba(0,0,0,0.6)];
+  }
+  .overlay-item.active .overlay-handle {
+    @apply block;
+  }
+  .overlay-option {
+    @apply aspect-square rounded-lg border-2 border-line bg-asphalt p-1.5 transition-[border-color,box-shadow] duration-200 hover:border-muted;
+  }
+  .overlay-option img {
+    @apply h-full w-full object-contain;
+  }
+  .overlay-option[aria-pressed="true"] {
+    @apply border-f1-red shadow-[0_0_10px_rgba(225,6,0,0.45)];
+  }
+  .studio-thumb {
+    @apply relative aspect-square overflow-hidden rounded-lg border border-line transition-colors duration-200 hover:border-f1-red;
+  }
+  .studio-thumb.active {
+    @apply border-2 border-f1-red;
+  }
+  .studio-thumb-open {
+    @apply block h-full w-full;
+  }
+  .studio-thumb-open img {
+    @apply h-full w-full object-cover;
+  }
+  .studio-thumb-badge {
+    @apply pointer-events-none absolute left-1 top-1 rounded bg-gold px-1.5 py-0.5 font-racing text-[10px] font-bold uppercase tracking-wide text-asphalt;
+  }
+  .studio-thumb-delete {
+    @apply absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-asphalt/85 text-base leading-none text-white hover:bg-f1-red;
+  }
+
+  .settings-card {
+    @apply flex flex-col rounded-2xl border border-line border-t-4 border-t-f1-red bg-carbon p-6 shadow-[0_10px_30px_rgba(0,0,0,0.6)];
+  }
+  .settings-title {
+    @apply border-b border-line pb-2 font-racing text-[22px] font-extrabold italic uppercase tracking-wide;
+  }
+  .settings-hint {
+    @apply mt-2 text-sm text-muted;
+  }
+  .settings-danger-btn {
+    @apply mt-5 w-full -skew-x-[10deg] rounded bg-f1-red px-3 py-3 font-title text-[15px] font-extrabold uppercase tracking-wide text-white shadow-[0_4px_12px_rgba(225,6,0,0.4)] transition-all duration-200 hover:-translate-y-px disabled:opacity-60;
   }
 
   /* ---- Profile page (profile.php) ---- */
@@ -328,10 +415,10 @@
     @apply flex flex-col items-center gap-4 rounded-2xl border border-line border-t-4 border-t-f1-red bg-carbon p-6 text-center shadow-[0_10px_30px_rgba(0,0,0,0.6)] sm:flex-row sm:items-center sm:gap-6 sm:text-left;
   }
   .profile-avatar {
-    @apply flex h-24 w-24 flex-shrink-0 items-center justify-center rounded-full border-4 border-carbon bg-[linear-gradient(135deg,var(--color-f1-red),var(--color-carbon-light))] font-racing text-3xl font-bold text-white shadow-[0_0_0_2px_var(--color-f1-red),0_10px_24px_rgba(225,6,0,0.28)];
+    @apply flex overflow-hidden h-24 w-24 flex-shrink-0 items-center justify-center rounded-full border-4 border-carbon bg-[linear-gradient(135deg,var(--color-f1-red),var(--color-carbon-light))] font-racing text-3xl font-bold text-white shadow-[0_0_0_2px_var(--color-f1-red),0_10px_24px_rgba(225,6,0,0.28)];
   }
   .profile-username {
-    @apply bg-[linear-gradient(135deg,#fff_60%,var(--color-f1-red))] bg-clip-text font-title text-2xl font-black italic uppercase tracking-wide text-transparent;
+    @apply bg-[linear-gradient(135deg,#fff_60%,var(--color-f1-red))] bg-clip-text inline-block max-w-full break-all pr-1 leading-tight font-title text-2xl font-black italic uppercase tracking-wide text-transparent;
   }
   .profile-badge {
     @apply inline-block rounded border border-f1-red bg-f1-red/15 px-2 py-0.5 font-racing text-[11px] font-bold uppercase tracking-wide text-f1-red;

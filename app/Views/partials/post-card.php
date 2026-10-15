@@ -26,11 +26,19 @@ $comments = $post['comments'] ?? [];
 $profileUrl = static function (string $username): string {
     return $username !== '' ? '/profile?username=' . urlencode($username) : '#';
 };
+
+$renderComment = static function (string $text) use ($profileUrl): string {
+    return preg_replace_callback(
+        '/(?<![\w@])@(\w+)/',
+        static fn (array $m) => '<a href="' . htmlspecialchars($profileUrl($m[1])) . '" class="comment-mention">@' . $m[1] . '</a>',
+        htmlspecialchars($text)
+    );
+};
 ?>
 <div class="post-card" id="post-<?= (int) ($post['id'] ?? 0) ?>">
     <div class="post-header">
         <div class="post-user-info">
-            <div class="post-user-avatar"><?= htmlspecialchars($post['avatar_initials'] ?? '??') ?></div>
+            <div class="post-user-avatar"><?= \App\Core\Helper::avatar($post['avatar_url'] ?? null, $post['username'] ?? '') ?></div>
             <a href="<?= htmlspecialchars($profileUrl($post['username'] ?? '')) ?>" class="post-username"><?= htmlspecialchars($post['username'] ?? '') ?></a>
         </div>
         <div class="flex items-center gap-2">
@@ -52,7 +60,7 @@ $profileUrl = static function (string $username): string {
         </div>
     </div>
     <div class="post-actions">
-        <button class="action-btn like-btn" aria-label="Like Post">
+        <button class="action-btn like-btn<?= !empty($post['liked_by_me']) ? ' liked' : '' ?>" aria-label="Like Post" aria-pressed="<?= !empty($post['liked_by_me']) ? 'true' : 'false' ?>">
             <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
         </button>
         <button class="action-btn comment-trigger-btn" aria-label="Comment">
@@ -73,15 +81,24 @@ $profileUrl = static function (string $username): string {
             </div>
         </form>
         <div class="post-comments-list">
-            <?php foreach ($comments as $comment): ?>
-                <div class="comment-item">
-                    <a href="<?= htmlspecialchars($profileUrl($comment['username'] ?? '')) ?>" class="comment-user"><?= htmlspecialchars($comment['username']) ?></a>
-                    <span><?= htmlspecialchars($comment['comment']) ?></span>
+            <?php foreach ($comments as $thread): ?>
+                <div class="comment-thread" data-comment-id="<?= (int) $thread['id'] ?>">
+                    <?php foreach ([$thread, ...$thread['replies']] as $comment): ?>
+                        <div class="comment-item<?= $comment['parent_id'] ? ' comment-reply' : '' ?>" data-comment-id="<?= (int) $comment['id'] ?>">
+                            <a href="<?= htmlspecialchars($profileUrl($comment['username'] ?? '')) ?>" class="comment-user"><?= htmlspecialchars($comment['username']) ?></a>
+                            <span class="comment-text"><?= $renderComment($comment['comment']) ?></span>
+                            <button type="button" class="comment-reply-btn" data-reply-to="<?= (int) $comment['id'] ?>" data-username="<?= htmlspecialchars($comment['username']) ?>">Responder</button>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
             <?php endforeach; ?>
         </div>
+        <div class="comment-reply-chip" hidden>
+            <span>Respondiendo a <strong class="comment-reply-target"></strong></span>
+            <button type="button" class="comment-reply-cancel" aria-label="Cancelar respuesta">&times;</button>
+        </div>
         <form class="comment-form">
-            <input type="text" placeholder="Añadir un comentario..." class="comment-input" required autocomplete="off">
+            <input type="text" placeholder="Añadir un comentario..." class="comment-input" required autocomplete="off" maxlength="500">
             <button type="submit" class="comment-submit-btn">Publicar</button>
         </form>
     </div>

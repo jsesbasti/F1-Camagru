@@ -13,7 +13,7 @@
             <!-- Profile header -->
             <section class="profile-card">
                 <div class="profile-avatar">
-                    <?= htmlspecialchars(substr(strtoupper($profileUser['username']), 0, 2)) ?>
+                    <?= \App\Core\Helper::avatar($profileUser['avatar'] ?? null, $profileUser['username']) ?>
                 </div>
                 <div class="flex flex-1 flex-col items-center sm:items-start">
                     <div class="flex flex-wrap items-center justify-center gap-2 sm:justify-start">

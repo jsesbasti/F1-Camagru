@@ -1,5 +1,6 @@
 <div class="modal-overlay" id="add-post-modal" data-authenticated="<?= $currentUser ? '1' : '0' ?>">
     <div class="modal-card">
+        <?php require __DIR__ . "/logout-link.php"; ?>
         <h2 class="modal-title" id="add-photo-modal-title">Cargar Telemetría</h2>
         <div class="modal-content" id="add-photo-modal-content">
             <div class="modal-state modal-state-auth" id="add-photo-auth-state" hidden>

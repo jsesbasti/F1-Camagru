@@ -57,6 +57,8 @@ class User extends Model
     {
         $allowed = [
             'is_verified',
+            'notify_comments',
+            'avatar',
             'username',
             'email',
             'password'
@@ -84,12 +86,13 @@ class User extends Model
         return $stmt->bindColumn($col,  $data);
     }
 
-    public static function delete(int $id) { 
+    public static function delete(int $id): bool
+    {
         try {
-            $stmt->prepare('DELETE FROM users WHERE id = :id');
-            $stmt->execute(['id' => $id]);
-            return true;
-        } catch (PDOException $e) {
+            $stmt = self::db()->prepare('DELETE FROM users WHERE id = :id');
+            $stmt->execute([':id' => $id]);
+            return $stmt->rowCount() > 0;
+        } catch (\PDOException $e) {
             error_log($e->getMessage());
             return false;
         }

@@ -6,3 +6,6 @@ data/
 */secrets/
 */uploads/
 /node_modules/
+graphify*
+CLAUDE*
+.claude/

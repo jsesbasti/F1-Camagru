@@ -3,6 +3,7 @@
      modal-overlay/modal-card visuals as add-photo-modal.php. -->
 <div class="modal-overlay" id="app-modal">
     <div class="modal-card">
+        <?php require __DIR__ . "/logout-link.php"; ?>
         <h2 class="modal-title" id="app-modal-title">Aviso</h2>
         <div class="modal-content" id="app-modal-message"></div>
         <div class="modal-auth-actions" id="app-modal-actions"></div>

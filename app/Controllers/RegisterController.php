@@ -6,6 +6,7 @@ use App\Models\Verification;
 use App\Core\Controller;
 use App\Core\Session;
 use App\Core\Helper;
+use App\Core\Mailer;
 use App\Validators\UserValidator;
 
 class RegisterController extends Controller
@@ -127,7 +128,7 @@ class RegisterController extends Controller
 		$token = bin2hex(random_bytes(16));
 		$user = Verification::find(username: $username);
 		$expires_at = (new \DateTime())->modify('+30 minutes')->format('Y-m-d H:i:s');
-		$url = "http://localhost:8080/verify?token=$token";
+		$url = Mailer::baseUrl() . "/verify?token=$token";
 		if ($user == null) {
 			Helper::json_response([
 				'errors' => [
@@ -137,7 +138,7 @@ class RegisterController extends Controller
 			exit ;
 		}
 		if (Verification::add([":user_id" => $user['id'], ":token" => $token, ":expires_at" => $expires_at]) != null) {
-			mail($user['email'], 'EMAIL VERIFICATION', "You need to verify your account $username.\r\nHere is the link where you can do it.\r\n\r\n$url");
+			Mailer::send($user['email'], 'EMAIL VERIFICATION', "You need to verify your account $username.\r\nHere is the link where you can do it.\r\n\r\n$url");
 			return ;
 		}
 		else {

@@ -2,61 +2,10 @@ import { showAlert, showConfirm } from './modal.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize elements
-  initUserDropdown();
   initLikeAndCommentSystem();
   initPostMenu();
   initInfiniteScroll();
-  initAddPhotoModal();
 });
-
-/**
- * 1. User Profile Dropdown Menu Lógica
- */
-function initUserDropdown() {
-  const profileBtn = document.getElementById('user-profile-btn');
-  const dropdownMenu = document.getElementById('dropdown-menu');
-
-  if (!profileBtn || !dropdownMenu) return;
-
-  profileBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isShown = dropdownMenu.classList.contains('show');
-    
-    if (isShown) {
-      closeDropdown();
-    } else {
-      dropdownMenu.style.display = 'flex';
-      // Allow display flex to apply before adding class for transition
-      setTimeout(() => {
-        dropdownMenu.classList.add('show');
-      }, 10);
-    }
-  });
-
-  // Close dropdown on click outside
-  document.addEventListener('click', (e) => {
-    if (!dropdownMenu.contains(e.target) && e.target !== profileBtn) {
-      closeDropdown();
-    }
-  });
-
-  // Close dropdown on escape key
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeDropdown();
-    }
-  });
-
-  function closeDropdown() {
-    dropdownMenu.classList.remove('show');
-    // Hide display after transition completes
-    setTimeout(() => {
-      if (!dropdownMenu.classList.contains('show')) {
-        dropdownMenu.style.display = 'none';
-      }
-    }, 250);
-  }
-}
 
 /**
  * 2. Lógica de Interacciones de Post (Me gusta y Comentarios)
@@ -66,59 +15,191 @@ function initLikeAndCommentSystem() {
   const feed = document.querySelector('.feed-container');
   if (!feed) return;
 
-  // Manejar Clicks (likes)
-  feed.addEventListener('click', (e) => {
+  feed.addEventListener('click', async (e) => {
     const likeBtn = e.target.closest('.like-btn');
-    if (likeBtn) {
-      e.preventDefault();
-      const isLiked = likeBtn.classList.contains('liked');
-      const card = likeBtn.closest('.post-card');
-      const countEl = card.querySelector('.likes-num');
-      let likes = parseInt(countEl.textContent.replace(/\./g, ''), 10) || 0;
+    if (!likeBtn || likeBtn.disabled) return;
+    e.preventDefault();
 
-      if (isLiked) {
-        likeBtn.classList.remove('liked');
-        likes--;
-      } else {
-        likeBtn.classList.add('liked');
-        likes++;
+    const card = likeBtn.closest('.post-card');
+    likeBtn.disabled = true;
+    try {
+      const data = await postInteraction('/api/posts/like', { id: postId(card) });
+      if (data) {
+        likeBtn.classList.toggle('liked', data.liked);
+        likeBtn.setAttribute('aria-pressed', data.liked ? 'true' : 'false');
+        card.querySelector('.likes-num').textContent = formatNumber(data.likes_count);
       }
-
-      countEl.textContent = formatNumber(likes);
+    } finally {
+      likeBtn.disabled = false;
     }
   });
 
-  // Manejar Envío de Comentarios
-  feed.addEventListener('submit', (e) => {
-    const form = e.target.closest('.comment-form');
-    if (form) {
+  feed.addEventListener('click', (e) => {
+    const replyBtn = e.target.closest('.comment-reply-btn');
+    if (replyBtn) {
       e.preventDefault();
-      const input = form.querySelector('.comment-input');
-      const commentText = input.value.trim();
-      if (!commentText) return;
+      const card = replyBtn.closest('.post-card');
+      setReplyTarget(card, replyBtn.dataset.replyTo, replyBtn.dataset.username);
+      const input = card.querySelector('.comment-input');
+      input.value = `@${replyBtn.dataset.username} `;
+      input.focus();
+      return;
+    }
 
-      const card = form.closest('.post-card');
-      const commentsList = card.querySelector('.post-comments-list');
-      
-      // Get current user or mock name
-      const currentUserNameElement = document.querySelector('.dropdown-username');
-      const currentUsername = currentUserNameElement ? currentUserNameElement.textContent.trim() : 'visitante_f1';
-
-      // Create new comment element
-      const commentItem = document.createElement('div');
-      commentItem.className = 'comment-item';
-      commentItem.innerHTML = `
-        <a href="${profileUrl(currentUsername)}" class="comment-user">${escapeHTML(currentUsername)}</a>
-        <span>${escapeHTML(commentText)}</span>
-      `;
-
-      commentsList.appendChild(commentItem);
-      commentsList.scrollTop = commentsList.scrollHeight; // Auto-scroll to bottom of comments
-      
-      // Reset input
-      input.value = '';
+    const cancelBtn = e.target.closest('.comment-reply-cancel');
+    if (cancelBtn) {
+      e.preventDefault();
+      const card = cancelBtn.closest('.post-card');
+      setReplyTarget(card, null);
+      card.querySelector('.comment-input').value = '';
     }
   });
+
+  feed.addEventListener('submit', async (e) => {
+    const form = e.target.closest('.comment-form');
+    if (!form) return;
+    e.preventDefault();
+
+    const input = form.querySelector('.comment-input');
+    const submitBtn = form.querySelector('.comment-submit-btn');
+    const commentText = input.value.trim();
+    if (!commentText) return;
+
+    const card = form.closest('.post-card');
+    const body = { id: postId(card), comment: commentText };
+    if (form.dataset.parentId) {
+      body.parent_id = Number(form.dataset.parentId);
+    }
+
+    submitBtn.disabled = true;
+    try {
+      const data = await postInteraction('/api/posts/comment', body);
+      if (data) {
+        const commentsList = card.querySelector('.post-comments-list');
+        const thread = data.comment.parent_id
+          && commentsList.querySelector(`.comment-thread[data-comment-id="${data.comment.parent_id}"]`);
+
+        if (thread) {
+          thread.appendChild(createCommentItem(data.comment));
+          thread.lastElementChild.scrollIntoView({ block: 'nearest' });
+        } else {
+          commentsList.appendChild(createCommentThread(data.comment));
+          commentsList.scrollTop = commentsList.scrollHeight; // Auto-scroll to bottom of comments
+        }
+        input.value = '';
+        setReplyTarget(card, null);
+      }
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+}
+
+function setReplyTarget(card, commentId, username = '') {
+  const form = card.querySelector('.comment-form');
+  const chip = card.querySelector('.comment-reply-chip');
+
+  if (commentId) {
+    form.dataset.parentId = commentId;
+    chip.querySelector('.comment-reply-target').textContent = `@${username}`;
+  } else {
+    delete form.dataset.parentId;
+  }
+  chip.hidden = !commentId;
+}
+
+async function postInteraction(url, body) {
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await response.json();
+
+    if (data.success) return data;
+
+    if (data.redirect) {
+      window.location.href = data.redirect;
+      return null;
+    }
+    await showAlert(Object.values(data.errors || {})[0] || 'Algo ha ido mal');
+  } catch (error) {
+    await showAlert('No se pudo conectar con el servidor');
+  }
+  return null;
+}
+
+function postId(card) {
+  return Number(card.id.replace('post-', ''));
+}
+
+function createCommentThread(thread) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'comment-thread';
+  wrapper.dataset.commentId = thread.id;
+
+  wrapper.appendChild(createCommentItem(thread));
+  (Array.isArray(thread.replies) ? thread.replies : []).forEach((reply) => {
+    wrapper.appendChild(createCommentItem(reply));
+  });
+  return wrapper;
+}
+
+function createCommentItem(comment) {
+  const item = document.createElement('div');
+  item.className = comment.parent_id ? 'comment-item comment-reply' : 'comment-item';
+  item.dataset.commentId = comment.id;
+
+  const userLink = document.createElement('a');
+  userLink.href = profileUrl(comment.username);
+  userLink.className = 'comment-user';
+  userLink.textContent = comment.username || '';
+
+  const text = document.createElement('span');
+  text.className = 'comment-text';
+  text.append(...linkMentions(comment.comment || ''));
+
+  const replyBtn = document.createElement('button');
+  replyBtn.type = 'button';
+  replyBtn.className = 'comment-reply-btn';
+  replyBtn.dataset.replyTo = comment.id;
+  replyBtn.dataset.username = comment.username || '';
+  replyBtn.textContent = 'Responder';
+
+  item.append(userLink, text, replyBtn);
+  return item;
+}
+
+function linkMentions(text) {
+  const nodes = [];
+  let last = 0;
+
+  for (const match of text.matchAll(/(?<![\w@])@(\w+)/g)) {
+    nodes.push(document.createTextNode(text.slice(last, match.index)));
+
+    const link = document.createElement('a');
+    link.href = profileUrl(match[1]);
+    link.className = 'comment-mention';
+    link.textContent = match[0];
+    nodes.push(link);
+
+    last = match.index + match[0].length;
+  }
+  nodes.push(document.createTextNode(text.slice(last)));
+  return nodes;
+}
+
+function setAvatar(el, avatarUrl, initials) {
+  if (avatarUrl) {
+    const img = document.createElement('img');
+    img.src = avatarUrl;
+    img.alt = '';
+    img.className = 'h-full w-full object-cover';
+    el.replaceChildren(img);
+  } else {
+    el.textContent = initials || '??';
+  }
 }
 
 /**
@@ -134,21 +215,6 @@ function formatNumber(num) {
  */
 function profileUrl(username) {
   return username ? `/profile?username=${encodeURIComponent(username)}` : '#';
-}
-
-/**
- * Helper to escape HTML and prevent XSS
- */
-function escapeHTML(str) {
-  return str.replace(/[&<>'"]/g, 
-    tag => ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      "'": '&#39;',
-      '"': '&quot;'
-    }[tag] || tag)
-  );
 }
 
 /**
@@ -415,7 +481,7 @@ function initInfiniteScroll() {
     const card = template.content.firstElementChild.cloneNode(true);
 
     card.id = `post-${post.id}`;
-    card.querySelector('.post-user-avatar').textContent = post.avatar_initials || '??';
+    setAvatar(card.querySelector('.post-user-avatar'), post.avatar_url, post.avatar_initials);
     card.querySelector('.post-badge').textContent = post.badge || 'Post';
     card.querySelectorAll('.post-username, .post-caption-user').forEach((el) => {
       el.textContent = post.username || '';
@@ -432,167 +498,18 @@ function initInfiniteScroll() {
     }
 
     card.querySelector('.likes-num').textContent = formatNumber(Number(post.likes_count || 0));
+    const likeBtn = card.querySelector('.like-btn');
+    likeBtn.classList.toggle('liked', Boolean(post.liked_by_me));
+    likeBtn.setAttribute('aria-pressed', post.liked_by_me ? 'true' : 'false');
     const caption = post.caption || '';
     card.querySelector('.post-caption-text').textContent = caption || 'Sin descripción';
     card.querySelector('.post-edit-textarea').value = caption;
 
     const commentsList = card.querySelector('.post-comments-list');
-    (Array.isArray(post.comments) ? post.comments : []).forEach((comment) => {
-      const item = document.createElement('div');
-      item.className = 'comment-item';
-
-      const userLink = document.createElement('a');
-      userLink.href = profileUrl(comment.username);
-      userLink.className = 'comment-user';
-      userLink.textContent = comment.username || '';
-
-      const text = document.createElement('span');
-      text.textContent = comment.comment || '';
-
-      item.append(userLink, text);
-      commentsList.appendChild(item);
+    (Array.isArray(post.comments) ? post.comments : []).forEach((thread) => {
+      commentsList.appendChild(createCommentThread(thread));
     });
 
     return card;
   }
-}
-
-/**
- * 5. Botón Añadir Foto en Footer - Modal Box Lógica
- */
-function initAddPhotoModal() {
-  const addBtn = document.getElementById('add-photo-btn');
-  const modal = document.getElementById('add-post-modal');
-  const closeBtn = document.getElementById('modal-close-btn');
-  const authState = document.getElementById('add-photo-auth-state');
-  const guestState = document.getElementById('add-photo-guest-state');
-  const cameraBtn = document.getElementById('add-photo-camera-btn');
-  const statusEl = document.getElementById('add-photo-status');
-
-  if (!addBtn || !modal || !closeBtn || !authState || !guestState) return;
-
-  const isAuthenticated = modal.dataset.authenticated === '1';
-
-  async function showModalState() {
-    if (isAuthenticated) {
-      authState.hidden = false;
-      guestState.hidden = true;
-      if (statusEl) {
-        statusEl.textContent = '';
-      }
-
-      // Check camera permission state (if supported) and update UI
-      try {
-        if (navigator.permissions && navigator.permissions.query) {
-          const perm = await navigator.permissions.query({ name: 'camera' });
-
-          if (perm && perm.state === 'granted') {
-            // If granted, prefer redirect (defensive)
-            window.location.href = '/photo';
-            return;
-          }
-
-          if (perm && perm.state === 'denied') {
-            if (statusEl) {
-              statusEl.innerHTML = 'Acceso a la cámara denegado. Habilítalo en la configuración del sitio: <a href="https://developer.mozilla.org/es/docs/Web/API/MediaDevices/getUserMedia" target="_blank" rel="noopener noreferrer">cómo permitir cámara</a>';
-            }
-            if (cameraBtn) cameraBtn.disabled = true;
-          } else {
-            // 'prompt' or unknown
-            if (statusEl) {
-              statusEl.textContent = '';
-            }
-            if (cameraBtn) cameraBtn.disabled = false;
-          }
-
-          // React to permission changes while modal is open
-          perm.onchange = () => {
-            // Re-evaluate UI when permission state changes
-            showModalState().catch(() => {});
-          };
-        }
-      } catch (err) {
-        // Permissions API may not be available; leave UI as default
-      }
-    } else {
-      authState.hidden = true;
-      guestState.hidden = false;
-    }
-  }
-
-  // Open modal (but if authenticated and camera permission already granted, go straight to /photo)
-  addBtn.addEventListener('click', async (e) => {
-    e.preventDefault();
-
-    if (isAuthenticated) {
-      try {
-        if (navigator.permissions && navigator.permissions.query) {
-          const status = await navigator.permissions.query({ name: 'camera' });
-          if (status && status.state === 'granted') {
-            window.location.href = '/photo';
-            return;
-          }
-        }
-      } catch (err) {
-        // permissions API may not be supported or may throw; fall through to showing modal
-      }
-    }
-
-    showModalState();
-    modal.style.display = 'flex';
-    setTimeout(() => {
-      modal.classList.add('show');
-    }, 10);
-  });
-
-  if (cameraBtn) {
-    cameraBtn.addEventListener('click', async () => {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        if (statusEl) {
-          statusEl.textContent = 'Tu navegador no soporta acceso a la cámara.';
-        }
-        return;
-      }
-
-      cameraBtn.disabled = true;
-      if (statusEl) {
-        statusEl.textContent = 'Solicitando permiso de cámara...';
-      }
-
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-        stream.getTracks().forEach((track) => track.stop());
-        window.location.href = '/photo';
-      } catch (error) {
-        if (statusEl) {
-          statusEl.textContent = 'Necesitas conceder permiso de cámara para continuar.';
-        }
-        cameraBtn.disabled = false;
-      }
-    });
-  }
-
-  // Close modal functions
-  const closeModal = () => {
-    modal.classList.remove('show');
-    setTimeout(() => {
-      if (!modal.classList.contains('show')) {
-        modal.style.display = 'none';
-      }
-    }, 300);
-  };
-
-  closeBtn.addEventListener('click', closeModal);
-  
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      closeModal();
-    }
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('show')) {
-      closeModal();
-    }
-  });
 }

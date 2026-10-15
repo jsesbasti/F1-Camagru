@@ -13,12 +13,13 @@ class HomeController extends Controller
     {
         $users = User::all();
         $feedPageSize = 4;
-        $feed = Image::feedPage($feedPageSize, 0);
         $currentUser = null;
-        
+
         if (Session::check()) {
             $currentUser = User::find(id: Session::getId());
         }
+
+        $feed = Image::feedPage($feedPageSize, 0, (int) ($currentUser['id'] ?? 0));
 
         $this->view('home', [
                 'title' => 'Página de inicio',
