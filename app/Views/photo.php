@@ -39,6 +39,7 @@
             </div>
 
             <div id="camera-actions" class="flex flex-col gap-3">
+                <button class="photo-action primary hidden" id="enable-camera-btn" type="button">Enable Camera</button>
                 <button class="photo-action primary" id="capture-photo-btn" type="button" disabled>Capture Photo</button>
                 <label class="photo-action secondary" for="upload-image">Upload Image</label>
                 <input type="file" id="upload-image" accept="image/*" class="hidden">

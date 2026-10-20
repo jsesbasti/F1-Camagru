@@ -47,6 +47,30 @@ class PostController extends Controller
         ]);
     }
 
+    // Polled by home.js every few seconds: current likes for the posts on
+    // screen plus any comments added after the last one the page has seen.
+    // Without `since` it only returns the newest comment id to start from.
+    public function live(): void
+    {
+        $ids = array_slice(array_unique(array_filter(array_map('intval', explode(',', (string) ($_GET['ids'] ?? ''))))), 0, 100);
+        $viewerId = Session::check() ? Session::getId() : 0;
+        $lastId = Comment::lastId();
+
+        $comments = [];
+        if (isset($_GET['since'])) {
+            $comments = Comment::since($ids, max(0, (int) $_GET['since']));
+            if ($comments) {
+                $lastId = max($lastId, end($comments)['id']);
+            }
+        }
+
+        Helper::json_response([
+            'likes' => (object) Like::stateFor($ids, $viewerId),
+            'comments' => $comments,
+            'last_comment_id' => $lastId,
+        ]);
+    }
+
     public function update(): void
     {
         if (!Session::check()) {

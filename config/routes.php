@@ -12,6 +12,7 @@ use App\Controllers\SettingsController;
 $router->get('/', [HomeController::class, 'index']);
 $router->get('/api/posts', [PostController::class, 'index']);
 $router->get('/post', [PostController::class, 'show']);
+$router->get('/api/posts/live', [PostController::class, 'live']);
 $router->post('/api/posts/update', [PostController::class, 'update']);
 $router->post('/api/posts/delete', [PostController::class, 'delete']);
 $router->post('/api/posts/like', [PostController::class, 'like']);

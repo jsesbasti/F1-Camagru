@@ -22,34 +22,38 @@
                 </div>
             <?php endif; ?>
 
+            <button type="button" id="feed-refresh-btn" class="group inline-flex items-center justify-center gap-2 self-center rounded-full border border-line bg-carbon px-4 py-2 font-racing text-[11px] font-extrabold uppercase tracking-wide text-muted transition-colors hover:border-f1-red hover:text-white disabled:cursor-wait disabled:opacity-65">
+                <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 fill-none stroke-current stroke-2 group-disabled:animate-spin" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"></path><path d="M21 3v6h-6"></path></svg>
+                Refresh
+            </button>
+
             <?php if (!empty($posts)): ?>
                 <?php foreach ($posts as $post): ?>
                     <?php require __DIR__ . '/partials/post-card.php'; ?>
                 <?php endforeach; ?>
             <?php else: ?>
-                <div class="post-card">
+                <div class="post-card feed-empty">
                     <div class="p-6 text-center">
                         Track clear
                     </div>
                 </div>
             <?php endif; ?>
 
-            <?php if (!empty($hasMorePosts)): ?>
-                <div id="infinite-loader"
-                     class="mb-5 flex items-center justify-center py-5"
-                     data-endpoint="/api/posts"
-                     data-has-more="1"
-                     data-next-page="<?= (int) ($nextFeedPage ?? 2) ?>"
-                     data-page-size="<?= (int) ($feedPageSize ?? 4) ?>">
-                    <div class="flex gap-2" aria-label="Loading cars">
-                        <div class="f1-light"></div>
-                        <div class="f1-light"></div>
-                        <div class="f1-light"></div>
-                        <div class="f1-light"></div>
-                        <div class="f1-light"></div>
-                    </div>
+            <div id="infinite-loader"
+                 class="mb-5 flex items-center justify-center py-5"
+                 <?= empty($hasMorePosts) ? 'hidden' : '' ?>
+                 data-endpoint="/api/posts"
+                 data-has-more="<?= empty($hasMorePosts) ? '0' : '1' ?>"
+                 data-next-page="<?= (int) ($nextFeedPage ?? 2) ?>"
+                 data-page-size="<?= (int) ($feedPageSize ?? 4) ?>">
+                <div class="flex gap-2" aria-label="Loading cars">
+                    <div class="f1-light"></div>
+                    <div class="f1-light"></div>
+                    <div class="f1-light"></div>
+                    <div class="f1-light"></div>
+                    <div class="f1-light"></div>
                 </div>
-            <?php endif; ?>
+            </div>
 
         </div>
     </main>

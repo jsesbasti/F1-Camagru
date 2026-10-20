@@ -27,6 +27,8 @@ $profileUrl = static function (string $username): string {
     return $username !== '' ? '/profile?username=' . urlencode($username) : '#';
 };
 
+// Escapes the text and turns every @username into a profile link; used for
+// both comments and the caption.
 $renderComment = static function (string $text) use ($profileUrl): string {
     return preg_replace_callback(
         '/(?<![\w@])@(\w+)/',
@@ -71,7 +73,7 @@ $renderComment = static function (string $text) use ($profileUrl): string {
         <div class="post-likes-count"><span class="likes-num"><?= number_format((int) ($post['likes_count'] ?? 0), 0, ',', '.') ?></span> me gusta</div>
         <div class="post-caption">
             <a href="<?= htmlspecialchars($profileUrl($post['username'] ?? '')) ?>" class="post-caption-user"><?= htmlspecialchars($post['username'] ?? '') ?></a>
-            <span class="post-caption-text"><?= htmlspecialchars($caption !== '' ? $caption : 'Sin descripción') ?></span>
+            <span class="post-caption-text"><?= $caption !== '' ? $renderComment($caption) : 'Sin descripción' ?></span>
         </div>
         <form class="post-edit-form" hidden>
             <textarea class="post-edit-textarea" rows="2" placeholder="Escribe una descripción..."><?= htmlspecialchars($caption) ?></textarea>

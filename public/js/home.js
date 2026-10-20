@@ -4,7 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize elements
   initLikeAndCommentSystem();
   initPostMenu();
-  initInfiniteScroll();
+  initFeedRefresh(initInfiniteScroll());
+  initLiveUpdates();
 });
 
 /**
@@ -79,12 +80,15 @@ function initLikeAndCommentSystem() {
         const thread = data.comment.parent_id
           && commentsList.querySelector(`.comment-thread[data-comment-id="${data.comment.parent_id}"]`);
 
-        if (thread) {
-          thread.appendChild(createCommentItem(data.comment));
-          thread.lastElementChild.scrollIntoView({ block: 'nearest' });
-        } else {
-          commentsList.appendChild(createCommentThread(data.comment));
-          commentsList.scrollTop = commentsList.scrollHeight; // Auto-scroll to bottom of comments
+        // The live poll may have already drawn it
+        if (!commentsList.querySelector(`[data-comment-id="${data.comment.id}"]`)) {
+          if (thread) {
+            thread.appendChild(createCommentItem(data.comment));
+            thread.lastElementChild.scrollIntoView({ block: 'nearest' });
+          } else {
+            commentsList.appendChild(createCommentThread(data.comment));
+            commentsList.scrollTop = commentsList.scrollHeight; // Auto-scroll to bottom of comments
+          }
         }
         input.value = '';
         setReplyTarget(card, null);
@@ -93,6 +97,84 @@ function initLikeAndCommentSystem() {
       submitBtn.disabled = false;
     }
   });
+}
+
+/**
+ * Actualizaciones en tiempo real: cada minuto pregunta al servidor
+ * por los likes de los posts que hay en pantalla y por los comentarios
+ * nuevos desde el último que hemos visto. Se pausa con la pestaña oculta.
+ */
+function initLiveUpdates() {
+  const feed = document.querySelector('.feed-container');
+  if (!feed) return;
+
+  const POLL_MS = 60 * 1000; // 1 minuto: suficiente sin cargar el servidor
+  let since = null;
+  let timer = null;
+  let polling = false;
+
+  async function poll() {
+    const cards = feed.querySelectorAll('.post-card[id^="post-"]');
+    const ids = Array.from(cards, postId).filter(Boolean);
+    if (!ids.length || polling) return;
+
+    const url = new URL('/api/posts/live', window.location.origin);
+    url.searchParams.set('ids', ids.join(','));
+    if (since !== null) url.searchParams.set('since', String(since));
+
+    polling = true;
+    try {
+      const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (!response.ok) return;
+      const data = await response.json();
+
+      Object.entries(data.likes || {}).forEach(([id, state]) => {
+        const card = document.getElementById(`post-${id}`);
+        const likeBtn = card?.querySelector('.like-btn');
+        if (!likeBtn || likeBtn.disabled) return; // a toggle of ours is in flight
+        likeBtn.classList.toggle('liked', state.liked);
+        likeBtn.setAttribute('aria-pressed', state.liked ? 'true' : 'false');
+        card.querySelector('.likes-num').textContent = formatNumber(state.likes_count);
+      });
+
+      (data.comments || []).forEach(appendLiveComment);
+      since = Math.max(since ?? 0, Number(data.last_comment_id) || 0);
+    } catch (error) {
+      // Network blip: try again on the next tick
+    } finally {
+      polling = false;
+    }
+  }
+
+  function appendLiveComment(comment) {
+    const card = document.getElementById(`post-${comment.image_id}`);
+    const list = card?.querySelector('.post-comments-list');
+    if (!list || list.querySelector(`[data-comment-id="${comment.id}"]`)) return;
+
+    const atBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 8;
+    if (comment.parent_id) {
+      const thread = list.querySelector(`.comment-thread[data-comment-id="${comment.parent_id}"]`);
+      if (!thread) return; // its thread isn't among the ones shown
+      thread.appendChild(createCommentItem(comment));
+    } else {
+      list.appendChild(createCommentThread(comment));
+    }
+    if (atBottom) list.scrollTop = list.scrollHeight;
+  }
+
+  function start() {
+    if (timer) return;
+    poll();
+    timer = setInterval(poll, POLL_MS);
+  }
+
+  function stop() {
+    clearInterval(timer);
+    timer = null;
+  }
+
+  document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+  if (!document.hidden) start();
 }
 
 function setReplyTarget(card, commentId, username = '') {
@@ -188,6 +270,13 @@ function linkMentions(text) {
   }
   nodes.push(document.createTextNode(text.slice(last)));
   return nodes;
+}
+
+// Caption with @mentions linked, mirroring $renderComment in post-card.php
+function setCaption(card, caption) {
+  const text = caption || '';
+  card.querySelector('.post-caption-text').replaceChildren(...(text ? linkMentions(text) : [document.createTextNode('Sin descripción')]));
+  card.querySelector('.post-edit-textarea').value = text;
 }
 
 function setAvatar(el, avatarUrl, initials) {
@@ -317,7 +406,7 @@ function initPostMenu() {
       const data = await response.json();
 
       if (data.success) {
-        card.querySelector('.post-caption-text').textContent = data.caption || 'Sin descripción';
+        setCaption(card, data.caption);
         toggleEditMode(card, false);
       } else {
         await showAlert(Object.values(data.errors || {})[0] || 'No se pudo actualizar el post');
@@ -362,32 +451,33 @@ function initPostMenu() {
 
 /**
  * 4. Lógica de Scroll Infinito con Semáforo de F1
+ * Devuelve { reset } para que el refresh manual pueda volver a empezar
+ * desde la página 2 después de recargar la primera.
  */
 function initInfiniteScroll() {
   const loader = document.getElementById('infinite-loader');
   const feed = document.querySelector('.feed-container');
-  if (!loader || !feed) return;
+  if (!loader || !feed) return null;
 
-  const currentUserId = Number(feed.dataset.currentUserId || 0);
   const endpoint = loader.dataset.endpoint || '/api/posts';
   const pageSize = Number(loader.dataset.pageSize || '4');
   let currentPage = Number(loader.dataset.nextPage || '2');
-  let hasMorePosts = true;
+  let hasMorePosts = loader.dataset.hasMore !== '0';
   let isLoading = false;
-  if (loader.dataset.hasMore === '0') {
-    return;
-  }
+  let generation = 0; // bumped on reset so a load in flight is discarded
 
   // IntersectionObserver to watch the loader
   const observer = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting && !isLoading) {
+    if (entries[0].isIntersecting && !isLoading && hasMorePosts) {
       triggerF1LightsLoad();
     }
   }, {
     rootMargin: '100px' // Load when loader is 100px from viewport bottom
   });
 
-  observer.observe(loader);
+  if (hasMorePosts) {
+    observer.observe(loader);
+  }
 
   /**
    * F1 Start Light Sequence for Loading Simulation
@@ -404,7 +494,7 @@ function initInfiniteScroll() {
         lightIndex++;
       } else {
         clearInterval(lightInterval);
-        
+
         // Wait 0.4s with all lights active, then extinguish them (loading finishes)
         setTimeout(() => {
           // Extinguish lights (green light flash/turn off)
@@ -421,13 +511,14 @@ function initInfiniteScroll() {
 
   async function loadMorePosts() {
     if (!hasMorePosts) {
-      disconnectLoader();
+      stopLoader();
       return;
     }
 
     const url = new URL(endpoint, window.location.origin);
     url.searchParams.set('page', String(currentPage));
     url.searchParams.set('limit', String(pageSize));
+    const requestGeneration = generation;
 
     try {
       const response = await fetch(url.toString(), {
@@ -441,75 +532,140 @@ function initInfiniteScroll() {
       }
 
       const data = await response.json();
+      if (requestGeneration !== generation) return; // the feed was refreshed meanwhile
       const posts = Array.isArray(data.posts) ? data.posts : [];
 
       if (!posts.length) {
-        hasMorePosts = false;
-        disconnectLoader();
+        stopLoader();
         return;
       }
 
       posts.forEach((post) => {
-        feed.appendChild(createPostCard(post));
+        // Posts published since the last refresh shift the pages: skip repeats
+        if (!document.getElementById(`post-${post.id}`)) {
+          loader.before(createPostCard(post));
+        }
       });
 
       currentPage += 1;
-      hasMorePosts = Boolean(data.hasMore);
-
-      if (!hasMorePosts) {
-        disconnectLoader();
+      if (!data.hasMore) {
+        stopLoader();
       }
     } catch (error) {
       console.error('Error loading posts:', error);
     }
   }
 
-  function disconnectLoader() {
-    observer.disconnect();
-    loader.remove();
+  function stopLoader() {
+    hasMorePosts = false;
+    observer.unobserve(loader);
+    loader.hidden = true;
   }
 
-  /**
-   * Clones #post-card-template (rendered server-side by the same
-   * partials/post-card.php that draws the initial feed) and fills it in
-   * with this post's data, instead of duplicating the markup as a JS
-   * string. Using textContent throughout means we don't need to
-   * HTML-escape anything here either.
-   */
-  function createPostCard(post) {
-    const template = document.getElementById('post-card-template');
-    const card = template.content.firstElementChild.cloneNode(true);
-
-    card.id = `post-${post.id}`;
-    setAvatar(card.querySelector('.post-user-avatar'), post.avatar_url, post.avatar_initials);
-    card.querySelector('.post-badge').textContent = post.badge || 'Post';
-    card.querySelectorAll('.post-username, .post-caption-user').forEach((el) => {
-      el.textContent = post.username || '';
-      el.href = profileUrl(post.username);
-    });
-
-    if (post.image_url) {
-      card.querySelector('.f1-visual-bg').style.backgroundImage = `url('${post.image_url}')`;
+  return {
+    reset(nextPage, hasMore) {
+      generation += 1;
+      currentPage = nextPage;
+      hasMorePosts = hasMore;
+      loader.hidden = !hasMore;
+      observer.unobserve(loader);
+      if (hasMore) {
+        observer.observe(loader);
+      }
     }
+  };
+}
 
-    const menu = card.querySelector('.post-menu');
-    if (menu) {
-      menu.hidden = !(currentUserId > 0 && Number(post.user_id) === currentUserId);
+/**
+ * 5. Refresh manual: vuelve a pedir la primera página del feed y sustituye
+ * los posts que hay en pantalla (posts nuevos, borrados, likes y comentarios
+ * al día) sin recargar la página entera.
+ */
+function initFeedRefresh(infiniteScroll) {
+  const button = document.getElementById('feed-refresh-btn');
+  const feed = document.querySelector('.feed-container');
+  const loader = document.getElementById('infinite-loader');
+  if (!button || !feed || !loader || !infiniteScroll) return;
+
+  const pageSize = Number(loader.dataset.pageSize || '4');
+
+  button.addEventListener('click', async () => {
+    button.disabled = true;
+    try {
+      const url = new URL(loader.dataset.endpoint || '/api/posts', window.location.origin);
+      url.searchParams.set('page', '1');
+      url.searchParams.set('limit', String(pageSize));
+
+      const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      const posts = Array.isArray(data.posts) ? data.posts : [];
+
+      feed.querySelectorAll('.post-card[id^="post-"], .feed-empty').forEach((el) => el.remove());
+      if (posts.length) {
+        posts.forEach((post) => loader.before(createPostCard(post)));
+      } else {
+        loader.before(createEmptyCard());
+      }
+      infiniteScroll.reset(2, Boolean(data.hasMore));
+      button.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (error) {
+      await showAlert('No se pudo actualizar el feed');
+    } finally {
+      button.disabled = false;
     }
+  });
 
-    card.querySelector('.likes-num').textContent = formatNumber(Number(post.likes_count || 0));
-    const likeBtn = card.querySelector('.like-btn');
-    likeBtn.classList.toggle('liked', Boolean(post.liked_by_me));
-    likeBtn.setAttribute('aria-pressed', post.liked_by_me ? 'true' : 'false');
-    const caption = post.caption || '';
-    card.querySelector('.post-caption-text').textContent = caption || 'Sin descripción';
-    card.querySelector('.post-edit-textarea').value = caption;
-
-    const commentsList = card.querySelector('.post-comments-list');
-    (Array.isArray(post.comments) ? post.comments : []).forEach((thread) => {
-      commentsList.appendChild(createCommentThread(thread));
-    });
-
+  function createEmptyCard() {
+    const card = document.createElement('div');
+    card.className = 'post-card feed-empty';
+    const inner = document.createElement('div');
+    inner.className = 'p-6 text-center';
+    inner.textContent = 'Track clear';
+    card.appendChild(inner);
     return card;
   }
+}
+
+/**
+ * Clones #post-card-template (rendered server-side by the same
+ * partials/post-card.php that draws the initial feed) and fills it in
+ * with this post's data, instead of duplicating the markup as a JS
+ * string. Using textContent throughout means we don't need to
+ * HTML-escape anything here either.
+ */
+function createPostCard(post) {
+  const template = document.getElementById('post-card-template');
+  const card = template.content.firstElementChild.cloneNode(true);
+  const currentUserId = Number(document.querySelector('.feed-container')?.dataset.currentUserId || 0);
+
+  card.id = `post-${post.id}`;
+  setAvatar(card.querySelector('.post-user-avatar'), post.avatar_url, post.avatar_initials);
+  card.querySelector('.post-badge').textContent = post.badge || 'Post';
+  card.querySelectorAll('.post-username, .post-caption-user').forEach((el) => {
+    el.textContent = post.username || '';
+    el.href = profileUrl(post.username);
+  });
+
+  if (post.image_url) {
+    card.querySelector('.f1-visual-bg').style.backgroundImage = `url('${post.image_url}')`;
+  }
+
+  const menu = card.querySelector('.post-menu');
+  if (menu) {
+    menu.hidden = !(currentUserId > 0 && Number(post.user_id) === currentUserId);
+  }
+
+  card.querySelector('.likes-num').textContent = formatNumber(Number(post.likes_count || 0));
+  const likeBtn = card.querySelector('.like-btn');
+  likeBtn.classList.toggle('liked', Boolean(post.liked_by_me));
+  likeBtn.setAttribute('aria-pressed', post.liked_by_me ? 'true' : 'false');
+  setCaption(card, post.caption);
+
+  const commentsList = card.querySelector('.post-comments-list');
+  (Array.isArray(post.comments) ? post.comments : []).forEach((thread) => {
+    commentsList.appendChild(createCommentThread(thread));
+  });
+
+  return card;
 }

@@ -74,4 +74,37 @@ class Comment extends Model
             return $lastThreads === null ? $list : array_slice($list, -$lastThreads);
         }, $threads);
     }
+
+    public static function lastId(): int
+    {
+        return (int) self::db()->query("SELECT COALESCE(MAX(id), 0) FROM comments")->fetchColumn();
+    }
+
+    // Comments newer than $sinceId on the given images, oldest first, so the
+    // feed can append what other people wrote since its last poll.
+    public static function since(array $imageIds, int $sinceId): array
+    {
+        if (empty($imageIds)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($imageIds), '?'));
+        $stmt = self::db()->prepare(
+            "SELECT c.id, c.image_id, c.parent_id, c.comment, c.created_at, u.username
+            FROM comments c
+            INNER JOIN users u ON u.id = c.user_id
+            WHERE c.id > ? AND c.image_id IN ($placeholders)
+            ORDER BY c.id ASC"
+        );
+        $stmt->execute([$sinceId, ...array_values($imageIds)]);
+
+        return array_map(static fn (array $row) => [
+            'id' => (int) $row['id'],
+            'image_id' => (int) $row['image_id'],
+            'parent_id' => $row['parent_id'] !== null ? (int) $row['parent_id'] : null,
+            'username' => $row['username'],
+            'comment' => $row['comment'],
+            'created_at' => $row['created_at'],
+        ], $stmt->fetchAll(\PDO::FETCH_ASSOC));
+    }
 }

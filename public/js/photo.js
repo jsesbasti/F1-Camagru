@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const editPreview = document.getElementById('edit-preview');
   const uploadInput = document.getElementById('upload-image');
   const captureButton = document.getElementById('capture-photo-btn');
+  const enableCameraButton = document.getElementById('enable-camera-btn');
   const cameraActions = document.getElementById('camera-actions');
   const editActions = document.getElementById('edit-actions');
   const publishButton = document.getElementById('publish-photo-btn');
@@ -182,7 +183,26 @@ document.addEventListener('DOMContentLoaded', () => {
     cameraReady = false;
   }
 
+  const CAMERA_ERRORS = {
+    NotAllowedError: 'Camera blocked: allow it from the icon in the address bar',
+    SecurityError: 'Camera blocked: allow it from the icon in the address bar',
+    NotFoundError: 'No camera found',
+    OverconstrainedError: 'No camera found',
+    NotReadableError: 'The camera is being used by another app',
+    AbortError: 'The camera is being used by another app',
+  };
+
+  function showEnableButton(show) {
+    enableCameraButton.classList.toggle('hidden', !show);
+    captureButton.classList.toggle('hidden', show);
+  }
+
   async function startCamera() {
+    if (!window.isSecureContext) {
+      status.textContent = 'Camera needs https or localhost';
+      renderOverlays();
+      return;
+    }
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       status.textContent = 'Your browser does not support camera access';
       renderOverlays();
@@ -190,22 +210,55 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     status.textContent = 'Requesting camera access...';
+    showEnableButton(false);
 
     try {
       stopCamera();
-      activeStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: false
-      });
+      try {
+        activeStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false
+        });
+      } catch (error) {
+        if (error.name !== 'OverconstrainedError') throw error;
+        activeStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      }
       video.srcObject = activeStream;
+      // Brave and Edge can block autoplay even on a muted video
+      await video.play().catch(() => {});
       cameraReady = true;
       status.textContent = 'Camera active';
     } catch (error) {
       console.error('Camera error:', error);
-      status.textContent = 'Could not access camera';
+      stopCamera();
+      status.textContent = CAMERA_ERRORS[error.name] || 'Could not access camera';
+      showEnableButton(true);
     }
     renderOverlays();
   }
+
+  // Edge and Brave hide (or silently drop) permission prompts that aren't
+  // triggered by a click, so we only ask on page load when access was
+  // already granted; otherwise we wait for the "Enable Camera" button.
+  async function autoStartCamera() {
+    let state = 'prompt';
+    try {
+      state = (await navigator.permissions.query({ name: 'camera' })).state;
+    } catch (error) {
+      // Firefox/Safari may not know the "camera" permission name: just try
+      state = 'granted';
+    }
+
+    if (state === 'granted') {
+      startCamera();
+    } else {
+      status.textContent = state === 'denied' ? CAMERA_ERRORS.NotAllowedError : 'Camera is off';
+      showEnableButton(true);
+      renderOverlays();
+    }
+  }
+
+  enableCameraButton.addEventListener('click', startCamera);
 
   function toSquarePng(source, width, height, mirror) {
     const side = Math.min(width, height);
@@ -243,7 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cameraActions.classList.remove('hidden');
     editorError.textContent = '';
     markActiveThumb();
-    startCamera();
+    autoStartCamera();
   }
 
   captureButton.addEventListener('click', () => {
@@ -340,22 +393,20 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const data = await send('/photo/publish', { description: description.value });
       if (data.success) {
-        upsertThumb(data.photo);
-        closeModal();
-        description.value = '';
-        enterCamera();
-        status.textContent = 'Photo published';
-      } else {
-        Object.entries(data.errors || {}).forEach(([field, message]) => {
-          const el = modal.querySelector(`[data-error="${field}"]`) || modal.querySelector('[data-error="error"]');
-          el.textContent = message;
-        });
+        // Back to the feed, where the new post shows up first; the button
+        // stays disabled so it can't be published twice while navigating
+        stopCamera();
+        window.location.href = '/';
+        return;
       }
+      Object.entries(data.errors || {}).forEach(([field, message]) => {
+        const el = modal.querySelector(`[data-error="${field}"]`) || modal.querySelector('[data-error="error"]');
+        el.textContent = message;
+      });
     } catch (error) {
       modal.querySelector('[data-error="error"]').textContent = 'Could not publish photo';
-    } finally {
-      renderOverlays();
     }
+    renderOverlays();
   });
 
   function fillThumb(thumb, entry) {
@@ -439,12 +490,12 @@ document.addEventListener('DOMContentLoaded', () => {
       stopCamera();
       renderOverlays();
     } else if (!photo) {
-      startCamera();
+      autoStartCamera();
     }
   });
 
   window.addEventListener('beforeunload', stopCamera);
 
   renderOverlays();
-  startCamera();
+  autoStartCamera();
 });
