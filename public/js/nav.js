@@ -144,7 +144,9 @@ function initAddPhotoModal() {
     cameraBtn.addEventListener('click', async () => {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         if (statusEl) {
-          statusEl.textContent = 'Tu navegador no soporta acceso a la cámara.';
+          statusEl.textContent = window.isSecureContext
+            ? 'Tu navegador no soporta acceso a la cámara.'
+            : 'La cámara solo funciona con https://. Abre la web con https o sube una imagen.';
         }
         return;
       }

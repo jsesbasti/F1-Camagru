@@ -204,7 +204,9 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      status.textContent = 'Your browser does not support camera access';
+      status.textContent = window.isSecureContext
+        ? 'Your browser does not support camera access'
+        : 'Camera needs HTTPS: open the site with https:// (or upload an image)';
       renderOverlays();
       return;
     }
