@@ -13,6 +13,40 @@ class User extends Model
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
+    // Verified users whose name contains $query, names starting with it first.
+    public static function search(string $query, int $limit = 20): array
+    {
+        $like = addcslashes($query, '\\%_');
+        $stmt = self::db()->prepare(
+            "SELECT id, username, avatar
+            FROM users
+            WHERE is_verified = 1 AND username LIKE :contains
+            ORDER BY username LIKE :prefix DESC, username ASC
+            LIMIT :limit"
+        );
+        $stmt->bindValue(':contains', "%$like%");
+        $stmt->bindValue(':prefix', "$like%");
+        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    // Users ordered by their most recent published photo.
+    public static function latestPosters(int $limit): array
+    {
+        $stmt = self::db()->prepare(
+            "SELECT u.id, u.username, u.avatar
+            FROM users u
+            INNER JOIN images i ON i.user_id = u.id AND i.is_draft = 0
+            GROUP BY u.id
+            ORDER BY MAX(i.created_at) DESC, MAX(i.id) DESC
+            LIMIT :limit"
+        );
+        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
     public static function find(?int $id = null, ?string $username = null, ?string $email = null) {
         if ($id !== null)
             return self::findId($id);
@@ -89,6 +123,9 @@ class User extends Model
     public static function delete(int $id): bool
     {
         try {
+            // parent_id has no FK, so other people's replies to this user's comments go by hand.
+            self::db()->prepare('DELETE r FROM comments r JOIN comments p ON r.parent_id = p.id WHERE p.user_id = :id')
+                ->execute([':id' => $id]);
             $stmt = self::db()->prepare('DELETE FROM users WHERE id = :id');
             $stmt->execute([':id' => $id]);
             return $stmt->rowCount() > 0;

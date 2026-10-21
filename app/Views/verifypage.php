@@ -21,8 +21,14 @@
             check your spam folder or request a new verification email.
         </p>
     </div>
-    <button id="resend-btn" class="w-full rounded-lg border-2 border-f1-red p-4 font-racing text-xl tracking-wide text-white transition-all duration-[250ms] hover:-translate-y-0.5 hover:bg-f1-red hover:shadow-[0_0_20px_rgba(225,6,0,0.4)]">
-        RESEND EMAIL
-    </button>
+    <form id="resend-form">
+        <input type="email" id="email" class="f1-input !mt-0 mb-3" placeholder="Your email" value="<?= htmlspecialchars($pendingEmail) ?>" required>
+        <p id="email-error" class="error-msg mb-3"></p>
+        <button type="submit" id="resend-btn" class="w-full rounded-lg border-2 border-f1-red p-4 font-racing text-xl tracking-wide text-white transition-all duration-[250ms] hover:-translate-y-0.5 hover:bg-f1-red hover:shadow-[0_0_20px_rgba(225,6,0,0.4)]">
+            RESEND EMAIL
+        </button>
+        <p id="success-msg" class="error-msg text-start-green"></p>
+        <p id="error-error" class="error-msg"></p>
+    </form>
 </div>
 </main>

@@ -152,6 +152,27 @@
   .modal-card {
     @apply relative w-[90%] max-w-[450px] translate-y-5 scale-95 rounded-lg border border-line border-t-4 border-t-f1-red bg-carbon p-6 shadow-[0_10px_40px_rgba(0,0,0,0.8)] transition-transform duration-300 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)];
   }
+  .post-card.comments-modal-card {
+    @apply grid h-[min(90vh,640px)] w-[min(95vw,960px)] grid-cols-[minmax(0,1fr)_360px] grid-rows-[minmax(0,1fr)] hover:border-line max-md:h-[92vh] max-md:grid-cols-1 max-md:grid-rows-[minmax(0,38vh)_minmax(0,1fr)];
+  }
+  .comments-modal-media {
+    @apply flex min-h-0 items-center justify-center bg-black;
+  }
+  .comments-modal-image {
+    @apply max-h-full max-w-full object-contain;
+  }
+  .comments-modal-side {
+    @apply flex min-h-0 flex-col gap-3 border-l border-line p-4 max-md:border-l-0 max-md:border-t;
+  }
+  .comments-modal-card .post-comments-list {
+    @apply mb-0 max-h-none flex-1 overscroll-contain;
+  }
+  .comments-modal-side .modal-logout-link {
+    @apply static;
+  }
+  .comments-modal-close {
+    @apply text-2xl leading-none text-muted hover:text-white;
+  }
   .modal-logout-link {
     @apply absolute right-4 top-5 flex items-center gap-1.5 rounded-full border border-line px-2.5 py-1 font-racing text-[11px] font-bold uppercase tracking-wide text-muted no-underline transition-colors duration-200 hover:border-f1-red hover:bg-f1-red hover:text-white;
   }
@@ -177,7 +198,7 @@
     @apply flex flex-wrap gap-3;
   }
   .modal-primary-btn {
-    @apply inline-flex min-h-11 w-full items-center justify-center rounded-md bg-f1-red px-3.5 py-2.5 font-racing font-bold uppercase tracking-wide text-white shadow-[0_4px_12px_rgba(225,6,0,0.4)] transition-transform duration-200 hover:-translate-y-px;
+    @apply inline-flex min-h-11 w-full items-center justify-center rounded-md bg-f1-red px-3.5 py-2.5 font-racing font-bold uppercase tracking-wide text-white shadow-[0_4px_12px_rgba(225,6,0,0.4)] transition-transform duration-200 hover:not-disabled:-translate-y-px disabled:cursor-not-allowed disabled:bg-f1-red/35 disabled:text-white/50 disabled:shadow-none;
   }
   .modal-secondary-btn {
     @apply inline-flex min-h-11 flex-[1_1_120px] items-center justify-center rounded-md border border-line bg-transparent px-3.5 py-2.5 font-racing font-bold uppercase tracking-wide text-white transition-[transform,border-color] duration-200 hover:-translate-y-px hover:border-muted;
@@ -211,22 +232,26 @@
     @apply rounded border border-f1-red bg-f1-red/15 px-1.5 py-0.5 font-racing text-[10px] font-bold uppercase tracking-wide text-white;
   }
   .post-media-container {
-    @apply relative flex aspect-[4/5] w-full select-none items-center justify-center overflow-hidden bg-asphalt;
+    @apply relative w-full select-none overflow-hidden bg-asphalt;
   }
-  .f1-visual-bg {
-    @apply relative h-full w-full bg-cover bg-center transition-transform duration-500;
+  .media-video {
+    @apply pointer-events-none absolute inset-0 h-full w-full object-cover;
   }
-  .post-media-container:hover .f1-visual-bg {
+  /* Natural height: square and 4:5 posts each show uncropped */
+  .post-media {
+    @apply block h-auto w-full transition-transform duration-500;
+  }
+  .post-media-container:hover .post-media {
     @apply scale-[1.02];
-  }
-  .visual-overlay {
-    @apply absolute inset-0 z-[1] bg-[linear-gradient(to_top,rgba(15,15,20,0.9)_10%,rgba(15,15,20,0.2)_60%,rgba(15,15,20,0.7)_100%)];
   }
   .post-actions {
     @apply flex items-center gap-4 px-4 pb-2 pt-3.5;
   }
   .action-btn {
     @apply flex items-center justify-center text-white transition-transform duration-200 hover:scale-[1.15] hover:text-f1-red;
+  }
+  .action-count {
+    @apply ml-1.5 text-sm font-bold;
   }
   .action-btn svg {
     @apply h-6 w-6 fill-none stroke-current stroke-2 transition-colors duration-200;
@@ -236,9 +261,6 @@
   }
   .post-details {
     @apply px-4 pb-3.5;
-  }
-  .post-likes-count {
-    @apply mb-1.5 text-sm font-bold;
   }
   .post-caption {
     @apply mb-2 text-sm leading-relaxed;
@@ -260,6 +282,9 @@
   }
   .comment-mention {
     @apply font-bold text-f1-red no-underline hover:underline;
+  }
+  .comment-more-btn {
+    @apply text-xs font-bold text-muted hover:text-white;
   }
   .comment-reply-btn {
     @apply ml-1.5 text-[11px] font-bold text-muted transition-colors duration-200 hover:text-white;
@@ -369,6 +394,12 @@
   .overlay-item.active .overlay-handle {
     @apply block;
   }
+  .aspect-option {
+    @apply rounded-md border-2 border-line px-3 py-1 font-racing text-xs font-bold text-white transition-colors duration-200 hover:border-muted disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .aspect-option[aria-pressed="true"] {
+    @apply border-f1-red bg-f1-red/15;
+  }
   .overlay-option {
     @apply aspect-square rounded-lg border-2 border-line bg-asphalt p-1.5 transition-[border-color,box-shadow] duration-200 hover:border-muted;
   }
@@ -423,11 +454,14 @@
   .profile-badge {
     @apply inline-block rounded border border-f1-red bg-f1-red/15 px-2 py-0.5 font-racing text-[11px] font-bold uppercase tracking-wide text-f1-red;
   }
+  .search-result {
+    @apply flex items-center gap-3 rounded-lg border border-line bg-carbon p-3 no-underline transition-colors duration-200 hover:border-f1-red;
+  }
   .profile-email {
-    @apply mt-1 text-sm text-muted;
+    @apply mt-1 text-sm text-muted break-all;
   }
   .profile-stats {
-    @apply mt-2 flex justify-center gap-6 border-t border-line pt-4 sm:mt-0 sm:justify-start sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0;
+    @apply mt-2 grid w-full grid-cols-2 gap-x-6 gap-y-3 border-t border-line pt-4 text-center min-[420px]:grid-cols-4 sm:mt-0 sm:w-auto sm:flex-shrink-0 sm:grid-cols-2 sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0;
   }
   .profile-stat-value {
     @apply block font-racing text-xl font-extrabold text-white;

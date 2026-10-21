@@ -14,14 +14,12 @@
 
 $isOwner = $currentUser && (int) ($post['user_id'] ?? 0) === (int) $currentUser['id'];
 
-$imageStyle = '';
-if (!empty($post['image_url'])) {
-    $escapedImageUrl = htmlspecialchars($post['image_url'], ENT_QUOTES, 'UTF-8');
-    $imageStyle = "background-image: url('{$escapedImageUrl}')";
-}
+$isVideo = \App\Core\Helper::isVideo($post['image_url'] ?? '');
 
 $caption = trim((string) ($post['caption'] ?? ''));
 $comments = $post['comments'] ?? [];
+// The feed sends a total; the single-post page has every comment, so count them.
+$commentsCount = $post['comments_count'] ?? array_sum(array_map(static fn (array $t) => 1 + count($t['replies']), $comments));
 
 $profileUrl = static function (string $username): string {
     return $username !== '' ? '/profile?username=' . urlencode($username) : '#';
@@ -36,6 +34,16 @@ $renderComment = static function (string $text) use ($profileUrl): string {
         htmlspecialchars($text)
     );
 };
+
+// Long comments show a cut-down version (at a word boundary) plus "ver más"; same rule as commentPreview() in home.js.
+$commentPreview = static function (string $text): ?string {
+    if (mb_strlen($text) <= 150) {
+        return null;
+    }
+    $cut = mb_substr($text, 0, 150);
+    $space = mb_strrpos($cut, ' ');
+    return rtrim($space > 50 ? mb_substr($cut, 0, $space) : $cut) . '…';
+};
 ?>
 <div class="post-card" id="post-<?= (int) ($post['id'] ?? 0) ?>">
     <div class="post-header">
@@ -47,7 +55,7 @@ $renderComment = static function (string $text) use ($profileUrl): string {
             <div class="post-badge"><?= htmlspecialchars($post['badge'] ?? 'Post') ?></div>
             <div class="post-menu"<?= $isOwner ? '' : ' hidden' ?>>
                 <button type="button" class="post-menu-btn" aria-label="Post options">
-                    <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="12" cy="19" r="2"></circle></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="12" cy="19" r="2"></circle></svg>
                 </button>
                 <div class="post-menu-dropdown">
                     <button type="button" class="post-menu-item post-edit-btn">Editar</button>
@@ -57,23 +65,31 @@ $renderComment = static function (string $text) use ($profileUrl): string {
         </div>
     </div>
     <div class="post-media-container">
-        <div class="f1-visual-bg" style="<?= $imageStyle ?>">
-            <div class="visual-overlay"></div>
-        </div>
+        <?php if ($isVideo): ?>
+            <video class="post-media" src="<?= htmlspecialchars($post['image_url']) ?>" muted loop playsinline autoplay></video>
+        <?php else: ?>
+            <img class="post-media" src="<?= htmlspecialchars($post['image_url'] ?? '') ?>" alt="" loading="lazy">
+        <?php endif; ?>
     </div>
     <div class="post-actions">
         <button class="action-btn like-btn<?= !empty($post['liked_by_me']) ? ' liked' : '' ?>" aria-label="Like Post" aria-pressed="<?= !empty($post['liked_by_me']) ? 'true' : 'false' ?>">
-            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            <span class="likes-num action-count"><?= number_format((int) ($post['likes_count'] ?? 0), 0, ',', '.') ?></span>
         </button>
         <button class="action-btn comment-trigger-btn" aria-label="Comment">
-            <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+            <span class="comments-num action-count"><?= number_format((int) $commentsCount, 0, ',', '.') ?></span>
         </button>
     </div>
     <div class="post-details">
-        <div class="post-likes-count"><span class="likes-num"><?= number_format((int) ($post['likes_count'] ?? 0), 0, ',', '.') ?></span> me gusta</div>
-        <div class="post-caption">
+        <?php $shortCaption = $caption !== '' ? $commentPreview($caption) : null; ?>
+        <div class="post-caption" data-caption="<?= htmlspecialchars($caption) ?>">
             <a href="<?= htmlspecialchars($profileUrl($post['username'] ?? '')) ?>" class="post-caption-user"><?= htmlspecialchars($post['username'] ?? '') ?></a>
-            <span class="post-caption-text"><?= $caption !== '' ? $renderComment($caption) : 'Sin descripción' ?></span>
+            <span class="post-caption-text"><?= $caption !== '' ? $renderComment($shortCaption ?? $caption) : 'Sin descripción' ?></span>
+            <?php if ($shortCaption): ?>
+                <span class="post-caption-full" hidden><?= $renderComment($caption) ?></span>
+                <button type="button" class="comment-more-btn">ver más</button>
+            <?php endif; ?>
         </div>
         <form class="post-edit-form" hidden>
             <textarea class="post-edit-textarea" rows="2" placeholder="Escribe una descripción..."><?= htmlspecialchars($caption) ?></textarea>
@@ -82,13 +98,18 @@ $renderComment = static function (string $text) use ($profileUrl): string {
                 <button type="submit" class="post-edit-save-btn">Guardar</button>
             </div>
         </form>
-        <div class="post-comments-list">
+        <div class="post-comments-list"<?= empty($fullComments) ? ' data-preview' : '' ?>>
             <?php foreach ($comments as $thread): ?>
                 <div class="comment-thread" data-comment-id="<?= (int) $thread['id'] ?>">
                     <?php foreach ([$thread, ...$thread['replies']] as $comment): ?>
                         <div class="comment-item<?= $comment['parent_id'] ? ' comment-reply' : '' ?>" data-comment-id="<?= (int) $comment['id'] ?>">
                             <a href="<?= htmlspecialchars($profileUrl($comment['username'] ?? '')) ?>" class="comment-user"><?= htmlspecialchars($comment['username']) ?></a>
-                            <span class="comment-text"><?= $renderComment($comment['comment']) ?></span>
+                            <?php $short = $commentPreview($comment['comment']); ?>
+                            <span class="comment-text"><?= $renderComment($short ?? $comment['comment']) ?></span>
+                            <?php if ($short): ?>
+                                <span class="comment-text-full" hidden><?= $renderComment($comment['comment']) ?></span>
+                                <button type="button" class="comment-more-btn">ver más</button>
+                            <?php endif; ?>
                             <button type="button" class="comment-reply-btn" data-reply-to="<?= (int) $comment['id'] ?>" data-username="<?= htmlspecialchars($comment['username']) ?>">Responder</button>
                         </div>
                     <?php endforeach; ?>

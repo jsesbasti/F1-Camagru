@@ -71,8 +71,32 @@ class Comment extends Model
 
         return array_map(static function (array $byId) use ($lastThreads) {
             $list = array_values($byId);
-            return $lastThreads === null ? $list : array_slice($list, -$lastThreads);
+            if ($lastThreads === null) {
+                return $list;
+            }
+            // Feed preview: newest threads, each with only its newest reply.
+            return array_map(
+                static fn (array $thread) => ['replies' => array_slice($thread['replies'], -1)] + $thread,
+                array_slice($list, -$lastThreads)
+            );
         }, $threads);
+    }
+
+    // [image_id => number of comments, replies included] for these images.
+    public static function countsFor(array $imageIds): array
+    {
+        $counts = array_fill_keys($imageIds, 0);
+        if (empty($imageIds)) {
+            return $counts;
+        }
+
+        $placeholders = implode(',', array_fill(0, count($imageIds), '?'));
+        $stmt = self::db()->prepare("SELECT image_id, COUNT(*) FROM comments WHERE image_id IN ($placeholders) GROUP BY image_id");
+        $stmt->execute(array_values($imageIds));
+        foreach ($stmt->fetchAll(\PDO::FETCH_KEY_PAIR) as $imageId => $count) {
+            $counts[$imageId] = (int) $count;
+        }
+        return $counts;
     }
 
     public static function lastId(): int

@@ -27,6 +27,10 @@ class RegisterController extends Controller
 	{
 		$this->view('verifypage', [
 			'title' => 'Verify page',
+			'pendingEmail' => $_SESSION['pending_verification_email'] ?? '',
+			'scripts' => [
+				'auth'
+			]
 		]);
 	}
 
@@ -52,33 +56,32 @@ class RegisterController extends Controller
 		$username = trim($data['username'] ?? '');
 		$password = trim($data['password'] ?? '');
 
+		// Check first, so a taken name/email never reaches the INSERT (and never burns an id).
+		$taken = [];
+		if (User::find(username: $username)) {
+			$taken['username'] = 'Username already taken';
+		}
+		if (User::find(email: $email)) {
+			$taken['email'] = 'Email in use';
+		}
+		if ($taken) {
+			Helper::json_response(['errors' => $taken], 400);
+		}
+
 		$hash = password_hash($password, PASSWORD_DEFAULT);
 
-		if (
-			User::add([
-				':email' => $email,
-				':username' => $username,
-				':password' => $hash
-			])
-		) {
-			self::sendEmailVerification($username);
-			Helper::json_response(['success' => true, 'redirect' => '/register/verify']);
-			exit;
+		if (!User::add([
+			':email' => $email,
+			':username' => $username,
+			':password' => $hash
+		])) {
+			// Only reachable if someone registered the same name/email in the meantime.
+			Helper::json_response(['errors' => ['error' => 'Username or email already in use']], 400);
 		}
-		if (User::find(username: $username) != null) {
-			Helper::json_response([
-				'errors' => [
-					'username' => 'Username already taken'
-				]
-			], 400);
-			exit;
-		}
-		Helper::json_response([
-			'errors' => [
-				'email' => 'Email in use'
-			]
-		], 400);
-		exit;
+
+		self::sendEmailVerification($username);
+		$_SESSION['pending_verification_email'] = $email;
+		Helper::json_response(['success' => true, 'redirect' => '/register/verify']);
 	}
 
 	public function verify()
@@ -92,22 +95,10 @@ class RegisterController extends Controller
 
 		$email_verification = Verification::find(token: $token);
 		if (!$email_verification) {
-			error_log('Token does not exist or was used');
-			Helper::json_response([
-				'errors' => [
-					'error' => 'Token does not exist'
-				]
-			], 403);
-			exit;
+			$this->invalidToken('This verification link is not valid or has already been used. If your account is already verified, just log in.', '/login', 'Go to login');
 		}
 		if ($email_verification['expires_at'] < (new \DateTime())->format('Y-m-d H:i:s')) {
-			error_log('Token expired');
-			Helper::json_response([
-				'errors' => [
-					'error' => 'Token has expired'
-				]
-			], 403);
-			exit;
+			$this->invalidToken('This verification link has expired.', '/register/verify', 'Send a new link');
 		}
 		if (Verification::verifyEmail($email_verification['user_id'], 'is_verified', 1)) {
 			Verification::deleteByToken($token);
@@ -122,6 +113,48 @@ class RegisterController extends Controller
 				'auth'
 			]
 		]);
+	}
+
+	public function resend(): void
+	{
+		$data = json_decode(file_get_contents("php://input"), true) ?: [];
+		$email = trim((string) ($data['email'] ?? ''));
+
+		try {
+			UserValidator::validateEmail($email);
+		} catch (\Exception $e) {
+			Helper::json_response(['errors' => ['email' => $e->getMessage()]], 400);
+		}
+
+		$user = User::find(email: $email);
+		if ($user && !$user['is_verified']) {
+			// Tokens last 30 min, so one expiring in more than 29 was sent under a minute ago.
+			$last = Verification::find(id: (int) $user['id']);
+			$tooSoon = $last && $last['expires_at'] > (new \DateTime())->modify('+29 minutes')->format('Y-m-d H:i:s');
+			if (!$tooSoon) {
+				self::sendEmailVerification($user['username']);
+			}
+		}
+
+		// Same answer either way, so this can't be used to find out which emails are registered.
+		Helper::json_response([
+			'success' => true,
+			'message' => 'If that email belongs to an account waiting for verification, a new link is on its way.'
+		]);
+	}
+
+	private function invalidToken(string $message, string $linkHref, string $linkText): void
+	{
+		http_response_code(403);
+		$this->view('email-confirm', [
+			'title' => 'Verification link',
+			'ok' => false,
+			'heading' => 'Link not valid',
+			'message' => $message,
+			'linkHref' => $linkHref,
+			'linkText' => $linkText
+		]);
+		exit;
 	}
 
 	private function sendEmailVerification($username) {

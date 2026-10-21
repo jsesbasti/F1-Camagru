@@ -23,15 +23,23 @@
             <div id="overlay-controls" class="flex flex-col gap-2 border-t border-line pt-3" hidden>
                 <label for="overlay-size" class="font-racing text-xs uppercase tracking-wide text-white">Size</label>
                 <input type="range" id="overlay-size" min="10" max="300" step="1" class="w-full accent-f1-red">
+                <label for="overlay-angle" class="font-racing text-xs uppercase tracking-wide text-white">Rotation</label>
+                <input type="range" id="overlay-angle" min="-180" max="180" step="1" class="w-full accent-f1-red">
                 <button type="button" id="overlay-reset" class="photo-action secondary !py-2">Reset position</button>
                 <p class="text-xs text-muted">Drag the overlay to move it; drag its corner or scroll to resize.</p>
             </div>
         </aside>
 
         <div class="flex flex-col gap-4 bg-[linear-gradient(135deg,rgba(61,61,78,0.4),rgba(15,15,20,0.9))] p-6 text-muted max-[700px]:order-1 max-[480px]:p-4">
+            <div class="flex items-center gap-2" id="aspect-picker">
+                <span class="font-racing text-xs uppercase tracking-wide text-white">Format</span>
+                <button type="button" class="aspect-option" data-aspect="1:1" aria-pressed="true">1:1</button>
+                <button type="button" class="aspect-option" data-aspect="4:5" aria-pressed="false">4:5</button>
+            </div>
             <div class="photo-stage">
                 <video id="camera-preview" autoplay playsinline muted class="h-full w-full [transform:scaleX(-1)] object-cover"></video>
                 <img id="edit-preview" src="" alt="Captured photo" class="hidden h-full w-full object-cover">
+                <video id="edit-preview-video" muted loop playsinline autoplay class="hidden h-full w-full object-cover"></video>
                 <div class="overlay-layer"></div>
                 <div class="pointer-events-none absolute inset-0 flex items-end justify-start bg-[linear-gradient(to_top,rgba(15,15,20,0.6),transparent_40%,transparent)] p-[18px]">
                     <div id="camera-status" class="relative inline-flex items-center gap-2 rounded-full border border-line bg-asphalt/72 px-3 py-2 font-racing text-xs uppercase tracking-wide text-white before:h-2 before:w-2 before:rounded-full before:bg-start-green before:shadow-[0_0_10px_rgba(0,230,118,0.3)] before:content-['']">Starting camera...</div>
@@ -42,7 +50,7 @@
                 <button class="photo-action primary hidden" id="enable-camera-btn" type="button">Enable Camera</button>
                 <button class="photo-action primary" id="capture-photo-btn" type="button" disabled>Capture Photo</button>
                 <label class="photo-action secondary" for="upload-image">Upload Image</label>
-                <input type="file" id="upload-image" accept="image/*" class="hidden">
+                <input type="file" id="upload-image" accept="image/*,video/mp4,video/webm,video/quicktime" class="hidden">
             </div>
 
             <div id="edit-actions" class="hidden flex-col gap-3">
@@ -68,11 +76,12 @@
 </div>
 
 <div class="modal-overlay" id="publish-modal">
-    <div class="modal-card !max-w-[520px]">
+    <div class="modal-card !max-w-[520px] max-h-[92vh] overflow-y-auto">
         <?php require __DIR__ . '/modals/logout-link.php'; ?>
         <h2 class="modal-title">Publish photo</h2>
         <div class="photo-stage mb-4">
             <img id="publish-preview" src="" alt="Photo to publish" class="h-full w-full object-cover">
+            <video id="publish-preview-video" muted loop playsinline autoplay class="hidden h-full w-full object-cover"></video>
             <div class="overlay-layer"></div>
         </div>
         <p class="mb-2 font-racing text-xs uppercase tracking-wide text-white">Overlays</p>
@@ -83,6 +92,7 @@
                 </button>
             <?php endforeach; ?>
         </div>
+        <p class="mt-2 text-sm text-error" id="publish-overlay-hint" hidden>Add at least one overlay to publish.</p>
         <p class="error-msg" data-error="overlays"></p>
         <textarea id="publish-description" class="f1-input min-h-[90px] resize-y" maxlength="2200" placeholder="Write a caption..."></textarea>
         <p class="error-msg" data-error="description"></p>

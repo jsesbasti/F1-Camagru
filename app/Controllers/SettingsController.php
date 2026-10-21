@@ -193,7 +193,7 @@ class SettingsController extends Controller
 
 		Helper::json_response([
 			'success' => true,
-			'message' => $enabled ? 'Comment emails on' : 'Comment emails off'
+			'message' => $enabled ? 'Email notifications on' : 'Email notifications off'
 		]);
 	}
 

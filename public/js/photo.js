@@ -1,6 +1,8 @@
 import { showConfirm } from './modal.js';
 
 const PHOTO_SIZE = 720;
+// Height / width of each post format (same table as PhotoController::ASPECTS).
+const ASPECTS = { '1:1': 1, '4:5': 1.25 };
 
 document.addEventListener('DOMContentLoaded', () => {
   const video = document.getElementById('camera-preview');
@@ -38,6 +40,32 @@ document.addEventListener('DOMContentLoaded', () => {
   const sizeControls = document.getElementById('overlay-controls');
   const sizeSlider = document.getElementById('overlay-size');
   const resetButton = document.getElementById('overlay-reset');
+  const angleSlider = document.getElementById('overlay-angle');
+  const publishOverlayHint = document.getElementById('publish-overlay-hint');
+  const editPreviewVideo = document.getElementById('edit-preview-video');
+  const publishPreviewVideo = document.getElementById('publish-preview-video');
+  const MEDIA_MAX_BYTES = 30 * 1024 * 1024;
+  let aspect = '1:1';
+
+  // The stage takes the format's shape, so what you see is the crop that's saved.
+  function setAspect(next) {
+    aspect = next;
+    document.querySelectorAll('.photo-stage').forEach((stage) => {
+      stage.style.aspectRatio = `1 / ${ASPECTS[aspect]}`;
+    });
+    document.querySelectorAll('.aspect-option').forEach((btn) => {
+      btn.setAttribute('aria-pressed', btn.dataset.aspect === aspect ? 'true' : 'false');
+    });
+  }
+
+  // Locked once there's a photo: switching would need the original back.
+  function lockAspect(locked) {
+    document.querySelectorAll('.aspect-option').forEach((btn) => { btn.disabled = locked; });
+  }
+
+  document.querySelectorAll('.aspect-option').forEach((btn) => {
+    btn.addEventListener('click', () => setAspect(btn.dataset.aspect));
+  });
 
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
@@ -68,6 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
         item.style.left = `${overlay.x * 100}%`;
         item.style.top = `${overlay.y * 100}%`;
         item.style.width = `${overlay.size * 100}%`;
+        item.style.rotate = `${overlay.angle || 0}deg`;
         item.classList.toggle('active', overlay.id === activeId);
         return item;
       });
@@ -78,10 +107,12 @@ document.addEventListener('DOMContentLoaded', () => {
     sizeControls.hidden = !active;
     if (active) {
       sizeSlider.value = Math.round(active.size * 100);
+      angleSlider.value = Math.round(active.angle || 0);
     }
 
     captureButton.disabled = !cameraReady || selected.length === 0;
     publishConfirm.disabled = selected.length === 0;
+    publishOverlayHint.hidden = selected.length > 0;
   }
 
   function setOverlays(overlays) {
@@ -99,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
           activeId = selected.length ? selected[selected.length - 1].id : null;
         }
       } else {
-        selected = [...selected, { id, x: 0.5, y: 0.5, size: 1 }];
+        selected = [...selected, { id, x: 0.5, y: 0.5, size: 1, angle: 0 }];
         activeId = id;
       }
       renderOverlays();
@@ -114,10 +145,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  angleSlider.addEventListener('input', () => {
+    const active = activeOverlay();
+    if (active) {
+      active.angle = clamp(Number(angleSlider.value), -180, 180);
+      renderOverlays();
+    }
+  });
+
   resetButton.addEventListener('click', () => {
     const active = activeOverlay();
     if (active) {
-      Object.assign(active, { x: 0.5, y: 0.5, size: 1 });
+      Object.assign(active, { x: 0.5, y: 0.5, size: 1, angle: 0 });
       renderOverlays();
     }
   });
@@ -192,6 +231,11 @@ document.addEventListener('DOMContentLoaded', () => {
     AbortError: 'The camera is being used by another app',
   };
 
+  const NAV_ERRORS = {
+    CameraNotSupported: "Your browser does not support camera access",
+    HttpsError: "Camera needs HTTPS: open the site with https:// (or upload an image)"
+  }
+
   function showEnableButton(show) {
     enableCameraButton.classList.toggle('hidden', !show);
     captureButton.classList.toggle('hidden', show);
@@ -199,14 +243,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function startCamera() {
     if (!window.isSecureContext) {
-      status.textContent = 'Camera needs https or localhost';
+      status.textContent = NAV_ERRORS.HttpsError;
       renderOverlays();
       return;
     }
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      status.textContent = window.isSecureContext
-        ? 'Your browser does not support camera access'
-        : 'Camera needs HTTPS: open the site with https:// (or upload an image)';
+      status.textContent = NAV_ERRORS.CameraNotSupported;
       renderOverlays();
       return;
     }
@@ -262,26 +304,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
   enableCameraButton.addEventListener('click', startCamera);
 
-  function toSquarePng(source, width, height, mirror) {
-    const side = Math.min(width, height);
+  // Centre-crops a video frame or image to the chosen format, as a PNG.
+  function toFramedPng(source, width, height, mirror) {
+    const ratio = ASPECTS[aspect];
+    const cropW = Math.min(width, height / ratio);
+    const cropH = cropW * ratio;
     const canvas = document.createElement('canvas');
     canvas.width = PHOTO_SIZE;
-    canvas.height = PHOTO_SIZE;
+    canvas.height = Math.round(PHOTO_SIZE * ratio);
     const ctx = canvas.getContext('2d');
     if (mirror) {
-      ctx.translate(PHOTO_SIZE, 0);
+      ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
     }
-    ctx.drawImage(source, (width - side) / 2, (height - side) / 2, side, side, 0, 0, PHOTO_SIZE, PHOTO_SIZE);
+    ctx.drawImage(source, (width - cropW) / 2, (height - cropH) / 2, cropW, cropH, 0, 0, canvas.width, canvas.height);
     return canvas.toDataURL('image/png');
+  }
+
+  // photo.isVideo: the original file is kept and sent as-is; the server
+  // squares it and burns the overlays in with ffmpeg.
+  function showMedia(img, vid, media) {
+    img.classList.toggle('hidden', !!media.isVideo);
+    vid.classList.toggle('hidden', !media.isVideo);
+    if (media.isVideo) {
+      vid.src = media.src;
+    } else {
+      img.src = media.src;
+      vid.removeAttribute('src');
+    }
   }
 
   function enterEdit(next) {
     photo = next;
     stopCamera();
-    editPreview.src = next.src;
+    showMedia(editPreview, editPreviewVideo, next);
+    lockAspect(true);
     video.classList.add('hidden');
-    editPreview.classList.remove('hidden');
+    saveDraftButton.hidden = !!next.file;
     cameraActions.classList.add('hidden');
     editActions.classList.replace('hidden', 'flex');
     status.textContent = next.draftId ? 'Editing draft' : 'Photo ready';
@@ -290,9 +349,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function enterCamera() {
+    if (photo?.file) URL.revokeObjectURL(photo.src);
     photo = null;
     editPreview.src = '';
     editPreview.classList.add('hidden');
+    editPreviewVideo.removeAttribute('src');
+    editPreviewVideo.classList.add('hidden');
+    lockAspect(false);
     video.classList.remove('hidden');
     editActions.classList.replace('flex', 'hidden');
     cameraActions.classList.remove('hidden');
@@ -305,7 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!video.videoWidth) {
       return;
     }
-    enterEdit({ src: toSquarePng(video, video.videoWidth, video.videoHeight, true) });
+    enterEdit({ src: toFramedPng(video, video.videoWidth, video.videoHeight, true) });
   });
 
   uploadInput.addEventListener('change', () => {
@@ -314,9 +377,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!file) {
       return;
     }
+    if (file.type === 'image/gif' || file.type.startsWith('video/')) {
+      if (file.size > MEDIA_MAX_BYTES) {
+        editorError.textContent = 'File is too large (max 30 MB)';
+        return;
+      }
+      enterEdit({ src: URL.createObjectURL(file), file, isVideo: file.type.startsWith('video/') });
+      return;
+    }
     const img = new Image();
     img.onload = () => {
-      enterEdit({ src: toSquarePng(img, img.naturalWidth, img.naturalHeight, false) });
+      enterEdit({ src: toFramedPng(img, img.naturalWidth, img.naturalHeight, false) });
       URL.revokeObjectURL(img.src);
     };
     img.onerror = () => {
@@ -331,10 +402,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = new FormData();
     if (photo.draftId) {
       form.append('draft_id', photo.draftId);
+    } else if (photo.file) {
+      form.append('media', photo.file);
     } else {
       form.append('image', await (await fetch(photo.src)).blob(), 'photo.png');
     }
     form.append('overlays', JSON.stringify(selected));
+    form.append('aspect', aspect);
     Object.entries(fields).forEach(([key, value]) => form.append(key, value));
 
     const response = await fetch(url, { method: 'POST', body: form });
@@ -360,7 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function openModal() {
-    publishPreview.src = photo.src;
+    showMedia(publishPreview, publishPreviewVideo, photo);
     modal.querySelectorAll('[data-error]').forEach((el) => el.textContent = '');
     modal.style.display = 'flex';
     setTimeout(() => modal.classList.add('show'), 10);
@@ -454,8 +528,14 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    enterEdit({ src: thumb.dataset.src, draftId: thumb.dataset.id });
-    setOverlays(JSON.parse(thumb.dataset.overlays || '[]'));
+    // A draft keeps the format it was shot in; read it off the image itself.
+    const img = new Image();
+    img.onload = () => {
+      setAspect(img.naturalHeight / img.naturalWidth > 1.1 ? '4:5' : '1:1');
+      enterEdit({ src: thumb.dataset.src, draftId: thumb.dataset.id });
+      setOverlays(JSON.parse(thumb.dataset.overlays || '[]'));
+    };
+    img.src = thumb.dataset.src;
   });
 
   async function deleteDraft(thumb) {

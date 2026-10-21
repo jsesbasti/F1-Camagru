@@ -66,6 +66,7 @@ class PostController extends Controller
 
         Helper::json_response([
             'likes' => (object) Like::stateFor($ids, $viewerId),
+            'comment_counts' => (object) Comment::countsFor($ids),
             'comments' => $comments,
             'last_comment_id' => $lastId,
         ]);
@@ -136,6 +137,16 @@ class PostController extends Controller
         } else {
             Helper::json_response(['errors' => ['error' => 'Could not delete post']], 500);
         }
+    }
+
+    public function details(): void
+    {
+        $id = (int) ($_GET['id'] ?? 0);
+        $post = $id ? Image::findPostById($id, Session::check() ? Session::getId() : 0) : null;
+        if (!$post) {
+            Helper::json_response(['errors' => ['error' => 'Post not found']], 404);
+        }
+        Helper::json_response(['post' => $post]);
     }
 
     public function like(): void

@@ -15,6 +15,12 @@ class PhotoController extends Controller
     private const UPLOAD_URL = '/uploads/photos';
     private const MAX_BYTES = 5 * 1024 * 1024;
     private const MAX_SIDE = 2000;
+    private const MEDIA_MAX_BYTES = 30 * 1024 * 1024;
+    private const MEDIA_WIDTH = 720;
+    // Height / width of the formats a post can have: square and vertical 4:5.
+    private const ASPECTS = ['1:1' => 1.0, '4:5' => 1.25];
+    private const MEDIA_MAX_SECONDS = 15;
+    private const MEDIA_TYPES = ['image/gif', 'video/mp4', 'video/webm', 'video/quicktime'];
 
     public function index(): void
     {
@@ -90,11 +96,14 @@ class PhotoController extends Controller
         $draftId = (int) ($_POST['draft_id'] ?? 0);
         $draft = $draftId ? $this->ownedDraft($draftId, $userId) : null;
 
-        $base = $draft
-            ? $this->loadPng(self::path($draft['source_filename'] ?? $draft['filename']))
-            : $this->uploadedPng();
-
-        $filename = $this->saveComposed($base, $overlays, 'img_');
+        if (!$draft && isset($_FILES['media'])) {
+            $filename = $this->publishMedia($overlays);
+        } else {
+            $base = $draft
+                ? $this->loadPng(self::path($draft['source_filename'] ?? $draft['filename']))
+                : $this->uploadedPng();
+            $filename = $this->saveComposed($base, $overlays, 'img_');
+        }
 
         if ($draft) {
             if (!Image::publishDraft($draftId, $filename, $description)) {
@@ -119,6 +128,114 @@ class PhotoController extends Controller
             'photo' => Image::studioEntry(['id' => $id, 'filename' => $filename, 'source_filename' => null, 'is_draft' => 0, 'overlays' => '']),
             'post_url' => "/post?id=$id"
         ]);
+    }
+
+    // GIFs and videos: animated ones go through ffmpeg into a square MP4 with
+    // the overlays burnt into every frame; a single-frame GIF is just a photo.
+    private function publishMedia(array $overlays): string
+    {
+        $file = $_FILES['media'];
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            $this->fail(['error' => 'No file received']);
+        }
+        if ($file['size'] > self::MEDIA_MAX_BYTES) {
+            $this->fail(['error' => 'File is too large (max 30 MB)']);
+        }
+
+        $type = (new \finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
+        if (!in_array($type, self::MEDIA_TYPES, true)) {
+            $this->fail(['error' => 'Only GIF, MP4, WebM and MOV files are supported']);
+        }
+
+        if ($type === 'image/gif' && !self::isAnimatedGif($file['tmp_name'])) {
+            $gif = @imagecreatefromgif($file['tmp_name']);
+            if (!$gif) {
+                $this->fail(['error' => 'Could not read image']);
+            }
+            return $this->saveComposed(self::framed($gif, self::aspect()), $overlays, 'img_');
+        }
+
+        if (!is_dir(self::UPLOAD_DIR) && !mkdir(self::UPLOAD_DIR, 0775, true) && !is_dir(self::UPLOAD_DIR)) {
+            $this->fail(['error' => 'Could not prepare upload directory'], 500);
+        }
+        $name = uniqid('vid_', true) . '.mp4';
+
+        set_time_limit(120);
+        exec(self::ffmpegCommand($file['tmp_name'], $overlays, self::aspect(), self::UPLOAD_DIR . "/$name") . ' 2>&1', $output, $code);
+        if ($code !== 0) {
+            error_log('ffmpeg failed: ' . implode("\n", array_slice($output, -5)));
+            @unlink(self::UPLOAD_DIR . "/$name");
+            $this->fail(['error' => 'Could not process that file']);
+        }
+
+        return self::UPLOAD_URL . "/$name";
+    }
+
+    // Same placement rules as stamp(): centre (x, y) and width as fractions of the frame.
+    private static function ffmpegCommand(string $input, array $overlays, float $ratio, string $output): string
+    {
+        $width = self::MEDIA_WIDTH;
+        $height = (int) round($width * $ratio);
+        $args = ['ffmpeg', '-y', '-i', $input];
+        $filters = ["[0:v]crop='min(iw,ih/$ratio)':'min(iw,ih/$ratio)*$ratio',scale=$width:$height,setsar=1,fps=30[b0]"];
+
+        foreach ($overlays as $i => $spec) {
+            $path = Overlay::path($spec['id']);
+            [$srcW, $srcH] = getimagesize($path);
+            $w = max(2, (int) round($spec['size'] * $width));
+            $h = max(2, (int) round($w * $srcH / $srcW));
+            $angle = $spec['angle'] * M_PI / 180;
+            $cx = round($spec['x'] * $width);
+            $cy = round($spec['y'] * $height);
+
+            $args[] = '-i';
+            $args[] = $path;
+            $n = $i + 1;
+            $filters[] = "[$n:v]scale=$w:$h,format=rgba,rotate=$angle:c=none:ow=rotw($angle):oh=roth($angle)[o$n]";
+            $filters[] = "[b$i][o$n]overlay=x=$cx-overlay_w/2:y=$cy-overlay_h/2[b$n]";
+        }
+
+        $last = count($overlays);
+        array_push($args,
+            '-filter_complex', implode(';', $filters),
+            '-map', "[b$last]", '-map', '0:a?',
+            '-t', (string) self::MEDIA_MAX_SECONDS,
+            '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '26', '-pix_fmt', 'yuv420p',
+            '-c:a', 'aac', '-b:a', '128k',
+            '-movflags', '+faststart',
+            $output
+        );
+
+        return implode(' ', array_map('escapeshellarg', $args));
+    }
+
+    // More than one graphic control block means more than one frame.
+    private static function isAnimatedGif(string $path): bool
+    {
+        return preg_match_all('#\x00\x21\xF9\x04.{4}\x00[\x2C\x21]#s', (string) file_get_contents($path)) > 1;
+    }
+
+    private static function aspect(): float
+    {
+        return self::ASPECTS[$_POST['aspect'] ?? ''] ?? self::ASPECTS['1:1'];
+    }
+
+    // Centre crop to the given height/width ratio, scaled to the standard width.
+    private static function framed(\GdImage $source, float $ratio): \GdImage
+    {
+        $srcW = imagesx($source);
+        $srcH = imagesy($source);
+        $cropW = (int) min($srcW, $srcH / $ratio);
+        $cropH = (int) round($cropW * $ratio);
+
+        $frame = imagecreatetruecolor(self::MEDIA_WIDTH, (int) round(self::MEDIA_WIDTH * $ratio));
+        imagecopyresampled(
+            $frame, $source, 0, 0,
+            intdiv($srcW - $cropW, 2), intdiv($srcH - $cropH, 2),
+            imagesx($frame), imagesy($frame), $cropW, $cropH
+        );
+        imagealphablending($frame, true);
+        return $frame;
     }
 
     private function requireSession(): int
@@ -167,6 +284,10 @@ class PhotoController extends Controller
         if ($info[0] > self::MAX_SIDE || $info[1] > self::MAX_SIDE) {
             $this->fail(['error' => 'Image is too big']);
         }
+        $ratio = $info[1] / $info[0];
+        if (!array_filter(self::ASPECTS, static fn (float $r) => abs($ratio - $r) < 0.01)) {
+            $this->fail(['error' => 'Photos must be square (1:1) or vertical (4:5)']);
+        }
 
         return $this->loadPng($file['tmp_name']);
     }
@@ -209,6 +330,21 @@ class PhotoController extends Controller
 
         $w = $spec['size'] * $width;
         $h = $w * $srcH / $srcW;
+
+        if ($spec['angle'] != 0) {
+            // Rotate at final size; the rotated bounding box is then placed 1:1.
+            $sized = imagecreatetruecolor(max(1, (int) round($w)), max(1, (int) round($h)));
+            imagealphablending($sized, false);
+            imagesavealpha($sized, true);
+            imagefill($sized, 0, 0, imagecolorallocatealpha($sized, 0, 0, 0, 127));
+            imagecopyresampled($sized, $overlay, 0, 0, 0, 0, imagesx($sized), imagesy($sized), $srcW, $srcH);
+
+            $overlay = imagerotate($sized, -$spec['angle'], imagecolorallocatealpha($sized, 0, 0, 0, 127));
+            imagesavealpha($overlay, true);
+            $w = $srcW = imagesx($overlay);
+            $h = $srcH = imagesy($overlay);
+        }
+
         $x = $spec['x'] * $width - $w / 2;
         $y = $spec['y'] * $height - $h / 2;
         $scale = $srcW / $w;

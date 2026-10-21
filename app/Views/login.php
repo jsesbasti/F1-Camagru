@@ -28,6 +28,10 @@
             <a href="/forgot-password" class="mt-4 block text-center text-sm text-muted no-underline hover:text-f1-red">
                 Forgot your password?
             </a>
+            <p class="mt-2 text-center text-sm text-muted">
+                No account yet?
+                <a href="/register" class="font-bold text-white no-underline hover:text-f1-red">Register</a>
+            </p>
         </div>
         <p id="error-error" class="error-msg"></p>
     </form>

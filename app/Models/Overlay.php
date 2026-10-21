@@ -53,6 +53,7 @@ class Overlay
                 'x' => self::fraction($item['x'] ?? 0.5, -0.5, 1.5),
                 'y' => self::fraction($item['y'] ?? 0.5, -0.5, 1.5),
                 'size' => self::fraction($item['size'] ?? 1, 0.1, 3),
+                'angle' => self::fraction($item['angle'] ?? 0, -180, 180),
             ];
         }
         return $specs;

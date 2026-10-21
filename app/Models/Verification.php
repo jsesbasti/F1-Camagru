@@ -44,7 +44,7 @@ class Verification extends Model
 
     public static function add(array $data) {
         try {
-            $stmt = self::db()->prepare("INSERT INTO email_verification (user_id, token, expires_at) VALUES (:user_id, :token, :expires_at)");
+            $stmt = self::db()->prepare("REPLACE INTO email_verification (user_id, token, expires_at) VALUES (:user_id, :token, :expires_at)");
             $stmt->execute($data);
             return true;
         } catch (\PDOException $e) {

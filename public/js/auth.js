@@ -71,7 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
 						errorElement.textContent = message;
 					}
 				});
-				form.reset();
 			}
 		} catch (error) {
 			return ;
@@ -147,6 +146,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
 			if (data.redirect) {
 				window.location.href = data.redirect;
+			} else {
+				Object.entries(data.errors).forEach(([field, message]) => {
+					const errorElement = document.getElementById(`${field}-error`);
+					if (errorElement) {
+						errorElement.textContent = message;
+					} else {
+						document.getElementById('error-error').textContent = message;
+					}
+				});
+			}
+		} catch (error) {
+			return ;
+		}
+	});
+});
+document.addEventListener('DOMContentLoaded', () => {
+
+	const form = document.getElementById('resend-form');
+	if (!form)
+		return;
+	form.addEventListener('submit', async (e) => {
+
+		e.preventDefault();
+
+		document.querySelectorAll('.error-msg')
+		.forEach(el => el.textContent = '');
+
+		const email = document.getElementById('email').value;
+
+		try {
+
+			const response = await api('/register/resend', 'POST', { email });
+
+			const data = await response.json();
+
+			if (data.success) {
+				document.getElementById('success-msg').textContent = data.message;
 			} else {
 				Object.entries(data.errors).forEach(([field, message]) => {
 					const errorElement = document.getElementById(`${field}-error`);

@@ -6,6 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initPostMenu();
   initFeedRefresh(initInfiniteScroll());
   initLiveUpdates();
+  initCommentsModal();
+  initCommentMore();
 });
 
 /**
@@ -16,7 +18,7 @@ function initLikeAndCommentSystem() {
   const feed = document.querySelector('.feed-container');
   if (!feed) return;
 
-  feed.addEventListener('click', async (e) => {
+  document.addEventListener('click', async (e) => {
     const likeBtn = e.target.closest('.like-btn');
     if (!likeBtn || likeBtn.disabled) return;
     e.preventDefault();
@@ -35,7 +37,7 @@ function initLikeAndCommentSystem() {
     }
   });
 
-  feed.addEventListener('click', (e) => {
+  document.addEventListener('click', (e) => {
     const replyBtn = e.target.closest('.comment-reply-btn');
     if (replyBtn) {
       e.preventDefault();
@@ -56,7 +58,7 @@ function initLikeAndCommentSystem() {
     }
   });
 
-  feed.addEventListener('submit', async (e) => {
+  document.addEventListener('submit', async (e) => {
     const form = e.target.closest('.comment-form');
     if (!form) return;
     e.preventDefault();
@@ -89,7 +91,13 @@ function initLikeAndCommentSystem() {
             commentsList.appendChild(createCommentThread(data.comment));
             commentsList.scrollTop = commentsList.scrollHeight; // Auto-scroll to bottom of comments
           }
+          trimPreview(commentsList);
         }
+        if (card.id === 'comments-modal-card') {
+          appendComment(document.getElementById(`post-${body.id}`), data.comment);
+        }
+        const num = document.getElementById(`post-${body.id}`)?.querySelector('.comments-num');
+        if (num) num.textContent = formatNumber(Number(num.textContent.replace(/\./g, '')) + 1);
         input.value = '';
         setReplyTarget(card, null);
       }
@@ -137,6 +145,11 @@ function initLiveUpdates() {
         card.querySelector('.likes-num').textContent = formatNumber(state.likes_count);
       });
 
+      Object.entries(data.comment_counts || {}).forEach(([id, count]) => {
+        const num = document.getElementById(`post-${id}`)?.querySelector('.comments-num');
+        if (num) num.textContent = formatNumber(count);
+      });
+
       (data.comments || []).forEach(appendLiveComment);
       since = Math.max(since ?? 0, Number(data.last_comment_id) || 0);
     } catch (error) {
@@ -147,19 +160,7 @@ function initLiveUpdates() {
   }
 
   function appendLiveComment(comment) {
-    const card = document.getElementById(`post-${comment.image_id}`);
-    const list = card?.querySelector('.post-comments-list');
-    if (!list || list.querySelector(`[data-comment-id="${comment.id}"]`)) return;
-
-    const atBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 8;
-    if (comment.parent_id) {
-      const thread = list.querySelector(`.comment-thread[data-comment-id="${comment.parent_id}"]`);
-      if (!thread) return; // its thread isn't among the ones shown
-      thread.appendChild(createCommentItem(comment));
-    } else {
-      list.appendChild(createCommentThread(comment));
-    }
-    if (atBottom) list.scrollTop = list.scrollHeight;
+    appendComment(document.getElementById(`post-${comment.image_id}`), comment);
   }
 
   function start() {
@@ -175,6 +176,126 @@ function initLiveUpdates() {
 
   document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
   if (!document.hidden) start();
+}
+
+function appendComment(card, comment) {
+  const list = card?.querySelector('.post-comments-list');
+  if (!list || list.querySelector(`[data-comment-id="${comment.id}"]`)) return;
+
+  const atBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 8;
+  if (comment.parent_id) {
+    const thread = list.querySelector(`.comment-thread[data-comment-id="${comment.parent_id}"]`);
+    if (!thread) return; // its thread isn't among the ones shown
+    thread.appendChild(createCommentItem(comment));
+  } else {
+    list.appendChild(createCommentThread(comment));
+  }
+  trimPreview(list);
+  if (atBottom) list.scrollTop = list.scrollHeight;
+}
+
+// Feed cards keep the same preview the server sends: last 3 threads, newest reply each.
+function trimPreview(list) {
+  if (!list.hasAttribute('data-preview')) return;
+  const threads = list.querySelectorAll(':scope > .comment-thread');
+  Array.from(threads).slice(0, -3).forEach((thread) => thread.remove());
+  list.querySelectorAll(':scope > .comment-thread').forEach((thread) => {
+    Array.from(thread.querySelectorAll(':scope > .comment-reply')).slice(0, -1).forEach((reply) => reply.remove());
+  });
+}
+
+/**
+ * Botón de comentarios: abre un modal con la imagen y todos sus comentarios.
+ */
+function initCommentsModal() {
+  const modal = document.getElementById('comments-modal');
+  if (!modal) return;
+  const card = modal.querySelector('#comments-modal-card');
+
+  document.addEventListener('click', async (e) => {
+    const trigger = e.target.closest('.comment-trigger-btn');
+    if (!trigger) return;
+    e.preventDefault();
+
+    const id = postId(trigger.closest('.post-card'));
+    try {
+      const response = await fetch(`/api/posts/details?id=${id}`, { headers: { 'Accept': 'application/json' } });
+      const data = await response.json();
+      if (!data.post) {
+        await showAlert(Object.values(data.errors || {})[0] || 'No se pudo cargar el post');
+        return;
+      }
+      fill(data.post);
+    } catch (error) {
+      await showAlert('No se pudo conectar con el servidor');
+      return;
+    }
+
+    document.documentElement.style.overflow = 'hidden';
+    modal.style.display = 'flex';
+    setTimeout(() => modal.classList.add('show'), 10);
+  });
+
+  function fill(post) {
+    card.dataset.postId = post.id;
+    const image = card.querySelector('.comments-modal-image');
+    const video = card.querySelector('.comments-modal-video');
+    image.hidden = isVideo(post.image_url);
+    video.hidden = !image.hidden;
+    if (image.hidden) {
+      video.src = post.image_url;
+    } else {
+      image.src = post.image_url;
+      video.removeAttribute('src');
+    }
+    setAvatar(card.querySelector('.post-user-avatar'), post.avatar_url, post.avatar_initials);
+    card.querySelectorAll('.post-username, .post-caption-user').forEach((el) => {
+      el.textContent = post.username;
+      el.href = profileUrl(post.username);
+    });
+    setCaption(card, post.caption);
+    card.querySelector('.post-comments-list').replaceChildren(...post.comments.map(createCommentThread));
+    card.querySelector('.comment-input').value = '';
+    setReplyTarget(card, null);
+  }
+
+  function close() {
+    document.documentElement.style.overflow = '';
+    modal.classList.remove('show');
+    setTimeout(() => {
+      if (!modal.classList.contains('show')) modal.style.display = 'none';
+    }, 300);
+  }
+
+  modal.querySelector('.comments-modal-close').addEventListener('click', close);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) close();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('show')) close();
+  });
+}
+
+// Same rule as $commentPreview in partials/post-card.php.
+function commentPreview(text) {
+  if (text.length <= 150) return null;
+  const cut = text.slice(0, 150);
+  const space = cut.lastIndexOf(' ');
+  return (space > 50 ? cut.slice(0, space) : cut).trimEnd() + '…';
+}
+
+function initCommentMore() {
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.comment-more-btn');
+    if (!btn) return;
+    const box = btn.parentElement;
+    const short = box.querySelector('.comment-text, .post-caption-text');
+    const full = box.querySelector('.comment-text-full, .post-caption-full');
+    const expand = full.hidden;
+    full.hidden = !expand;
+    short.hidden = expand;
+    btn.textContent = expand ? 'ver menos' : 'ver más';
+  });
 }
 
 function setReplyTarget(card, commentId, username = '') {
@@ -213,7 +334,7 @@ async function postInteraction(url, body) {
 }
 
 function postId(card) {
-  return Number(card.id.replace('post-', ''));
+  return Number(card.dataset.postId || card.id.replace('post-', ''));
 }
 
 function createCommentThread(thread) {
@@ -238,9 +359,12 @@ function createCommentItem(comment) {
   userLink.className = 'comment-user';
   userLink.textContent = comment.username || '';
 
+  const full = comment.comment || '';
+  const short = commentPreview(full);
+
   const text = document.createElement('span');
   text.className = 'comment-text';
-  text.append(...linkMentions(comment.comment || ''));
+  text.append(...linkMentions(short ?? full));
 
   const replyBtn = document.createElement('button');
   replyBtn.type = 'button';
@@ -249,7 +373,20 @@ function createCommentItem(comment) {
   replyBtn.dataset.username = comment.username || '';
   replyBtn.textContent = 'Responder';
 
-  item.append(userLink, text, replyBtn);
+  item.append(userLink, text);
+  if (short) {
+    const fullText = document.createElement('span');
+    fullText.className = 'comment-text-full';
+    fullText.hidden = true;
+    fullText.append(...linkMentions(full));
+
+    const moreBtn = document.createElement('button');
+    moreBtn.type = 'button';
+    moreBtn.className = 'comment-more-btn';
+    moreBtn.textContent = 'ver más';
+    item.append(fullText, ' ', moreBtn);
+  }
+  item.append(replyBtn);
   return item;
 }
 
@@ -275,8 +412,46 @@ function linkMentions(text) {
 // Caption with @mentions linked, mirroring $renderComment in post-card.php
 function setCaption(card, caption) {
   const text = caption || '';
-  card.querySelector('.post-caption-text').replaceChildren(...(text ? linkMentions(text) : [document.createTextNode('Sin descripción')]));
-  card.querySelector('.post-edit-textarea').value = text;
+  const short = text ? commentPreview(text) : null;
+  const box = card.querySelector('.post-caption');
+  box.dataset.caption = text;
+  box.querySelectorAll('.post-caption-full, .comment-more-btn').forEach((el) => el.remove());
+
+  const shown = box.querySelector('.post-caption-text');
+  shown.hidden = false;
+  shown.replaceChildren(...(text ? linkMentions(short ?? text) : [document.createTextNode('Sin descripción')]));
+
+  if (short) {
+    const full = document.createElement('span');
+    full.className = 'post-caption-full';
+    full.hidden = true;
+    full.append(...linkMentions(text));
+
+    const moreBtn = document.createElement('button');
+    moreBtn.type = 'button';
+    moreBtn.className = 'comment-more-btn';
+    moreBtn.textContent = 'ver más';
+    box.append(full, ' ', moreBtn);
+  }
+
+  const textarea = card.querySelector('.post-edit-textarea');
+  if (textarea) textarea.value = text;
+}
+
+// Same rule as Helper::isVideo(): animated posts are stored as MP4.
+function isVideo(url) {
+  return /\.mp4$/i.test(url || '');
+}
+
+function mediaVideo(url) {
+  const video = document.createElement('video');
+  video.className = 'media-video';
+  video.src = url;
+  video.muted = true;
+  video.loop = true;
+  video.autoplay = true;
+  video.playsInline = true;
+  return video;
 }
 
 function setAvatar(el, avatarUrl, initials) {
@@ -377,9 +552,7 @@ function initPostMenu() {
     if (!captionEl || !form) return;
 
     if (editing) {
-      const captionText = card.querySelector('.post-caption-text')?.textContent.trim() || '';
-      const textarea = form.querySelector('.post-edit-textarea');
-      textarea.value = captionText === 'Sin descripción' ? '' : captionText;
+      form.querySelector('.post-edit-textarea').value = captionEl.dataset.caption || '';
     }
 
     captionEl.hidden = editing;
@@ -648,7 +821,14 @@ function createPostCard(post) {
   });
 
   if (post.image_url) {
-    card.querySelector('.f1-visual-bg').style.backgroundImage = `url('${post.image_url}')`;
+    const media = card.querySelector('.post-media');
+    if (isVideo(post.image_url)) {
+      const video = mediaVideo(post.image_url);
+      video.className = 'post-media';
+      media.replaceWith(video);
+    } else {
+      media.src = post.image_url;
+    }
   }
 
   const menu = card.querySelector('.post-menu');
@@ -657,6 +837,7 @@ function createPostCard(post) {
   }
 
   card.querySelector('.likes-num').textContent = formatNumber(Number(post.likes_count || 0));
+  card.querySelector('.comments-num').textContent = formatNumber(Number(post.comments_count || 0));
   const likeBtn = card.querySelector('.like-btn');
   likeBtn.classList.toggle('liked', Boolean(post.liked_by_me));
   likeBtn.setAttribute('aria-pressed', post.liked_by_me ? 'true' : 'false');

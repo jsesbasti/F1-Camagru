@@ -10,6 +10,10 @@ class Helper {
         exit();
     }
 
+    static public function isVideo(string $url): bool {
+        return str_ends_with(strtolower($url), '.mp4');
+    }
+
     static public function avatar(?string $avatarUrl, string $username): string {
         if ($avatarUrl) {
             return '<img src="' . htmlspecialchars($avatarUrl) . '" alt="" class="h-full w-full object-cover">';

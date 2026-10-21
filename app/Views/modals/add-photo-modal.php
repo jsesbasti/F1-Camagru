@@ -7,6 +7,7 @@
                 <p>Para continuar necesitas activar la cámara y entrar al área de captura.</p>
                 <p class="mt-2.5 font-racing font-bold uppercase text-f1-red">Boxes listos para recibir tu imagen.</p>
                 <button class="modal-primary-btn" id="add-photo-camera-btn" type="button">Permitir cámara y continuar</button>
+                <a class="modal-primary-btn border border-line !bg-transparent !shadow-none hover:border-muted" href="/photo">Continuar sin cámara</a>
                 <p class="modal-status" id="add-photo-status" aria-live="polite"></p>
             </div>
             <div class="modal-state modal-state-guest" id="add-photo-guest-state" hidden>

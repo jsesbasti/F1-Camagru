@@ -23,7 +23,7 @@
             <?php endif; ?>
 
             <button type="button" id="feed-refresh-btn" class="group inline-flex items-center justify-center gap-2 self-center rounded-full border border-line bg-carbon px-4 py-2 font-racing text-[11px] font-extrabold uppercase tracking-wide text-muted transition-colors hover:border-f1-red hover:text-white disabled:cursor-wait disabled:opacity-65">
-                <svg viewBox="0 0 24 24" class="h-3.5 w-3.5 fill-none stroke-current stroke-2 group-disabled:animate-spin" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"></path><path d="M21 3v6h-6"></path></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-3.5 w-3.5 fill-none stroke-current stroke-2 group-disabled:animate-spin" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"></path><path d="M21 3v6h-6"></path></svg>
                 Refresh
             </button>
 
@@ -64,6 +64,8 @@
          instead of duplicating it in a JS string. Rendered from the same
          partials/post-card.php, with the owner menu forced visible so the
          clone always has it available; home.js hides it per-post itself. -->
+    <?php require __DIR__ . "/modals/comments-modal.php"; ?>
+
     <template id="post-card-template">
         <?php
             (function () {

@@ -5,10 +5,10 @@
     <form id="register-form" class="f1-form-card">
         <h1 class="f1-form-title">Register</h1>
         <div>
-            <input type="text" name="email" id="email" autocomplete="on" placeholder="email" class="f1-input">
-            <p id="email-error" class="error-msg"></p>
             <input type="text" name="username" id="username" autocomplete="on" placeholder="username" class="f1-input">
             <p id="username-error" class="error-msg"></p>
+            <input type="text" name="email" id="email" autocomplete="on" placeholder="email" class="f1-input">
+            <p id="email-error" class="error-msg"></p>
             <input type="password" name="password" id="password" placeholder="password" class="f1-input">
             <p id="password-error" class="error-msg"></p>
             <input type="password" name="confirm" id="confirm" placeholder="confirm password" class="f1-input">

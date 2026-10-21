@@ -11,7 +11,7 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $users = User::all();
+        $users = User::latestPosters(7);
         $feedPageSize = 4;
         $currentUser = null;
 

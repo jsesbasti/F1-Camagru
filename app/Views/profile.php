@@ -15,7 +15,7 @@
                 <div class="profile-avatar">
                     <?= \App\Core\Helper::avatar($profileUser['avatar'] ?? null, $profileUser['username']) ?>
                 </div>
-                <div class="flex flex-1 flex-col items-center sm:items-start">
+                <div class="flex min-w-0 flex-1 flex-col items-center sm:items-start">
                     <div class="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
                         <span class="profile-username"><?= htmlspecialchars($profileUser['username']) ?></span>
                         <span class="profile-badge">F1 driver</span>
@@ -28,6 +28,9 @@
                             On the grid since <?= htmlspecialchars(date('d M Y', strtotime($profileUser['created_at']))) ?>
                         </span>
                     <?php endif; ?>
+                    <?php if (!$isOwnProfile): ?>
+                        <button type="button" id="follow-btn" class="photo-action <?= $isFollowing ? 'secondary' : 'primary' ?> mt-3 !w-auto !py-2" data-user-id="<?= (int) $profileUser['id'] ?>"><?= $isFollowing ? 'Unfollow' : 'Follow' ?></button>
+                    <?php endif; ?>
                 </div>
                 <div class="profile-stats">
                     <div>
@@ -38,6 +41,14 @@
                         <span class="profile-stat-value"><?= (int) $likesReceived ?></span>
                         <span class="profile-stat-label">Likes</span>
                     </div>
+                    <div>
+                        <span class="profile-stat-value" id="followers-count"><?= (int) $follows['followers'] ?></span>
+                        <span class="profile-stat-label">Followers</span>
+                    </div>
+                    <div>
+                        <span class="profile-stat-value"><?= (int) $follows['following'] ?></span>
+                        <span class="profile-stat-label">Following</span>
+                    </div>
                 </div>
             </section>
 
@@ -47,19 +58,23 @@
                     <?php foreach ($photos as $photo): ?>
                         <?php
                             $bgStyle = '';
-                            if (!empty($photo['image_url'])) {
+                            $isVideo = \App\Core\Helper::isVideo($photo['image_url'] ?? '');
+                            if (!empty($photo['image_url']) && !$isVideo) {
                                 $escapedUrl = htmlspecialchars($photo['image_url'], ENT_QUOTES, 'UTF-8');
                                 $bgStyle = "background-image: url('{$escapedUrl}')";
                             }
                         ?>
                         <a href="/post?id=<?= (int) $photo['id'] ?>" class="profile-photo-item group no-underline" style="<?= $bgStyle ?>">
+                            <?php if ($isVideo): ?>
+                                <video class="media-video" src="<?= htmlspecialchars($photo['image_url']) ?>" muted loop playsinline autoplay></video>
+                            <?php endif; ?>
                             <div class="profile-photo-overlay">
                                 <span class="profile-photo-stat">
-                                    <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                                     <?= (int) $photo['likes_count'] ?>
                                 </span>
                                 <span class="profile-photo-stat">
-                                    <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
                                     <?= (int) $photo['comments_count'] ?>
                                 </span>
                             </div>

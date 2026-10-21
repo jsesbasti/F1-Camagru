@@ -31,7 +31,8 @@ CREATE TABLE IF NOT EXISTS comments (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (image_id) REFERENCES images(id) ON DELETE CASCADE,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE
+  -- No FK on parent_id: MySQL aborts a cascade that re-enters comments ("exceeds max tables limit of 30")
+  INDEX (parent_id)
 );
 
 CREATE TABLE IF NOT EXISTS likes (
@@ -64,4 +65,21 @@ CREATE TABLE IF NOT EXISTS email_changes (
   token VARCHAR(64) NOT NULL UNIQUE,
   expires_at DATETIME NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS follows (
+  follower_id INT NOT NULL,
+  followed_id INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (follower_id, followed_id),
+  FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (followed_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS follow_notifications (
+  follower_id INT NOT NULL,
+  followed_id INT NOT NULL,
+  PRIMARY KEY (follower_id, followed_id),
+  FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (followed_id) REFERENCES users(id) ON DELETE CASCADE
 );
