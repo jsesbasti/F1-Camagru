@@ -4,6 +4,9 @@ Red social de fotos con temática de F1: haces una foto con la webcam (o subes u
 
 Hecho en PHP sin framework, MySQL, nginx y JavaScript sin librerías, todo en Docker.
 
+> **📷 Importante: la cámara solo funciona en `localhost` o por `https://`.**
+> Los navegadores solo dan acceso a la webcam en contextos seguros. Entra por <http://localhost:8080> en la misma máquina que ejecuta Docker, o publica la web con HTTPS (ver [Publicarlo en internet](#publicarlo-en-internet)). Si entras por una IP o un dominio con `http://` (por ejemplo `http://10.12.5.6:8080`), la cámara no se activará y solo podrás subir imágenes.
+
 **Funcionalidades:**
 - Registro con verificación por email, login, logout y recuperación de contraseña.
 - Editor de fotos:
@@ -13,8 +16,11 @@ Hecho en PHP sin framework, MySQL, nginx y JavaScript sin librerías, todo en Do
   - publicación con descripción.
 
   La superposición final se hace en el servidor con GD.
-- Feed con scroll infinito, likes, comentarios, respuestas y menciones `@usuario`.
-- Perfil público y página individual de cada post.
+- Feed con scroll infinito, likes, comentarios, respuestas y menciones `@usuario`. Los likes y comentarios nuevos aparecen en directo sin recargar.
+- Editar la descripción o borrar tus propios posts.
+- Perfil público con contador de seguidores y seguidos, y botón para seguir a otros usuarios.
+- Buscador de usuarios.
+- Página individual de cada post.
 - Settings:
   - foto de perfil;
   - nombre de usuario;
@@ -22,7 +28,7 @@ Hecho en PHP sin framework, MySQL, nginx y JavaScript sin librerías, todo en Do
   - contraseña;
   - avisos por email de comentarios;
   - borrar la cuenta.
-- Avisos por email al cambiar datos de la cuenta y cuando alguien comenta en tus fotos.
+- Avisos por email al cambiar datos de la cuenta, cuando alguien comenta en tus fotos y cuando alguien empieza a seguirte (solo la primera vez).
 
 ---
 
@@ -127,6 +133,8 @@ Sin este paso todas las páginas dan error, porque falta `vendor/autoload.php`.
 
 <http://localhost:8080>
 
+Para usar la cámara entra por `localhost` o por `https://`: por una IP con `http://` el navegador la bloquea (ver el aviso del principio).
+
 Regístrate, abre el email de verificación y haz login. Si el email no llega, mira [Problemas frecuentes](#problemas-frecuentes).
 
 ---
@@ -230,7 +238,7 @@ Para que se pueda entrar desde cualquier sitio y los enlaces de los emails funci
 
 **`port is already allocated`.** Otro programa usa el puerto 8080 o el 33006. Páralo, o cambia el puerto de la izquierda en `docker/docker-compose.yml` (por ejemplo `"8081:80"`) y ajusta `APP_URL`.
 
-**La cámara no se activa.** Los navegadores solo permiten la cámara en `localhost` o con `https://`. Si entras por una IP con `http://`, usa la opción de subir imagen o publícalo con HTTPS.
+**La cámara no se activa.** Los navegadores solo permiten la cámara en `localhost` o con `https://`. Si entras por una IP o un dominio con `http://`, usa la opción de subir imagen o publícalo con HTTPS. Comprueba también que has dado permiso de cámara al navegador para la página.
 
 **Errores de base de datos tras actualizar el código** (por ejemplo `Unknown column`). La base de datos es de una versión anterior: mira [Si la base de datos se creó con una versión anterior](#si-la-base-de-datos-se-creó-con-una-versión-anterior).
 
@@ -244,7 +252,7 @@ Para que se pueda entrar desde cualquier sitio y los enlaces de los emails funci
 app/
   Controllers/   Una clase por sección (Home, Login, Register, Password, Photo, Post, User, Settings)
   Core/          Router, Controller base, Session, Model (PDO), Helper, Mailer
-  Models/        User, Image, Comment, Like, Overlay, Verification, PasswordReset, EmailChange
+  Models/        User, Image, Comment, Like, Follow, Overlay, Verification, PasswordReset, EmailChange
   Validators/    Validación de usuario, email y contraseña
   Views/         Plantillas PHP: layouts/, partials/, modals/ y una vista por página
 config/
