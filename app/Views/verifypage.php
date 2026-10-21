@@ -1,4 +1,7 @@
 <main class="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,var(--color-carbon),var(--color-asphalt))] p-8 text-white">
+<a href="/" class="f1-back-link">
+    ← HOME
+</a>
 <div class="relative w-[min(92%,560px)] overflow-hidden rounded-2xl border border-line border-t-4 border-t-f1-red bg-carbon/95 p-12 text-center shadow-[0_20px_50px_rgba(0,0,0,0.7)] before:pointer-events-none before:absolute before:inset-0 before:bg-[repeating-linear-gradient(-45deg,transparent,transparent_18px,rgba(255,255,255,0.015)_18px,rgba(255,255,255,0.015)_20px)] before:content-[''] max-[600px]:p-8">
     <span class="mb-8 inline-block font-racing text-[0.95rem] uppercase tracking-[2px] text-start-green">
         ● STATUS : WAITING FOR EMAIL VERIFICATION

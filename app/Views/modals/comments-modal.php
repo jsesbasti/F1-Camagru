@@ -10,7 +10,7 @@
                 <a href="#" class="post-username"></a>
                 <div class="ml-auto flex items-center gap-2">
                     <?php require __DIR__ . '/logout-link.php'; ?>
-                    <button type="button" class="comments-modal-close" aria-label="Cerrar">&times;</button>
+                    <button type="button" class="comments-modal-close" aria-label="Close">&times;</button>
                 </div>
             </div>
             <div class="post-caption">
@@ -19,12 +19,12 @@
             </div>
             <div class="post-comments-list comments-modal-list"></div>
             <div class="comment-reply-chip" hidden>
-                <span>Respondiendo a <strong class="comment-reply-target"></strong></span>
-                <button type="button" class="comment-reply-cancel" aria-label="Cancelar respuesta">&times;</button>
+                <span>Replying to <strong class="comment-reply-target"></strong></span>
+                <button type="button" class="comment-reply-cancel" aria-label="Cancel reply">&times;</button>
             </div>
             <form class="comment-form">
-                <input type="text" placeholder="Añadir un comentario..." class="comment-input" required autocomplete="off" maxlength="500">
-                <button type="submit" class="comment-submit-btn">Publicar</button>
+                <input type="text" placeholder="Add a comment..." class="comment-input" required autocomplete="off" maxlength="500">
+                <button type="submit" class="comment-submit-btn">Post</button>
             </form>
         </div>
     </div>

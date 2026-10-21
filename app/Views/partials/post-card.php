@@ -35,7 +35,7 @@ $renderComment = static function (string $text) use ($profileUrl): string {
     );
 };
 
-// Long comments show a cut-down version (at a word boundary) plus "ver más"; same rule as commentPreview() in home.js.
+// Long comments show a cut-down version (at a word boundary) plus "see more"; same rule as commentPreview() in home.js.
 $commentPreview = static function (string $text): ?string {
     if (mb_strlen($text) <= 150) {
         return null;
@@ -58,8 +58,8 @@ $commentPreview = static function (string $text): ?string {
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="12" cy="19" r="2"></circle></svg>
                 </button>
                 <div class="post-menu-dropdown">
-                    <button type="button" class="post-menu-item post-edit-btn">Editar</button>
-                    <button type="button" class="post-menu-item danger post-delete-btn">Borrar</button>
+                    <button type="button" class="post-menu-item post-edit-btn">Edit</button>
+                    <button type="button" class="post-menu-item danger post-delete-btn">Delete</button>
                 </div>
             </div>
         </div>
@@ -85,17 +85,17 @@ $commentPreview = static function (string $text): ?string {
         <?php $shortCaption = $caption !== '' ? $commentPreview($caption) : null; ?>
         <div class="post-caption" data-caption="<?= htmlspecialchars($caption) ?>">
             <a href="<?= htmlspecialchars($profileUrl($post['username'] ?? '')) ?>" class="post-caption-user"><?= htmlspecialchars($post['username'] ?? '') ?></a>
-            <span class="post-caption-text"><?= $caption !== '' ? $renderComment($shortCaption ?? $caption) : 'Sin descripción' ?></span>
+            <span class="post-caption-text"><?= $caption !== '' ? $renderComment($shortCaption ?? $caption) : 'No caption' ?></span>
             <?php if ($shortCaption): ?>
                 <span class="post-caption-full" hidden><?= $renderComment($caption) ?></span>
-                <button type="button" class="comment-more-btn">ver más</button>
+                <button type="button" class="comment-more-btn">see more</button>
             <?php endif; ?>
         </div>
         <form class="post-edit-form" hidden>
-            <textarea class="post-edit-textarea" rows="2" placeholder="Escribe una descripción..."><?= htmlspecialchars($caption) ?></textarea>
+            <textarea class="post-edit-textarea" rows="2" placeholder="Write a caption..."><?= htmlspecialchars($caption) ?></textarea>
             <div class="post-edit-actions">
-                <button type="button" class="post-edit-cancel-btn">Cancelar</button>
-                <button type="submit" class="post-edit-save-btn">Guardar</button>
+                <button type="button" class="post-edit-cancel-btn">Cancel</button>
+                <button type="submit" class="post-edit-save-btn">Save</button>
             </div>
         </form>
         <div class="post-comments-list"<?= empty($fullComments) ? ' data-preview' : '' ?>>
@@ -108,21 +108,21 @@ $commentPreview = static function (string $text): ?string {
                             <span class="comment-text"><?= $renderComment($short ?? $comment['comment']) ?></span>
                             <?php if ($short): ?>
                                 <span class="comment-text-full" hidden><?= $renderComment($comment['comment']) ?></span>
-                                <button type="button" class="comment-more-btn">ver más</button>
+                                <button type="button" class="comment-more-btn">see more</button>
                             <?php endif; ?>
-                            <button type="button" class="comment-reply-btn" data-reply-to="<?= (int) $comment['id'] ?>" data-username="<?= htmlspecialchars($comment['username']) ?>">Responder</button>
+                            <button type="button" class="comment-reply-btn" data-reply-to="<?= (int) $comment['id'] ?>" data-username="<?= htmlspecialchars($comment['username']) ?>">Reply</button>
                         </div>
                     <?php endforeach; ?>
                 </div>
             <?php endforeach; ?>
         </div>
         <div class="comment-reply-chip" hidden>
-            <span>Respondiendo a <strong class="comment-reply-target"></strong></span>
-            <button type="button" class="comment-reply-cancel" aria-label="Cancelar respuesta">&times;</button>
+            <span>Replying to <strong class="comment-reply-target"></strong></span>
+            <button type="button" class="comment-reply-cancel" aria-label="Cancel reply">&times;</button>
         </div>
         <form class="comment-form">
-            <input type="text" placeholder="Añadir un comentario..." class="comment-input" required autocomplete="off" maxlength="500">
-            <button type="submit" class="comment-submit-btn">Publicar</button>
+            <input type="text" placeholder="Add a comment..." class="comment-input" required autocomplete="off" maxlength="500">
+            <button type="submit" class="comment-submit-btn">Post</button>
         </form>
     </div>
 </div>

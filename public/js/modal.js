@@ -72,15 +72,15 @@ function show(title, message, buttons) {
 	});
 }
 
-export function showAlert(message, title = 'Aviso') {
+export function showAlert(message, title = 'Notice') {
 	return show(title, message, [
-		{ label: 'Aceptar', value: true, primary: true },
+		{ label: 'OK', value: true, primary: true },
 	]);
 }
 
-export function showConfirm(message, title = 'Confirmar') {
+export function showConfirm(message, title = 'Confirm') {
 	return show(title, message, [
-		{ label: 'Cancelar', value: false, primary: false },
-		{ label: 'Confirmar', value: true, primary: true },
+		{ label: 'Cancel', value: false, primary: false },
+		{ label: 'Confirm', value: true, primary: true },
 	]);
 }

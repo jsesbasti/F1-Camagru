@@ -115,8 +115,8 @@ class UserController extends Controller
 		if ($following && $followed['notify_comments'] && Follow::markNotified($followerId, $followedId)) {
 			$follower = User::find(id: $followerId);
 			Mailer::send($followed['email'], "{$follower['username']} started following you",
-				"Hi {$followed['username']},\r\n\r\n{$follower['username']} started following you on Camagru.\r\n\r\nSee their profile: " . Mailer::baseUrl() . '/profile?username=' . urlencode($follower['username'])
-				. "\r\n\r\nYou can turn these emails off in Settings: " . Mailer::baseUrl() . "/settings");
+				"Hi " . Mailer::e($followed['username']) . ",\r\n\r\n" . Mailer::e($follower['username']) . " started following you on Camagru.\r\n\r\n" . Mailer::link("See {$follower['username']}'s profile", '/profile?username=' . urlencode($follower['username']))
+				. "\r\n\r\nYou can turn these emails off in " . Mailer::link('Settings', '/settings') . ".");
 		}
 		exit;
 	}

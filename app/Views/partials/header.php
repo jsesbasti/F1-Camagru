@@ -1,11 +1,11 @@
 <header class="f1-header">
     <a href="/" class="flex items-center gap-2 no-underline">
-        <div class="flex h-6 w-6 -skew-x-[15deg] items-center justify-center bg-f1-red font-racing text-sm font-black italic text-white">F1</div>
+        <img src="/logo.svg" alt="" width="36" height="36" class="block">
         <span class="inline-block bg-[linear-gradient(135deg,#fff_60%,var(--color-f1-red))] bg-clip-text pr-1 font-racing text-[26px] font-extrabold italic uppercase leading-none tracking-wide text-transparent antialiased max-[480px]:text-[22px]">Camagru</span>
     </a>
     <?php if ($currentUser): ?>
         <div class="flex items-center gap-2.5">
-        <a href="/search" class="f1-logout-btn !w-10 justify-center !px-0" aria-label="Buscar usuarios" title="Buscar usuarios">
+        <a href="/search" class="f1-logout-btn !w-10 justify-center !px-0" aria-label="Search users" title="Search users">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         </a>
         <a href="/logout" class="f1-logout-btn" aria-label="Logout" title="Logout">

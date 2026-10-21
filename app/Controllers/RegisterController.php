@@ -161,7 +161,6 @@ class RegisterController extends Controller
 		$token = bin2hex(random_bytes(16));
 		$user = Verification::find(username: $username);
 		$expires_at = (new \DateTime())->modify('+30 minutes')->format('Y-m-d H:i:s');
-		$url = Mailer::baseUrl() . "/verify?token=$token";
 		if ($user == null) {
 			Helper::json_response([
 				'errors' => [
@@ -171,7 +170,7 @@ class RegisterController extends Controller
 			exit ;
 		}
 		if (Verification::add([":user_id" => $user['id'], ":token" => $token, ":expires_at" => $expires_at]) != null) {
-			Mailer::send($user['email'], 'EMAIL VERIFICATION', "You need to verify your account $username.\r\nHere is the link where you can do it.\r\n\r\n$url");
+			Mailer::send($user['email'], 'EMAIL VERIFICATION', "You need to verify your account " . Mailer::e($username) . ".\r\n\r\n" . Mailer::link('Verify my account', "/verify?token=$token"));
 			return ;
 		}
 		else {

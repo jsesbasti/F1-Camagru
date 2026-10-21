@@ -101,6 +101,7 @@ Esto copia `docker/env.example` a `docker/.env`. Revisa los valores:
 | --- | --- | --- |
 | `DB_SERVER` | `camagru-db` | Host de MySQL dentro de la red de Docker. Déjalo así. |
 | `APP_URL` | `http://localhost:8080` | Dirección pública de la web. Se usa en **todos los enlaces de los emails**: verificación, cambio de contraseña, confirmación de email y avisos. |
+| `CLOUD_URL` | vacía | La rellena `make cloud` con la URL del túnel. Mientras tiene valor, los emails la usan en lugar de `APP_URL`. Déjala vacía. |
 | `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE` | rutas a `/run/secrets/…` | Déjalas como vienen. |
 
 Si la web se va a abrir desde otro ordenador, `APP_URL` tiene que ser la dirección con la que se accede desde allí (por ejemplo `http://10.12.5.6:8080` o `https://camagru.midominio.com`). Si se queda en `localhost`, los enlaces de los emails solo funcionarán en la máquina que ejecuta Docker. Escríbela con `http://` o `https://` delante.
@@ -152,6 +153,8 @@ Regístrate, abre el email de verificación y haz login. Si el email no llega, m
 | `make sh-php` / `sh-nginx` | Abre una shell dentro del contenedor |
 | `make sh-db` | Abre la consola de MySQL sobre la base de datos de la app |
 | `make env` | Copia `docker/env.example` a `docker/.env` |
+| `make cloud` | Publica la web en internet con un túnel de Cloudflare y pone su URL en `CLOUD_URL` (ver [Publicarlo en internet](#publicarlo-en-internet)) |
+| `make local` | Vuelve a modo local: para el túnel y vacía `CLOUD_URL` para usar `APP_URL` |
 | `make css-build` / `make css-watch` | Compila el CSS (ver [Modificar el CSS](#modificar-el-css)) |
 
 > **⚠️ Cuidado con estos.** No se limitan a este proyecto: afectan a **todo Docker en tu máquina**.
@@ -207,7 +210,21 @@ make css-watch      # recompila cada vez que guardas
 
 ## Publicarlo en internet
 
-Para que se pueda entrar desde cualquier sitio y los enlaces de los emails funcionen fuera de tu máquina:
+Para que se pueda entrar desde cualquier sitio y los enlaces de los emails funcionen fuera de tu máquina.
+
+### Opción rápida: `make cloud`
+
+```sh
+make cloud
+```
+
+Levanta un *quick tunnel* de Cloudflare en un contenedor (no hace falta cuenta ni instalar nada), escribe su URL `https://….trycloudflare.com` en `CLOUD_URL` de `docker/.env` y recrea el contenedor de PHP para que la use. `APP_URL` no se toca: mientras `CLOUD_URL` tenga valor, los enlaces de los emails usan la del túnel; si está vacía, vuelven a usar `APP_URL`. Al terminar muestra la URL. Como es HTTPS, la cámara funciona desde cualquier dispositivo.
+
+- La URL es aleatoria y **cambia cada vez** que ejecutas `make cloud`; los enlaces de emails enviados con una URL anterior dejan de funcionar.
+- `make local` para el túnel, vacía `CLOUD_URL` y recrea PHP, así que los emails vuelven a usar `APP_URL`. `make down` también vacía `CLOUD_URL`.
+- Si no sale la URL, mira `make logs-tunnel`.
+
+### Opción manual
 
 1. Expón el puerto 8080 con una dirección pública, por ejemplo:
    - con un túnel (Cloudflare Tunnel, ngrok…);

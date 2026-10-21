@@ -22,7 +22,7 @@ class HomeController extends Controller
         $feed = Image::feedPage($feedPageSize, 0, (int) ($currentUser['id'] ?? 0));
 
         $this->view('home', [
-                'title' => 'Página de inicio',
+                'title' => 'Home',
                 'users' => $users,
                 'posts' => $feed['posts'],
                 'hasMorePosts' => $feed['hasMore'],

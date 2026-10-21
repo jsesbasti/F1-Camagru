@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				return;
 			}
 			if (!data.success) {
-				await showAlert(Object.values(data.errors || {})[0] || 'Algo ha ido mal');
+				await showAlert(Object.values(data.errors || {})[0] || 'Something went wrong');
 				return;
 			}
 
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			button.classList.toggle('secondary', data.following);
 			document.getElementById('followers-count').textContent = data.followers;
 		} catch (error) {
-			await showAlert('No se pudo conectar con el servidor');
+			await showAlert('Could not connect to the server');
 		} finally {
 			button.disabled = false;
 		}

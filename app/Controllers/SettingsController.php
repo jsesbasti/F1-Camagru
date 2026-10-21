@@ -56,7 +56,7 @@ class SettingsController extends Controller
 		}
 
 		self::notify($user['email'], 'Your Camagru username was changed',
-			"Hi {$username},\r\n\r\nYour Camagru username was changed from \"{$user['username']}\" to \"{$username}\".");
+			"Hi " . Mailer::e($username) . ",\r\n\r\nYour Camagru username was changed from \"" . Mailer::e($user['username']) . "\" to \"" . Mailer::e($username) . "\".");
 
 		Helper::json_response([
 			'success' => true,
@@ -97,15 +97,14 @@ class SettingsController extends Controller
 			$this->fail(['error' => 'Could not request email change'], 500);
 		}
 
-		$url = Mailer::baseUrl() . "/settings/confirm-email?token=$token";
 		if (!Mailer::send($email, 'Confirm your new Camagru email',
-			"Hi {$user['username']},\r\n\r\nConfirm that this is your new Camagru email by opening the link below (it expires in 30 minutes):\r\n\r\n$url\r\n\r\nIf you didn't request this, you can ignore this email.")) {
+			"Hi " . Mailer::e($user['username']) . ",\r\n\r\nConfirm that this is your new Camagru email by opening the link below (it expires in 30 minutes):\r\n\r\n" . Mailer::link('Confirm my new email', "/settings/confirm-email?token=$token") . "\r\n\r\nIf you didn't request this, you can ignore this email.")) {
 			EmailChange::deleteByToken($token);
 			$this->fail(['error' => 'Could not send the confirmation email'], 500);
 		}
 
 		self::notify($user['email'], 'Camagru email change requested',
-			"Hi {$user['username']},\r\n\r\nSomeone asked to change your Camagru email to {$email}. It won't change until the link sent to that address is opened.");
+			"Hi " . Mailer::e($user['username']) . ",\r\n\r\nSomeone asked to change your Camagru email to " . Mailer::e($email) . ". It won't change until the link sent to that address is opened.");
 
 		Helper::json_response([
 			'success' => true,
@@ -136,7 +135,7 @@ class SettingsController extends Controller
 		EmailChange::deleteByToken($token);
 
 		self::notify($user['email'], 'Your Camagru email was changed',
-			"Hi {$user['username']},\r\n\r\nYour Camagru email was changed to {$change['new_email']}. You won't get notifications at this address anymore.");
+			"Hi " . Mailer::e($user['username']) . ",\r\n\r\nYour Camagru email was changed to " . Mailer::e($change['new_email']) . ". You won't get notifications at this address anymore.");
 
 		$this->confirmPage(true, "Your email is now {$change['new_email']}.");
 	}
@@ -167,7 +166,7 @@ class SettingsController extends Controller
 		}
 
 		self::notify($user['email'], 'Your Camagru password was changed',
-			"Hi {$user['username']},\r\n\r\nYour Camagru password was just changed.");
+			"Hi " . Mailer::e($user['username']) . ",\r\n\r\nYour Camagru password was just changed.");
 
 		Helper::json_response([
 			'success' => true,
@@ -276,7 +275,7 @@ class SettingsController extends Controller
 		self::removeAvatarFile($user['avatar']);
 
 		Mailer::send($user['email'], 'Your Camagru account was deleted',
-			"Hi {$user['username']},\r\n\r\nYour Camagru account and everything you posted (photos, likes and comments) have been permanently deleted.\r\n\r\nIf you didn't do this, someone else had your password. The deletion can't be undone, but you can create a new account at " . Mailer::baseUrl() . "/register");
+			"Hi " . Mailer::e($user['username']) . ",\r\n\r\nYour Camagru account and everything you posted (photos, likes and comments) have been permanently deleted.\r\n\r\nIf you didn't do this, someone else had your password. The deletion can't be undone, but you can " . Mailer::link('create a new account', '/register') . ".");
 
 		Session::close();
 		Helper::json_response([
@@ -347,7 +346,7 @@ class SettingsController extends Controller
 
 	private static function notify(string $to, string $subject, string $body): void
 	{
-		Mailer::send($to, $subject, $body . "\r\n\r\nIf this wasn't you, reset your password right away:\r\n" . Mailer::baseUrl() . "/forgot-password");
+		Mailer::send($to, $subject, $body . "\r\n\r\nIf this wasn't you, " . Mailer::link('reset your password', '/forgot-password') . " right away.");
 	}
 
 	private function fail(array $errors, int $status = 400): void

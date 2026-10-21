@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			empty.hidden = data.results.length > 0;
 		} catch (error) {
 			if (error.name !== 'AbortError')
-				await showAlert('No se pudo conectar con el servidor');
+				await showAlert('Could not connect to the server');
 		}
 	}
 

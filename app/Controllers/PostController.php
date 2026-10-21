@@ -205,15 +205,17 @@ class PostController extends Controller
 
     private function notifyComment(array $author, array $image, string $comment, ?array $repliedTo): void
     {
-        $url = Mailer::baseUrl() . "/post?id={$image['id']}";
-        $footer = "\r\n\r\nSee it here: $url\r\n\r\nYou can turn these emails off in Settings: " . Mailer::baseUrl() . "/settings";
+        $footer = "\r\n\r\n" . Mailer::link('See the post', "/post?id={$image['id']}")
+            . "\r\n\r\nYou can turn these emails off in " . Mailer::link('Settings', '/settings') . ".";
+        $authorName = Mailer::e($author['username']);
+        $comment = Mailer::e($comment);
 
         $notified = [(int) $author['id']];
 
         $owner = User::find(id: (int) $image['user_id']);
         if ($owner && !in_array((int) $owner['id'], $notified, true) && $owner['notify_comments']) {
             Mailer::send($owner['email'], "{$author['username']} commented on your photo",
-                "Hi {$owner['username']},\r\n\r\n{$author['username']} commented on your photo:\r\n\r\n\"$comment\"" . $footer);
+                "Hi " . Mailer::e($owner['username']) . ",\r\n\r\n$authorName commented on your photo:\r\n\r\n\"$comment\"" . $footer);
         }
         $notified[] = (int) $image['user_id'];
 
@@ -221,7 +223,7 @@ class PostController extends Controller
             $target = User::find(id: (int) $repliedTo['user_id']);
             if ($target && !in_array((int) $target['id'], $notified, true) && $target['notify_comments']) {
                 Mailer::send($target['email'], "{$author['username']} replied to your comment",
-                    "Hi {$target['username']},\r\n\r\n{$author['username']} replied to your comment \"{$repliedTo['comment']}\":\r\n\r\n\"$comment\"" . $footer);
+                    "Hi " . Mailer::e($target['username']) . ",\r\n\r\n$authorName replied to your comment \"" . Mailer::e($repliedTo['comment']) . "\":\r\n\r\n\"$comment\"" . $footer);
             }
         }
     }

@@ -93,7 +93,7 @@ function initAddPhotoModal() {
 
           if (perm && perm.state === 'denied') {
             if (statusEl) {
-              statusEl.innerHTML = 'Acceso a la cámara denegado. Habilítalo en la configuración del sitio: <a href="https://developer.mozilla.org/es/docs/Web/API/MediaDevices/getUserMedia" target="_blank" rel="noopener noreferrer">cómo permitir cámara</a>';
+              statusEl.innerHTML = 'Camera access denied. Enable it in your site settings: <a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia" target="_blank" rel="noopener noreferrer">how to allow the camera</a>';
             }
             if (cameraBtn) cameraBtn.disabled = true;
           } else {
@@ -158,7 +158,7 @@ function initAddPhotoModal() {
 
       cameraBtn.disabled = true;
       if (statusEl) {
-        statusEl.textContent = 'Solicitando permiso de cámara...';
+        statusEl.textContent = 'Requesting camera permission...';
       }
 
       try {
@@ -167,7 +167,7 @@ function initAddPhotoModal() {
         window.location.href = '/photo';
       } catch (error) {
         if (statusEl) {
-          statusEl.textContent = 'Necesitas conceder permiso de cámara para continuar.';
+          statusEl.textContent = 'You need to allow camera access to continue.';
         }
         cameraBtn.disabled = false;
       }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" class="scroll-smooth">
+<html lang="en" class="scroll-smooth">
 
 <head>
 
@@ -9,6 +9,9 @@
           content="width=device-width, initial-scale=1.0">
 
     <title><?= htmlspecialchars($title ?? 'Camagru') ?></title>
+
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="/logo.svg">
 
     <!-- Google Fonts -->
 

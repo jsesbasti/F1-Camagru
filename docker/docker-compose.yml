@@ -46,6 +46,18 @@ services:
       - smtp_password
       - smtp_mail
 
+  # Quick tunnel de Cloudflare (sin cuenta): publica nginx en una URL
+  # https://*.trycloudflare.com aleatoria. Solo arranca con `make cloud`.
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: camagru-tunnel
+    command: ["tunnel", "--no-autoupdate", "--url", "http://nginx:80"]
+    profiles: ["cloud"]
+    depends_on:
+      - nginx
+    networks:
+      - camagru
+
   db:
     build: ./mysql
     container_name: camagru-db

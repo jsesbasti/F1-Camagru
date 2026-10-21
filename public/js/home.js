@@ -222,12 +222,12 @@ function initCommentsModal() {
       const response = await fetch(`/api/posts/details?id=${id}`, { headers: { 'Accept': 'application/json' } });
       const data = await response.json();
       if (!data.post) {
-        await showAlert(Object.values(data.errors || {})[0] || 'No se pudo cargar el post');
+        await showAlert(Object.values(data.errors || {})[0] || 'Could not load the post');
         return;
       }
       fill(data.post);
     } catch (error) {
-      await showAlert('No se pudo conectar con el servidor');
+      await showAlert('Could not connect to the server');
       return;
     }
 
@@ -294,7 +294,7 @@ function initCommentMore() {
     const expand = full.hidden;
     full.hidden = !expand;
     short.hidden = expand;
-    btn.textContent = expand ? 'ver menos' : 'ver más';
+    btn.textContent = expand ? 'see less' : 'see more';
   });
 }
 
@@ -326,9 +326,9 @@ async function postInteraction(url, body) {
       window.location.href = data.redirect;
       return null;
     }
-    await showAlert(Object.values(data.errors || {})[0] || 'Algo ha ido mal');
+    await showAlert(Object.values(data.errors || {})[0] || 'Something went wrong');
   } catch (error) {
-    await showAlert('No se pudo conectar con el servidor');
+    await showAlert('Could not connect to the server');
   }
   return null;
 }
@@ -371,7 +371,7 @@ function createCommentItem(comment) {
   replyBtn.className = 'comment-reply-btn';
   replyBtn.dataset.replyTo = comment.id;
   replyBtn.dataset.username = comment.username || '';
-  replyBtn.textContent = 'Responder';
+  replyBtn.textContent = 'Reply';
 
   item.append(userLink, text);
   if (short) {
@@ -383,7 +383,7 @@ function createCommentItem(comment) {
     const moreBtn = document.createElement('button');
     moreBtn.type = 'button';
     moreBtn.className = 'comment-more-btn';
-    moreBtn.textContent = 'ver más';
+    moreBtn.textContent = 'see more';
     item.append(fullText, ' ', moreBtn);
   }
   item.append(replyBtn);
@@ -419,7 +419,7 @@ function setCaption(card, caption) {
 
   const shown = box.querySelector('.post-caption-text');
   shown.hidden = false;
-  shown.replaceChildren(...(text ? linkMentions(short ?? text) : [document.createTextNode('Sin descripción')]));
+  shown.replaceChildren(...(text ? linkMentions(short ?? text) : [document.createTextNode('No caption')]));
 
   if (short) {
     const full = document.createElement('span');
@@ -430,7 +430,7 @@ function setCaption(card, caption) {
     const moreBtn = document.createElement('button');
     moreBtn.type = 'button';
     moreBtn.className = 'comment-more-btn';
-    moreBtn.textContent = 'ver más';
+    moreBtn.textContent = 'see more';
     box.append(full, ' ', moreBtn);
   }
 
@@ -582,10 +582,10 @@ function initPostMenu() {
         setCaption(card, data.caption);
         toggleEditMode(card, false);
       } else {
-        await showAlert(Object.values(data.errors || {})[0] || 'No se pudo actualizar el post');
+        await showAlert(Object.values(data.errors || {})[0] || 'Could not update the post');
       }
     } catch (error) {
-      await showAlert('No se pudo actualizar el post');
+      await showAlert('Could not update the post');
     } finally {
       saveBtn.disabled = false;
     }
@@ -593,7 +593,7 @@ function initPostMenu() {
 
   async function deletePost(card) {
     if (!card) return;
-    const confirmed = await showConfirm('¿Seguro que quieres borrar esta foto? Esta acción no se puede deshacer.', 'Borrar foto');
+    const confirmed = await showConfirm('Delete this photo? This cannot be undone.', 'Delete photo');
     if (!confirmed) return;
 
     const id = Number(card.id.replace('post-', ''));
@@ -614,10 +614,10 @@ function initPostMenu() {
           window.location.href = '/';
         }
       } else {
-        await showAlert(Object.values(data.errors || {})[0] || 'No se pudo borrar el post');
+        await showAlert(Object.values(data.errors || {})[0] || 'Could not delete the post');
       }
     } catch (error) {
-      await showAlert('No se pudo borrar el post');
+      await showAlert('Could not delete the post');
     }
   }
 }
@@ -783,7 +783,7 @@ function initFeedRefresh(infiniteScroll) {
       infiniteScroll.reset(2, Boolean(data.hasMore));
       button.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (error) {
-      await showAlert('No se pudo actualizar el feed');
+      await showAlert('Could not refresh the feed');
     } finally {
       button.disabled = false;
     }
