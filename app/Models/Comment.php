@@ -74,9 +74,9 @@ class Comment extends Model
             if ($lastThreads === null) {
                 return $list;
             }
-            // Feed preview: newest threads, each with only its newest reply.
+            // Feed preview: newest threads, each with only its first reply.
             return array_map(
-                static fn (array $thread) => ['replies' => array_slice($thread['replies'], -1)] + $thread,
+                static fn (array $thread) => ['replies' => array_slice($thread['replies'], 0, 1)] + $thread,
                 array_slice($list, -$lastThreads)
             );
         }, $threads);

@@ -194,13 +194,14 @@ function appendComment(card, comment) {
   if (atBottom) list.scrollTop = list.scrollHeight;
 }
 
-// Feed cards keep the same preview the server sends: last 3 threads, newest reply each.
+// Feed cards keep the same preview the server sends: last 3 threads, first reply each
+// (so a thread's preview reply doesn't change when new replies come in).
 function trimPreview(list) {
   if (!list.hasAttribute('data-preview')) return;
   const threads = list.querySelectorAll(':scope > .comment-thread');
   Array.from(threads).slice(0, -3).forEach((thread) => thread.remove());
   list.querySelectorAll(':scope > .comment-thread').forEach((thread) => {
-    Array.from(thread.querySelectorAll(':scope > .comment-reply')).slice(0, -1).forEach((reply) => reply.remove());
+    Array.from(thread.querySelectorAll(':scope > .comment-reply')).slice(1).forEach((reply) => reply.remove());
   });
 }
 
