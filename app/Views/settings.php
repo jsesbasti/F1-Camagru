@@ -65,7 +65,7 @@
             <label class="mt-3 flex cursor-pointer items-center justify-between gap-4">
                 <span>
                     <span class="block text-white">Email notifications</span>
-                    <span class="settings-hint !mt-0 block">Email me when someone comments on my photos, replies to my comments or starts following me.</span>
+                    <span class="settings-hint !mt-0 block">Email me when someone comments on my photos, replies to my comments, mentions me or starts following me.</span>
                 </span>
                 <input type="checkbox" id="notify-comments" class="h-5 w-5 flex-shrink-0 accent-f1-red" <?= $currentUser['notify_comments'] ? 'checked' : '' ?>>
             </label>

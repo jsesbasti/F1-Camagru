@@ -208,6 +208,7 @@ class PostController extends Controller
         $footer = "\r\n\r\n" . Mailer::link('See the post', "/post?id={$image['id']}")
             . "\r\n\r\nYou can turn these emails off in " . Mailer::link('Settings', '/settings') . ".";
         $authorName = Mailer::e($author['username']);
+        $rawComment = $comment;
         $comment = Mailer::e($comment);
 
         $notified = [(int) $author['id']];
@@ -224,6 +225,21 @@ class PostController extends Controller
             if ($target && !in_array((int) $target['id'], $notified, true) && $target['notify_comments']) {
                 Mailer::send($target['email'], "{$author['username']} replied to your comment",
                     "Hi " . Mailer::e($target['username']) . ",\r\n\r\n$authorName replied to your comment \"" . Mailer::e($repliedTo['comment']) . "\":\r\n\r\n\"$comment\"" . $footer);
+            }
+            $notified[] = (int) $repliedTo['user_id'];
+        }
+
+        // @mentions, same pattern as the profile links in post-card.php. Capped so
+        // one comment can't be used to mass-email people.
+        preg_match_all('/(?<![\w@])@(\w+)/', $rawComment, $matches);
+        foreach (array_slice(array_unique($matches[1]), 0, 10) as $username) {
+            $mentioned = User::find(username: $username);
+            if ($mentioned && !in_array((int) $mentioned['id'], $notified, true) && $mentioned['notify_comments']) {
+                Mailer::send($mentioned['email'], "{$author['username']} mentioned you in a comment",
+                    "Hi " . Mailer::e($mentioned['username']) . ",\r\n\r\n$authorName mentioned you in a comment:\r\n\r\n\"$comment\"" . $footer);
+            }
+            if ($mentioned) {
+                $notified[] = (int) $mentioned['id'];
             }
         }
     }

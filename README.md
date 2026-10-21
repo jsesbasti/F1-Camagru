@@ -28,7 +28,7 @@ Hecho en PHP sin framework, MySQL, nginx y JavaScript sin librerías, todo en Do
   - contraseña;
   - avisos por email de comentarios;
   - borrar la cuenta.
-- Avisos por email al cambiar datos de la cuenta, cuando alguien comenta en tus fotos y cuando alguien empieza a seguirte (solo la primera vez).
+- Avisos por email al cambiar datos de la cuenta, cuando alguien comenta en tus fotos, te responde, te menciona con `@usuario` o empieza a seguirte (esto último solo la primera vez).
 
 ---
 
