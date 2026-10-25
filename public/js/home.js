@@ -1,4 +1,5 @@
 import { showAlert, showConfirm } from './modal.js';
+import './mentions.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize elements

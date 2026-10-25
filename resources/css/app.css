@@ -302,7 +302,7 @@
     @apply mr-1.5 font-bold text-white no-underline;
   }
   .comment-form {
-    @apply flex items-center gap-2.5 border-t border-line pt-2.5;
+    @apply relative flex items-center gap-2.5 border-t border-line pt-2.5;
   }
   .comment-input {
     @apply flex-1 bg-transparent py-1 text-[13px] text-white outline-none placeholder:text-muted;
@@ -312,6 +312,30 @@
   }
   .comment-input:not(:placeholder-shown) + .comment-submit-btn {
     @apply pointer-events-auto opacity-100;
+  }
+
+  /* ---- @mention autocomplete (public/js/mentions.js) ---- */
+  .mention-list {
+    @apply absolute bottom-full left-0 z-20 mb-1 min-w-40 overflow-hidden rounded-lg border border-line bg-carbon py-1 shadow-[0_8px_20px_rgba(0,0,0,0.5)];
+  }
+  .mention-option {
+    @apply flex cursor-pointer items-center gap-2 px-3 py-1.5 text-[13px] text-white;
+  }
+  .mention-mirror {
+    @apply pointer-events-none absolute overflow-hidden border-solid border-transparent text-white [overflow-wrap:break-word];
+  }
+  /* Not bold like .comment-mention: a wider glyph would push the caret out of place. */
+  .mention-typed {
+    @apply text-f1-red;
+  }
+  .mention-mirrored {
+    @apply !text-transparent caret-white;
+  }
+  .mention-option .post-user-avatar {
+    @apply h-6 w-6 flex-shrink-0 text-[10px];
+  }
+  .mention-option[aria-selected="true"] {
+    @apply bg-f1-red/20 text-f1-red;
   }
 
   /* ---- Post owner menu (post-card, home.php + public/js/home.js) ---- */
@@ -339,7 +363,7 @@
 
   /* ---- Inline caption editing (post-details, home.php + public/js/home.js) ---- */
   .post-edit-form {
-    @apply mb-2 flex flex-col gap-2;
+    @apply relative mb-2 flex flex-col gap-2;
   }
   .post-edit-textarea {
     @apply w-full resize-none rounded border border-line bg-asphalt px-3 py-2 font-body text-sm text-white outline-none transition-[border-color,box-shadow] duration-200 focus:border-f1-red focus:shadow-[0_0_6px_rgba(225,6,0,0.4)];
