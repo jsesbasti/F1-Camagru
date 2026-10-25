@@ -64,7 +64,7 @@ function initAddPhotoModal() {
   const cameraBtn = document.getElementById('add-photo-camera-btn');
   const statusEl = document.getElementById('add-photo-status');
   const NAV_ERRORS = {
-    CameraNotSupported: "Your browser does not support camera acces",
+    CameraNotSupported: "Your browser does not support camera access",
     HttpsError: "Camera needs HTTPS: open the site with https:// (or upload an image)"
   }
 
@@ -148,10 +148,9 @@ function initAddPhotoModal() {
     cameraBtn.addEventListener('click', async () => {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         if (statusEl) {
-          // statusEl.textContent = NAV_ERRORS[CameraNotSupported];
           statusEl.textContent = window.isSecureContext
-            ? NAV_ERRORS[CameraNotSupported]
-            : NAV_ERRORS[HttpsError];
+            ? NAV_ERRORS.CameraNotSupported
+            : NAV_ERRORS.HttpsError;
         }
         return;
       }

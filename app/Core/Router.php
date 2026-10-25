@@ -28,6 +28,8 @@ class Router
         }
 
         http_response_code(404);
-        echo "404 Not Found";
+        $title = 'Page not found';
+        $content = __DIR__ . '/../Views/404.php';
+        require __DIR__ . '/../Views/layouts/app.php';
     }
 }
