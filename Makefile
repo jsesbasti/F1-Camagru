@@ -89,4 +89,6 @@ re: fclean up
 
 re-vol: fclean down-vol up
 
+re-cloud: fclean down-vol cloud
+
 .PHONY: all up-logs up build stop down down-volumes clean fclean re env cloud local css-build css-watch
