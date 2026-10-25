@@ -1,4 +1,5 @@
 import { showConfirm } from './modal.js';
+import './mentions.js';
 
 const PHOTO_SIZE = 720;
 // Height / width of each post format (same table as PhotoController::ASPECTS).
@@ -458,7 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('show')) {
+    if (e.key === 'Escape' && !e.defaultPrevented && modal.classList.contains('show')) {
       closeModal();
     }
   });
@@ -492,7 +493,8 @@ document.addEventListener('DOMContentLoaded', () => {
     thumb.dataset.src = entry.source_url;
     thumb.querySelector('img').src = entry.image_url;
     thumb.querySelector('.studio-thumb-open').setAttribute('aria-label', entry.is_draft ? 'Edit draft' : 'View post');
-    thumb.querySelector('.studio-thumb-badge').hidden = !entry.is_draft;
+    thumb.querySelector('.studio-thumb-badge-draft').hidden = !entry.is_draft;
+    thumb.querySelector('.studio-thumb-badge-publication').hidden = entry.is_draft;
     thumb.querySelector('.studio-thumb-delete').hidden = !entry.is_draft;
   }
 

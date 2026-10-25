@@ -445,8 +445,11 @@
   .studio-thumb-open img {
     @apply h-full w-full object-cover;
   }
-  .studio-thumb-badge {
+  .studio-thumb-badge-draft {
     @apply pointer-events-none absolute left-1 top-1 rounded bg-gold px-1.5 py-0.5 font-racing text-[10px] font-bold uppercase tracking-wide text-asphalt;
+  }
+  .studio-thumb-badge-publication {
+    @apply pointer-events-none absolute left-1 top-1 rounded bg-start-green px-1.5 py-0.5 font-racing text-[10px] font-bold uppercase tracking-wide text-asphalt;
   }
   .studio-thumb-delete {
     @apply absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-asphalt/85 text-base leading-none text-white hover:bg-f1-red;

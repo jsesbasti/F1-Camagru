@@ -1,6 +1,6 @@
-// @mention autocomplete for comment inputs and caption edits, backed by
+// @mention autocomplete for comment inputs, caption edits and the publish caption, backed by
 // /api/users/search (same endpoint as search.js).
-const FIELDS = '.comment-input, .post-edit-textarea';
+const FIELDS = '.comment-input, .post-edit-textarea, #publish-description';
 
 let field = null;
 let list = null;
