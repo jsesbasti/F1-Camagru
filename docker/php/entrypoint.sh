@@ -21,6 +21,14 @@ EOF
 chown www-data:www-data /etc/msmtprc
 chmod 600 /etc/msmtprc
 
+# vendor/ isn't in the repo: on a fresh clone, generate it so every page
+# doesn't fail on a missing vendor/autoload.php.
+if [ ! -f /var/www/html/vendor/autoload.php ]; then
+    echo "vendor/ not found, running composer install..."
+    composer install --no-interaction --no-progress --working-dir=/var/www/html \
+        || echo "composer install failed: run 'docker exec camagru-php composer install' by hand" >&2
+fi
+
 mkdir -p /var/www/html/public/uploads/avatars /var/www/html/public/uploads/photos
 chown -R www-data:www-data /var/www/html/public/uploads
 chmod -R 775 /var/www/html/public/uploads

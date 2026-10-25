@@ -120,17 +120,9 @@ Comprueba que están los tres en marcha:
 docker ps --format '{{.Names}}: {{.Status}}'
 ```
 
-### 6. Generar el autoload de PHP
+La carpeta `vendor/` no está en el repositorio: la primera vez que arranca, el contenedor de PHP la genera solo con `composer install`.
 
-La carpeta `vendor/` no está en el repositorio. Genérala una vez con el Composer que trae el contenedor de PHP:
-
-```sh
-docker exec camagru-php composer install
-```
-
-Sin este paso todas las páginas dan error, porque falta `vendor/autoload.php`.
-
-### 7. Abrir la web
+### 6. Abrir la web
 
 <http://localhost:8080>
 
@@ -249,7 +241,7 @@ Levanta un *quick tunnel* de Cloudflare en un contenedor (no hace falta cuenta n
 
 **Los enlaces de los emails van a `localhost`.** `APP_URL` no está puesto o el contenedor no se ha recreado desde que lo cambiaste. Ver [Publicarlo en internet](#publicarlo-en-internet), paso 3.
 
-**Todas las páginas dan error 500 o salen en blanco.** Seguramente falta `vendor/`: ejecuta el [paso 6](#6-generar-el-autoload-de-php). Los detalles del error están en `make logs-php`.
+**Todas las páginas dan error 500 o salen en blanco.** Seguramente falta `vendor/` y no se pudo generar al arrancar (lo verás en `make logs-php`). Créalo a mano con `docker exec camagru-php composer install`.
 
 **`camagru-php` no arranca o se queda esperando.** Espera a que MySQL esté listo: la primera vez puede tardar unos segundos más. Si no arranca, mira `make logs-db`; lo más habitual es que falte algún fichero en `docker/secrets/`.
 

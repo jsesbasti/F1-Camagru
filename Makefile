@@ -3,9 +3,11 @@ COMPOSE=docker compose -f $(COMPOSE-FILE)
 ENV-FILE=docker/.env
 
 # Escribe CLOUD_URL en el .env (lo añade si no existe). Uso: $(call set-cloud-url,<url>)
+# -i.bak (y luego borrar el .bak) porque el sed de macOS exige extensión en -i
+# y el de Linux no la acepta separada: así funciona en los dos.
 define set-cloud-url
 	if grep -q '^CLOUD_URL=' $(ENV-FILE); then \
-		sed -i "s|^CLOUD_URL=.*|CLOUD_URL=\"$(1)\"|" $(ENV-FILE); \
+		sed -i.bak "s|^CLOUD_URL=.*|CLOUD_URL=\"$(1)\"|" $(ENV-FILE) && rm -f $(ENV-FILE).bak; \
 	else \
 		printf '\nCLOUD_URL="%s"\n' "$(1)" >> $(ENV-FILE); \
 	fi
