@@ -3,7 +3,7 @@ data/
 */db-data
 /vendor/
 *.lock
-*/secrets/
+*.secret
 */uploads/
 /node_modules/
 graphify*
