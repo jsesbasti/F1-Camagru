@@ -94,7 +94,9 @@
         </div>
         <p class="mt-2 text-sm text-error" id="publish-overlay-hint" hidden>Add at least one overlay to publish.</p>
         <p class="error-msg" data-error="overlays"></p>
-        <textarea id="publish-description" class="f1-input min-h-[90px] resize-y" maxlength="2200" placeholder="Write a caption..."></textarea>
+        <div class="relative">
+            <textarea id="publish-description" class="f1-input min-h-[90px] resize-y" maxlength="2200" placeholder="Write a caption..."></textarea>
+        </div>
         <p class="error-msg" data-error="description"></p>
         <p class="error-msg" data-error="error"></p>
         <div class="modal-auth-actions mt-4">

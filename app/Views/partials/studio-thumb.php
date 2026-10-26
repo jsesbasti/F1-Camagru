@@ -6,6 +6,7 @@
             <img src="<?= htmlspecialchars($photo['image_url']) ?>" alt="" loading="lazy">
         <?php endif; ?>
     </button>
-    <span class="studio-thumb-badge" <?= $photo['is_draft'] ? '' : 'hidden' ?>>Draft</span>
+    <span class="studio-thumb-badge-draft" <?= $photo['is_draft'] ? '' : 'hidden' ?>>Draft</span>
+    <span class="studio-thumb-badge-publication" <?= $photo['is_draft'] ? 'hidden' : '' ?>>Published</span>
     <button type="button" class="studio-thumb-delete" aria-label="Delete draft" <?= $photo['is_draft'] ? '' : 'hidden' ?>>&times;</button>
 </div>
