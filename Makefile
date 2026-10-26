@@ -80,7 +80,7 @@ logs-%:
 	@docker logs -f camagru-$*
 
 sh-db:
-	@docker exec -it camagru-db mysql -p"$$(cat ./docker/secrets/db_root_password)" -D "$$(cat ./docker/secrets/db_name)"
+	@docker exec -it camagru-db mysql -p"$$(cat ./docker/secrets/db_root_password.secret)" -D "$$(cat ./docker/secrets/db_name.secret)"
 sh-%:
 	@docker exec -it camagru-$* /bin/bash
 
